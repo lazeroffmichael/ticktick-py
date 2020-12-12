@@ -1,10 +1,10 @@
 import httpx
 
 
-class TickTick_Client:
+class TickTickClient:
     BASE_URL = 'https://api.ticktick.com/api/v2/'
 
-    def __init__(self, username: str, password: str):
+    def __init__(self, username: str, password: str) -> None:
         """
         Initializes a client session by loggin into TickTick
         :param username: TickTick Username
@@ -14,12 +14,11 @@ class TickTick_Client:
         self.cookies = {}
         self.login(username, password)
 
-    def login(self, username: str, password: str):
+    def login(self, username: str, password: str) -> None:
         """
-        Logs into TickTick using passed username and password
+        Obtains session token
         :param username: TickTick Username
         :param password: TickTick Password
-        :return:
         """
         url = self.BASE_URL + 'user/signon'
         user_info = {
@@ -41,5 +40,3 @@ class TickTick_Client:
         self.access_token = response_information['token']
         self.cookies['t'] = self.access_token
 
-
-if __name__ == '__main__':
