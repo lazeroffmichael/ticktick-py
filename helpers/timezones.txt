@@ -1,3 +1,5 @@
+List of timezones from pytz.all_timezones
+
 Africa/Abidjan
 Africa/Accra
 Africa/Addis_Ababa
