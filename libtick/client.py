@@ -1,6 +1,9 @@
 from datetime import datetime
-import calendar
+
 import httpx
+import os
+
+from helpers.time_zone import convert_local_time_to_UTC, date_format
 
 
 class TickTickClient:
@@ -52,59 +55,33 @@ class TickTickClient:
         """Returns a dictionary of Project ID Values mapped to project names"""
         pass
 
-    def get_summary(self, start_date: datetime, end_date: datetime):
+    def get_summary(self, start_date: datetime, end_date: datetime, time_zone: str):
         """
         Returns a dictionary containing the fields for each completed task between the given start_date and end_date
+
+        List of timezones can be found in helpers -> timezones.txt
         :param start_date: datetime object containing the calendar date that you want the search to start at
         :param end_date: datetime object containing the calendar date that you want the summary to end at
+        :param time_zone: Local time zone string
         :return: dict object
-
-        Normal Full Day Usage: When only year, month, and day values are initialized
-            Single Day Summary -> my_dict = object_name.get_summary(datetime(2020, 11, 12), datetime(2020, 11, 12))
-            Multi  Day Summary -> my_dict = object_name.get_summary(datetime(2020, 11, 12), datetime(2020, 11, 17))
-
-        Specific Time Range: To choose a specified day and time range, initialize the datetime object with UTC time
-            Specific Time Range -> my_dict = object_name.get_summary(datetime(2020, 11, 12, 9, 40), datetime(2020, 11, 15, 12, 40, 5))
         """
-
         # Check if logged in
         if not self.access_token:
             raise ValueError('You Are Not Logged In')
 
         url = self.BASE_URL + 'project/all/completed/'
 
-        # Must set time fields for UTC standard for Normal Full Day Usage
-        if (start_date.hour == 0 and start_date.minute == 0 and start_date.second == 0 and
-            end_date.hour == 0 and end_date.minute == 0 and end_date.second == 0):
+        if start_date == end_date:
+            new_end_hour = 23
+            new_end_minute = 59
+            end_date = datetime(end_date.year, end_date.month, end_date.day, new_end_hour, new_end_minute)
 
-            # Change start_date hour to be 8
-            start_date = datetime(start_date.year, start_date.month, start_date.day, 8, start_date.minute, start_date.second)
-
-            #
-            month_range = calendar.monthrange(end_date.year, end_date.month)
-            new_year = end_date.year
-            new_month = end_date.month
-
-            if end_date.day == month_range[1] and end_date.month == 12:
-                new_day, new_month = 1, 1
-                new_year = end_date.year + 1
-
-            elif end_date.day == month_range[1]:
-                new_day = 1
-                new_month = end_date.month + 1
-
-            else:
-                new_day = end_date.day + 1
-
-            end_date = datetime(new_year, new_month, new_day, 7, 59, 0)
-
-
-
-        date_string = '%Y-%m-%d %H:%M:%S'
+        start_date = convert_local_time_to_UTC(start_date, time_zone)
+        end_date = convert_local_time_to_UTC(end_date, time_zone)
 
         parameters = {
-            'from': start_date.strftime(date_string),
-            'to': end_date.strftime(date_string),
+            'from': start_date.strftime(date_format),
+            'to': end_date.strftime(date_format),
             'limit': 100
         }
         request = httpx.get(url, params=parameters, cookies=self.cookies)
@@ -135,11 +112,11 @@ class TickTickClient:
 
 
 if __name__ == '__main__':
-    #client = TickTickClient()
-    #tasks = client.get_summary(datetime(2020, 12, 13, 10), datetime(2020, 12, 13, 16))
-    #print(tasks)
-    #for task in tasks:
-        #print(task['title'])
-
-
-
+    usern = os.getenv('TICKTICK_USER')
+    passw = os.getenv('TICKTICK_PASS')
+    client = TickTickClient(usern, passw)
+    tz = 'US/Pacific'
+    tasks = client.get_summary(datetime(2020, 12, 13), datetime(2020, 12, 13))
+    print(tasks)
+    for task in tasks:
+        print(task['title'])
