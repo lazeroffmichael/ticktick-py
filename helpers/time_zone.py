@@ -5,7 +5,7 @@ from datetime import datetime
 date_format = '%Y-%m-%d %H:%M:%S'
 
 
-def convert_local_time_to_UTC(original_time: datetime, time_zone:str):
+def convert_local_time_to_utc(original_time: datetime, time_zone:str):
     """
     Converts the passed datetime from the time_zone specified into UTC time.
 
