@@ -22,3 +22,4 @@ def convert_local_time_to_utc(original_time: datetime, time_zone:str):
     time_object = datetime.strptime(original_time, date_format)
     time_zone_dt = time_zone.localize(time_object)
     return time_zone_dt.astimezone(utc).replace(tzinfo=None)
+

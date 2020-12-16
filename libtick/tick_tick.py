@@ -32,6 +32,7 @@ class TickTickClient:
         self.access_token = ''
         self.cookies = {}
         self.login(username, password)
+        self.lists = self.get_lists_name_and_id()
 
     def login(self, username: str, password: str) -> None:
         """
@@ -70,22 +71,37 @@ class TickTickClient:
     def create_tag(self):
         pass
 
-    def create_project(self) -> None:
-        pass
+    @logged_in
+    def create_list(self, list_name: str, color_id: str = None, list_type: str = 'TASK') -> str:
+        """Creates a new list with the passed parameters"""
+        if list_name in self.lists:
+            raise ValueError('Cannot Create List: Duplicate Name')
+
+        url = self.BASE_URL + 'batch/project'
+        payload = {
+            'add': [{'name': list_name,
+                     'color': color_id,
+                     'kind': list_type,
+                     }]
+        }
+        response = httpx.post(url, json=payload, cookies=self.cookies)
+        self.check_status_code(response, 'Could Not Create List')
+        self.lists = self.get_lists_name_and_id()
+        return "List Creation Successful"
 
     @logged_in
     def delete_list(self, list_id: str) -> None:
         """Deletes the list corresponding to the passed list id number"""
         url = self.BASE_URL + 'batch/project'
-        parameters = {
+        payload = {
             'delete': [list_id],
         }
-        response = httpx.post(url, json=parameters, cookies=self.cookies)
+        response = httpx.post(url, json=payload, cookies=self.cookies)
         self.check_status_code(response, 'Could Not Delete List')
 
     @logged_in
-    def get_lists(self) -> dict:
-        """Returns a dictionary containing all fields for each list"""
+    def get_lists(self) -> list:
+        """Returns a list containing all fields for each lists in TickTick"""
         url = self.BASE_URL + 'projects'
         response = httpx.get(url, cookies=self.cookies)
         self.check_status_code(response, 'Could Not Retrieve Values')
@@ -108,22 +124,32 @@ class TickTickClient:
     def get_summary(self, time_zone: str, start_date: datetime, end_date: datetime = None, full_day: bool = True) -> list:
         """
         Returns a list containing all the fields for all the completed tasks on the date or range of dates.
-
+        SINGLE FULL DAY: get_summary(time_zone, start_date) -> Returns list for the single date (hours, minutes, seconds ignored)
+        MULTI FULL DAY RANGE: get_summary(time_zone, start_date, end_date) -> Returns list for range (hours, minutes, seconds ignored)
+        MULTI DAY SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day = False)
+            -> Returns list for the range of the dates where hours, minutes, and seconds are taken into account
         """
         url = self.BASE_URL + 'project/all/completed'
 
+        # Handles case when start_date occurs after end_date
+        if end_date is not None and start_date > end_date:
+            raise ValueError('Invalid Date Range: Start Date Occurs After End Date')
+
+        # Handles invalid timezone argument
         if time_zone not in pytz.all_timezones_set:
             raise ValueError('Invalid Time Zone')
 
+        # Handles single day entry
         if end_date is None:
             start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
 
+        # Handles multi day, full_day entry
         elif full_day is True and end_date is not None:
             start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
 
-        # Time Range is specific and will stay the same
+        # Convert Local Time to UTC time based off the time_zone string specified
         start_date = convert_local_time_to_utc(start_date, time_zone)
         end_date = convert_local_time_to_utc(end_date, time_zone)
 
@@ -164,6 +190,9 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    tasks = client.get_summary('US/Pacific', datetime(2020, 12, 10, 8), full_day=False)
-    for task in tasks:
-        print(task['title'])
+    name = 'Created List'
+    print(client.lists)
+    client.create_list(name)
+    print(client.lists)
+    client.create_list(name)
+
