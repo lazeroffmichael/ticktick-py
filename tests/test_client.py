@@ -16,14 +16,14 @@ class TestClient:
         """Tests invalid login"""
         user = 'not'
         passw = 'good'
-        with pytest.raises(ValueError):
+        with pytest.raises(RuntimeError):
             test_client = TickTickClient(user, passw)
 
     def test_check_status_code(self, client):
         """Tests that a failed httpx request raises an exception"""
         url = client.BASE_URL + 'badurl'
         response = httpx.get(url, cookies=client.cookies)
-        with pytest.raises(ValueError):
+        with pytest.raises(RuntimeError):
             client.check_status_code(response, 'Error')
 
     def test_not_logged_in(self, client):
@@ -32,5 +32,5 @@ class TestClient:
         passw = os.getenv('TICKTICK_PASS')
         new_client = TickTickClient(user, passw)
         new_client.access_token = ''
-        with pytest.raises(ValueError):
+        with pytest.raises(RuntimeError):
             new_client.delete_list('1234')

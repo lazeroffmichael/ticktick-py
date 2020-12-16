@@ -5,12 +5,12 @@ from datetime import datetime
 
 class TestGetSummary:
 
-    def test_invalid_time_zone_get_summary(self, client):
+    def test_get_summary_invalid_time_zone(self, client):
         """Tests that an exception is raised if an invalid time zone is passed to get_summary"""
         start = datetime(2020, 12, 14)
         end = datetime(2020, 12, 14)
         tz = 'THIS AINT IT CHIEF'
-        with pytest.raises(ValueError):
+        with pytest.raises(KeyError):
             client.get_summary(tz, start, end)
 
     def test_get_summary_single_day_good_return(self, client):

@@ -14,7 +14,7 @@ def logged_in(func):
 
     def call(self, *args, **kwargs):
         if not self.access_token:
-            raise ValueError('ERROR: Not Logged In')
+            raise RuntimeError('ERROR -> Not Logged In')
         return func(self, *args, **kwargs)
 
     return call
@@ -53,7 +53,7 @@ class TickTickClient:
         response = httpx.post(url, json=user_info, params=parameters)
 
         # Raise error for any status code other than 200 (OK)
-        self.check_status_code(response, 'Could Not Log In - Invalid Username or Password')
+        self.check_status_code(response, 'Could Not Log In -> Invalid Username or Password')
 
         response_information = response.json()
         self.access_token = response_information['token']
@@ -61,9 +61,9 @@ class TickTickClient:
 
     @staticmethod
     def check_status_code(response, error_message: str) -> None:
-        """Makes sure the return on the response was 200"""
+        """Makes sure the return on the response was 200, if not raise exception"""
         if response.status_code != 200:
-            raise ValueError(error_message)
+            raise RuntimeError(error_message)
 
     def create_task(self, task_name: str):
         pass
@@ -72,7 +72,7 @@ class TickTickClient:
         pass
 
     @logged_in
-    def create_list(self, list_name: str, color_id: str = None, list_type: str = 'TASK') -> str:
+    def create_list(self, list_name: str, color_id: str = None, list_type: str = 'TASK') -> dict:
         """Creates a new list with the passed parameters"""
         if list_name in self.lists:
             raise ValueError('Cannot Create List: Duplicate Name')
@@ -87,17 +87,24 @@ class TickTickClient:
         response = httpx.post(url, json=payload, cookies=self.cookies)
         self.check_status_code(response, 'Could Not Create List')
         self.lists = self.get_lists_name_and_id()
-        return "List Creation Successful"
+        return {list_name: self.lists[list_name]}
 
     @logged_in
-    def delete_list(self, list_id: str) -> None:
-        """Deletes the list corresponding to the passed list id number"""
+    def delete_list(self, list_name: str) -> str:
+        """Deletes the list corresponding to the passed project name"""
+        # Check if the name exists
+        if list_name not in self.lists:
+            raise KeyError(f'{list_name} Does Not Exist To Delete')
+
         url = self.BASE_URL + 'batch/project'
         payload = {
-            'delete': [list_id],
+            'delete': [self.lists[list_name]],
         }
         response = httpx.post(url, json=payload, cookies=self.cookies)
         self.check_status_code(response, 'Could Not Delete List')
+        # Update class project dictionary
+        self.lists = self.get_lists_name_and_id()
+        return f'{list_name} Deletion Successful'
 
     @logged_in
     def get_lists(self) -> list:
@@ -137,7 +144,7 @@ class TickTickClient:
 
         # Handles invalid timezone argument
         if time_zone not in pytz.all_timezones_set:
-            raise ValueError('Invalid Time Zone')
+            raise KeyError('Invalid Time Zone')
 
         # Handles single day entry
         if end_date is None:
@@ -190,9 +197,3 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    name = 'Created List'
-    print(client.lists)
-    client.create_list(name)
-    print(client.lists)
-    client.create_list(name)
-
