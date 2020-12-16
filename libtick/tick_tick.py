@@ -7,12 +7,25 @@ import pytz
 from helpers.time_zone import date_format, convert_local_time_to_utc
 
 
+def logged_in(func):
+    """
+    Decorator that will check if the current instance is logged in
+    """
+
+    def call(self, *args, **kwargs):
+        if not self.access_token:
+            raise ValueError('ERROR: Not Logged In')
+        return func(self, *args, **kwargs)
+
+    return call
+
+
 class TickTickClient:
     BASE_URL = 'https://api.ticktick.com/api/v2/'
 
     def __init__(self, username: str, password: str) -> None:
         """
-        Initializes a client session by loggin into TickTick
+        Initializes a client session by logging into TickTick
         :param username: TickTick Username
         :param password: TickTick Password
         """
@@ -44,16 +57,6 @@ class TickTickClient:
         response_information = response.json()
         self.access_token = response_information['token']
         self.cookies['t'] = self.access_token
-
-    def logged_in(func):
-        """
-        Checks if the access token is still set, meaning the user is still logged on
-        """
-        def do_check(*args, **kwargs):
-            if not args[0].access_token:
-                raise ValueError('ERROR: Not Logged In')
-
-        return do_check
 
     @staticmethod
     def check_status_code(response, error_message: str) -> None:
@@ -102,20 +105,22 @@ class TickTickClient:
         return name_dict
 
     @logged_in
-    def get_summary(self, time_zone: str, start_date: datetime, end_date=None) -> dict:
+    def get_summary(self, time_zone: str, start_date: datetime, end_date: datetime = None, full_day: bool = True) -> list:
+        """
+        Returns a list containing all the fields for all the completed tasks on the date or range of dates.
+
+        """
         url = self.BASE_URL + 'project/all/completed'
 
         if time_zone not in pytz.all_timezones_set:
             raise ValueError('Invalid Time Zone')
 
         if end_date is None:
-            # Single Date Entered -> end_date becomes start date with last hour, minute, and second of day
             start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
 
-        elif (start_date.hour == 0, start_date.minute == 0, start_date.second == 0,
-              end_date.hour == 0, end_date.minute == 0, end_date.second == 0):
-            # Full Day Range Entered -> End date must change to last hour, minute, and second of day
+        elif full_day is True and end_date is not None:
+            start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
 
         # Time Range is specific and will stay the same
@@ -159,6 +164,6 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    tasks = client.get_summary('US/Pacific', datetime(2020, 12, 11))
+    tasks = client.get_summary('US/Pacific', datetime(2020, 12, 10, 8), full_day=False)
     for task in tasks:
         print(task['title'])

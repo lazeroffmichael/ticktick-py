@@ -32,25 +32,44 @@ class TestClient:
         with pytest.raises(ValueError):
             new_client.delete_list('1234')
 
-    def test_invalid_time_zone_get_summary(self,client):
+    def test_invalid_time_zone_get_summary(self, client):
         start = datetime(2020, 12, 14)
         end = datetime(2020, 12, 14)
         tz = 'THIS AINT IT CHIEF'
-        tasks = client.get_summary(tz, start, end)
+        with pytest.raises(ValueError):
+            tasks = client.get_summary(tz, start, end)
 
     def test_get_summary_single_day_good_return(self, client):
         start = datetime(2020, 12, 14)
+        tz = 'US/Pacific'
+        tasks = client.get_summary(tz, start)
+        assert tasks[0] != ''
+
+    def test_get_summary_single_day_full_day_false(self, client):
+        start = datetime(2020, 12, 14, 8)
+        tz = 'US/Pacific'
+        tasks = client.get_summary(tz, start, full_day=False)
+        assert tasks[0] != ''
+
+    def test_get_summary_multi_day_full_good_return(self, client):
+        start = datetime(2020, 12, 10)
         end = datetime(2020, 12, 14)
         tz = 'US/Pacific'
         tasks = client.get_summary(tz, start, end)
-        assert tasks != []
+        assert tasks[0] != ''
+
+    def test_get_summary_multi_day_not_full_day_good_return(self, client):
+        start = datetime(2020, 12, 10)
+        end = datetime(2020, 12, 14)
+        tz = 'US/Pacific'
+        tasks = client.get_summary(tz, start, end, full_day=False)
 
     def test_get_summary_multi_day_good_return(self, client):
         start = datetime(2020, 12, 10)
         end = datetime(2020, 12, 14)
         tz = 'US/Pacific'
         tasks = client.get_summary(tz, start, end)
-        assert tasks != []
+        assert tasks[0] != ''
 
     def test_get_summary_bad_start_and_end(self, client):
         start = datetime(2020, 11, 14)
