@@ -1,17 +1,19 @@
-from datetime import datetime
-
+import re
 import httpx
 import os
 import pytz
 
-from helpers.time_zone import date_format, convert_local_time_to_utc
+from datetime import datetime
+from helpers.time_zone import convert_local_time_to_utc
+from helpers.constants import DATE_FORMAT, VALID_HEX_VALUES
 
 
 def logged_in(func):
     """
-    Decorator that will check if the current instance is logged in
+    Serves as a decorator making sure that the instance is still logged in for a function call.
+    :param func: Function that is decorated
+    :return: Inner function
     """
-
     def call(self, *args, **kwargs):
         if not self.access_token:
             raise RuntimeError('ERROR -> Not Logged In')
@@ -21,11 +23,14 @@ def logged_in(func):
 
 
 class TickTickClient:
+    """
+    Contains all methods for interacting with TickTick servers
+    """
     BASE_URL = 'https://api.ticktick.com/api/v2/'
 
     def __init__(self, username: str, password: str) -> None:
         """
-        Initializes a client session by logging into TickTick
+        Initializes a client session.
         :param username: TickTick Username
         :param password: TickTick Password
         """
@@ -36,7 +41,7 @@ class TickTickClient:
 
     def login(self, username: str, password: str) -> None:
         """
-        Obtains session token
+        Logs in to TickTick and sets the instance access token.
         :param username: TickTick Username
         :param password: TickTick Password
         """
@@ -61,7 +66,12 @@ class TickTickClient:
 
     @staticmethod
     def check_status_code(response, error_message: str) -> None:
-        """Makes sure the return on the response was 200, if not raise exception"""
+        """
+        Makes sure the httpx response was status 200 (ok)
+        :param response: httpx request
+        :param error_message: Error message to be included with the exception
+        :return: None
+        """
         if response.status_code != 200:
             raise RuntimeError(error_message)
 
@@ -71,11 +81,31 @@ class TickTickClient:
     def create_tag(self):
         pass
 
+    def get_inbox_id(self):
+        pass
+
+
+
     @logged_in
     def create_list(self, list_name: str, color_id: str = None, list_type: str = 'TASK') -> dict:
+        """
+        Creates a list (project) with the specified parameters.
+        :param list_name: Name of the project to be created
+        :param color_id: Desired color for the project in hex
+        :param list_type: Defaults to normal "TASK" type, or specify 'NOTE' for note type list
+        :return: Dictionary containing {list_name:list_id_value}
+        """
         """Creates a new list with the passed parameters"""
         if list_name in self.lists:
-            raise ValueError('Cannot Create List: Duplicate Name')
+            raise ValueError('Cannot Create List -> Duplicate Name')
+
+        if list_type != 'TASK' and list_type != 'NOTE':
+            raise ValueError('Invalid List Type -> Must be "TASK" or "NOTE"')
+
+        if color_id is not None:
+            check_color = re.search(VALID_HEX_VALUES, color_id)
+            if not check_color:
+                raise ValueError('Invalid Hex Color String')
 
         url = self.BASE_URL + 'batch/project'
         payload = {
@@ -91,10 +121,14 @@ class TickTickClient:
 
     @logged_in
     def delete_list(self, list_name: str) -> str:
-        """Deletes the list corresponding to the passed project name"""
+        """
+        Deletes the list of the passed name if the list exists.
+        :param list_name: Name of the list to be deleted
+        :return: Output message that the deletion was successful
+        """
         # Check if the name exists
         if list_name not in self.lists:
-            raise KeyError(f'{list_name} Does Not Exist To Delete')
+            raise KeyError(f'"{list_name}" Does Not Exist To Delete')
 
         url = self.BASE_URL + 'batch/project'
         payload = {
@@ -108,7 +142,10 @@ class TickTickClient:
 
     @logged_in
     def get_lists(self) -> list:
-        """Returns a list containing all fields for each lists in TickTick"""
+        """
+        Obtains the attributes for each list (project) in your profile
+        :return: List
+        """
         url = self.BASE_URL + 'projects'
         response = httpx.get(url, cookies=self.cookies)
         self.check_status_code(response, 'Could Not Retrieve Values')
@@ -117,7 +154,10 @@ class TickTickClient:
 
     @logged_in
     def get_lists_name_and_id(self) -> dict:
-        """Returns a dictionary containing -> {project name: id}"""
+        """
+        Maps each list (project) name to its respective id.
+        :return: Dictionary
+        """
         request = self.get_lists()
         name_dict = dict()
         for task in request:
@@ -130,11 +170,18 @@ class TickTickClient:
     @logged_in
     def get_summary(self, time_zone: str, start_date: datetime, end_date: datetime = None, full_day: bool = True) -> list:
         """
-        Returns a list containing all the fields for all the completed tasks on the date or range of dates.
-        SINGLE FULL DAY: get_summary(time_zone, start_date) -> Returns list for the single date (hours, minutes, seconds ignored)
-        MULTI FULL DAY RANGE: get_summary(time_zone, start_date, end_date) -> Returns list for range (hours, minutes, seconds ignored)
-        MULTI DAY SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day = False)
-            -> Returns list for the range of the dates where hours, minutes, and seconds are taken into account
+        Obtains all the attributes for all the completed tasks on the date or range of dates passed.
+
+        A full list of valid time_zone strings are in helpers -> timezones.txt
+        SINGLE DAY SUMMARY: get_summary(time_zone, start_date)
+        MULTI DAY SUMMARY: get_summary(time_zone, start_date, end_date)
+        SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day = False)
+
+        :param time_zone: String specifying the local time zone
+        :param start_date: Datetime object
+        :param end_date: Datetime object
+        :param full_day: Boolean specifying whether hours, minutes, and seconds are to be taken into account for the datetime objects
+        :return: list containing all the task attributes
         """
         url = self.BASE_URL + 'project/all/completed'
 
@@ -146,12 +193,12 @@ class TickTickClient:
         if time_zone not in pytz.all_timezones_set:
             raise KeyError('Invalid Time Zone')
 
-        # Handles single day entry
+        # Single Day Entry
         if end_date is None:
             start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
 
-        # Handles multi day, full_day entry
+        # Multi DAy -> Full Day Entry
         elif full_day is True and end_date is not None:
             start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
             end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
@@ -161,8 +208,8 @@ class TickTickClient:
         end_date = convert_local_time_to_utc(end_date, time_zone)
 
         parameters = {
-            'from': start_date.strftime(date_format),
-            'to': end_date.strftime(date_format),
+            'from': start_date.strftime(DATE_FORMAT),
+            'to': end_date.strftime(DATE_FORMAT),
             'limit': 100
         }
         response = httpx.get(url, params=parameters, cookies=self.cookies)
@@ -197,3 +244,8 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
+    name = 'Yuh2'
+    color = '#DD730CDD'
+    client.create_list(name, color, list_type='NOTE')
+
+    client.delete_list(name)

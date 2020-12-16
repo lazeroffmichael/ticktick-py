@@ -7,7 +7,15 @@ class TestLists:
     def test_create_list_success(self, client):
         """Tests creating a list and having it populate the class list dictionary"""
         name = 'Created List from Python'
-        assert name in client.create_list(name)
+        color = "#e070ff"
+        assert name in client.create_list(name, color)
+        assert name in client.lists
+
+    def test_create_list_type_note_success(self, client):
+        """Tests creating a list with type note"""
+        name = 'Test Note Type List'
+        color = "#b20000"
+        assert name in client.create_list(name, color)
         assert name in client.lists
 
     def test_create_list_duplicate_failure(self, client):
@@ -31,12 +39,33 @@ class TestLists:
         """Tests list is properly deleted"""
         # Get id for 'Created List From Python'
         name = 'Created List from Python'
+        name2 = 'Test Note Type List'
         # Delete List
         client.delete_list(name)
+        client.delete_list(name2)
         assert name not in client.lists
+        assert name2 not in client.lists
 
     def test_delete_list_fail(self, client):
         """Tests deletion will not occur if list name does not exist"""
         name = 'Yeah this project does not exist'
         with pytest.raises(KeyError):
             client.delete_list(name)
+
+    def test_wrong_list_type(self, client):
+        """Tests wrong list type entered"""
+        type = "Wrong list"
+        with pytest.raises(ValueError):
+            client.create_list('List Name', list_type=type)
+
+    def test_wrong_hex_string_input(self, client):
+        """Tests wrong input for hex color"""
+        fail = "Yeah this not right"
+        with pytest.raises(ValueError):
+            client.create_list('', color_id=fail)
+
+    def test_wrong_hex_string_input_2(self, client):
+        """Tests another wrong input for hex color"""
+        fail = "#DD730CDD"
+        with pytest.raises(ValueError):
+            client.create_list('', color_id=fail)

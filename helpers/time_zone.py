@@ -1,8 +1,7 @@
 import pytz
 from datetime import datetime
 
-
-date_format = '%Y-%m-%d %H:%M:%S'
+from helpers.constants import DATE_FORMAT
 
 
 def convert_local_time_to_utc(original_time: datetime, time_zone:str):
@@ -18,8 +17,8 @@ def convert_local_time_to_utc(original_time: datetime, time_zone:str):
 
     utc = pytz.utc
     time_zone = pytz.timezone(time_zone)
-    original_time = original_time.strftime(date_format)
-    time_object = datetime.strptime(original_time, date_format)
+    original_time = original_time.strftime(DATE_FORMAT)
+    time_object = datetime.strptime(original_time, DATE_FORMAT)
     time_zone_dt = time_zone.localize(time_object)
     return time_zone_dt.astimezone(utc).replace(tzinfo=None)
 
