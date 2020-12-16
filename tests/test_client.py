@@ -4,76 +4,33 @@ import pytest
 import httpx
 
 from libtick.tick_tick import TickTickClient
-from datetime import datetime
 
 
 class TestClient:
 
     def test_good_login(self, client):
+        """Tests login is valid in conftest.py"""
         assert client.access_token != ''
 
     def test_bad_login(self, client):
+        """Tests invalid login"""
         user = 'not'
         passw = 'good'
         with pytest.raises(ValueError):
             test_client = TickTickClient(user, passw)
 
     def test_check_status_code(self, client):
+        """Tests that a failed httpx request raises an exception"""
         url = client.BASE_URL + 'badurl'
         response = httpx.get(url, cookies=client.cookies)
         with pytest.raises(ValueError):
             client.check_status_code(response, 'Error')
 
     def test_not_logged_in(self, client):
+        """Tests that an exception is raised when access_token is not alive"""
         user = os.getenv('TICKTICK_USER')
         passw = os.getenv('TICKTICK_PASS')
         new_client = TickTickClient(user, passw)
         new_client.access_token = ''
         with pytest.raises(ValueError):
             new_client.delete_list('1234')
-
-    def test_invalid_time_zone_get_summary(self, client):
-        start = datetime(2020, 12, 14)
-        end = datetime(2020, 12, 14)
-        tz = 'THIS AINT IT CHIEF'
-        with pytest.raises(ValueError):
-            tasks = client.get_summary(tz, start, end)
-
-    def test_get_summary_single_day_good_return(self, client):
-        start = datetime(2020, 12, 14)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start)
-        assert tasks[0] != ''
-
-    def test_get_summary_single_day_full_day_false(self, client):
-        start = datetime(2020, 12, 14, 8)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start, full_day=False)
-        assert tasks[0] != ''
-
-    def test_get_summary_multi_day_full_good_return(self, client):
-        start = datetime(2020, 12, 10)
-        end = datetime(2020, 12, 14)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start, end)
-        assert tasks[0] != ''
-
-    def test_get_summary_multi_day_not_full_day_good_return(self, client):
-        start = datetime(2020, 12, 10)
-        end = datetime(2020, 12, 14)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start, end, full_day=False)
-
-    def test_get_summary_multi_day_good_return(self, client):
-        start = datetime(2020, 12, 10)
-        end = datetime(2020, 12, 14)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start, end)
-        assert tasks[0] != ''
-
-    def test_get_summary_bad_start_and_end(self, client):
-        start = datetime(2020, 11, 14)
-        end = datetime(2020, 11, 10)
-        tz = 'US/Pacific'
-        tasks = client.get_summary(tz, start, end)
-        assert tasks == []
