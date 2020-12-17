@@ -14,6 +14,7 @@ def logged_in(func):
     :param func: Function that is decorated
     :return: Inner function
     """
+
     def call(self, *args, **kwargs):
         if not self.access_token:
             raise RuntimeError('ERROR -> Not Logged In')
@@ -84,8 +85,6 @@ class TickTickClient:
     def get_inbox_id(self):
         pass
 
-
-
     @logged_in
     def create_list(self, list_name: str, color_id: str = None, list_type: str = 'TASK') -> dict:
         """
@@ -97,10 +96,10 @@ class TickTickClient:
         """
         """Creates a new list with the passed parameters"""
         if list_name in self.lists:
-            raise ValueError('Cannot Create List -> Duplicate Name')
+            raise ValueError(f"Cannot Create List '{list_name}' -> Already Exists")
 
         if list_type != 'TASK' and list_type != 'NOTE':
-            raise ValueError('Invalid List Type -> Must be "TASK" or "NOTE"')
+            raise ValueError(f"Invalid List Type '{list_type}' -> Must be 'TASK' or 'NOTE'")
 
         if color_id is not None:
             check_color = re.search(VALID_HEX_VALUES, color_id)
@@ -112,6 +111,8 @@ class TickTickClient:
             'add': [{'name': list_name,
                      'color': color_id,
                      'kind': list_type,
+                     'sortOrder': '-7885694173184',
+                     'sortType': 'sortOrder'
                      }]
         }
         response = httpx.post(url, json=payload, cookies=self.cookies)
@@ -128,7 +129,7 @@ class TickTickClient:
         """
         # Check if the name exists
         if list_name not in self.lists:
-            raise KeyError(f'"{list_name}" Does Not Exist To Delete')
+            raise KeyError(f"List: '{list_name}' Does Not Exist To Delete")
 
         url = self.BASE_URL + 'batch/project'
         payload = {
@@ -138,7 +139,16 @@ class TickTickClient:
         self.check_status_code(response, 'Could Not Delete List')
         # Update class project dictionary
         self.lists = self.get_lists_name_and_id()
-        return f'{list_name} Deletion Successful'
+        return f"List: '{list_name}' Deleted"
+
+    @logged_in
+    def archive_list(self, list_name: str) -> str:
+        """
+        Moves the passed list to "Archived Lists"
+        :param list_name: Name of the list to be moved
+        :return: String specifying the archive was successful
+        """
+
 
     @logged_in
     def get_lists(self) -> list:
@@ -175,7 +185,7 @@ class TickTickClient:
         A full list of valid time_zone strings are in helpers -> timezones.txt
         SINGLE DAY SUMMARY: get_summary(time_zone, start_date)
         MULTI DAY SUMMARY: get_summary(time_zone, start_date, end_date)
-        SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day = False)
+        SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day=False)
 
         :param time_zone: String specifying the local time zone
         :param start_date: Datetime object
@@ -244,8 +254,4 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    name = 'Yuh2'
-    color = '#DD730CDD'
-    client.create_list(name, color, list_type='NOTE')
-
-    client.delete_list(name)
+    print(client.lists)

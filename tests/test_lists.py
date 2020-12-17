@@ -69,3 +69,15 @@ class TestLists:
         fail = "#DD730CDD"
         with pytest.raises(ValueError):
             client.create_list('', color_id=fail)
+
+    def test_archive_list_success(self, client):
+        # Create a test list
+        name = 'Test Archive List'
+        client.create_list(name)
+        # Archive the test list
+        client.archive_list(name)
+
+        pass
+
+    def test_archive_list_failure(self, client):
+        pass
