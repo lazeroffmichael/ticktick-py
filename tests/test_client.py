@@ -28,9 +28,19 @@ class TestClient:
 
     def test_not_logged_in(self, client):
         """Tests that an exception is raised when access_token is not alive"""
-        user = os.getenv('TICKTICK_USER')
-        passw = os.getenv('TICKTICK_PASS')
-        new_client = TickTickClient(user, passw)
-        new_client.access_token = ''
+        original_token = client.access_token
+        client.access_token = ''
         with pytest.raises(RuntimeError):
-            new_client.delete_list('1234')
+            client.delete_list('1234')
+        client.access_token = original_token
+
+    def test_initial_sync(self, client):
+        response = client._initial_sync()
+        assert response.status_code == 200
+
+    def test_settings(self, client):
+        response = client._settings()
+        assert response.status_code == 200
+        assert client.profile_id is not None
+        assert client.time_zone != ''
+
