@@ -31,16 +31,15 @@ class TestClient:
         original_token = client.access_token
         client.access_token = ''
         with pytest.raises(RuntimeError):
-            client.delete_list('1234')
+            client._sync()
         client.access_token = original_token
 
     def test_initial_sync(self, client):
-        response = client._initial_sync()
-        assert response.status_code == 200
+        response = client._sync()
+        assert client.state['inbox_id'] != ''
 
     def test_settings(self, client):
         response = client._settings()
-        assert response.status_code == 200
         assert client.profile_id is not None
         assert client.time_zone != ''
 
