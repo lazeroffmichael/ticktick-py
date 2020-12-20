@@ -10,11 +10,24 @@ class TestLists:
         name = 'Created List from Python'
         color = "#e070ff"
         task = client.list_create(name, color)
-        exists = False
-        for list_num in client.state['lists']:
-            if task == list_num['id']:
-                exists = True
-        assert exists
+        get_object = client.get_by_id(task, search_key='lists')
+        assert get_object['name'] == name
+        client.list_delete(task)
+
+    def test_update_success(self, client):
+        """Tests updating an already existing list"""
+        name = 'dnioanfknravndiojfioreajfior'
+        task = client.list_create(name)
+        get_object = client.get_by_id(task, search_key='lists')
+        assert get_object['name'] == name
+        update_name = 'jiocajiofhraoiv'
+        get_object['name'] = update_name
+        task2 = client.list_update(get_object['id'])
+        get_object2 = client.get_by_id(task2, search_key='lists')
+        assert get_object2['name'] == update_name
+        assert get_object['id'] == get_object2['id']
+        assert get_object['id'] == task2
+        client.list_delete(task2)
 
     def test_create_list_type_note_success(self, client):
         """Tests creating a list with type note"""
@@ -22,48 +35,39 @@ class TestLists:
         color = "#b20000"
         list_type = 'NOTE'
         task = client.list_create(name, color, list_type)
-        exists = False
-        for list_num in client.state['lists']:
-            if task == list_num['id'] and list_type == 'NOTE':
-                exists = True
-        assert exists
+        my_object = client.get_by_id(task, search_key='lists')
+        assert my_object
+        client.list_delete(task)
 
     def test_create_list_duplicate_failure(self, client):
         """Tests no list creation if the same name already exists"""
-        duplicate_name = 'Created List from Python'
+        name = 'hhdfhaovnoanrvoi'
+        duplicate_name = name
+        task = client.list_create(name)
         with pytest.raises(ValueError):
             client.list_create(duplicate_name)
+        client.list_delete(task)
 
     def test_delete_list_pass(self, client):
         """Tests list is properly deleted"""
         # Get id for 'Created List From Python'
-        name = 'Created List from Python'
-        name2 = 'Test Note Type List'
-        id1 = 0
-        id2 = 0
-        for id_check in client.state['lists']:
-            if name == id_check['name']:
-                id1 = id_check['id']
-            if name2 == id_check['name']:
-                id2 = id_check['id']
+        name = 'konvoanfopkndlkva'
+        name2 = 'nkojvon;slkvn;sfnv'
+        task1 = client.list_create(name)
+        task2 = client.list_create(name2)
         # Delete List
-        task = client.list_delete(id1)
-        task2 = client.list_delete(id2)
-        exists = False
-        exists2 = False
-        for list_num in client.state['lists']:
-            if task == list_num['id']:
-                exists = True
-            if task2 == list_num['id']:
-                exists2 = True
-        assert not exists
-        assert not exists2
+        task1 = client.list_delete(task1)
+        task2 = client.list_delete(task2)
+        obj1 = client.get_by_id(task1)
+        obj2 = client.get_by_id(task2)
+        assert not obj1
+        assert not obj2
 
     def test_delete_list_fail(self, client):
         """Tests deletion will not occur if list name does not exist"""
-        name = 'Yeah this project does not exist'
+        list_id = 'Yeah this project does not exist'
         with pytest.raises(KeyError):
-            client.list_delete(name)
+            client.list_delete(list_id)
 
     def test_wrong_list_type(self, client):
         """Tests wrong list type entered"""
@@ -109,5 +113,31 @@ class TestLists:
             if response == list_id['id']:
                 exists = True
         assert exists
+
+    def test_delete_list_folder(self, client):
+        """Test Deletion of an already created folder"""
+        name = 'Test Group List'
+        list_id = ''
+        # Find it
+        for nm in client.state['list_folders']:
+            if nm['name'] == name:
+                list_id = nm['id']
+
+        response = client.list_delete_folder(list_id)
+        for j in client.state['list_folders']:
+            if j['id'] == response:
+                assert False
+
+    def test_delete_list_folder_fail(self, client):
+        """Test failed deletion of a non existent folder"""
+        folder_id = 'nope no folder with this id'
+        with pytest.raises(KeyError):
+            client.list_delete_folder(folder_id)
+
+    def test_non_deletion_of_grouped_tasks(self, client):
+        """Asserts that if a parent folder is deleted the lists are not deleted"""
+        pass
+
+
 
 

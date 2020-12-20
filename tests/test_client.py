@@ -43,3 +43,36 @@ class TestClient:
         assert client.profile_id is not None
         assert client.time_zone != ''
 
+    def test_get_id(self, client):
+        list_name = 'jfkldjfkdjfa;kjfkljalkf'
+        response = client.list_create(list_name)
+        found_id = client.get_id(name=list_name)
+        assert response in found_id
+        client.list_delete(response)
+
+    def test_get_id_key_specified(self, client):
+        list_name = 'jfkldjfkdjfa;kjfkljalkf'
+        response = client.list_create(list_name)
+        found_id = client.get_id(name=list_name, search_key='lists')
+        assert response in found_id
+        client.list_delete(response)
+
+    def test_get_by_id_fail(self, client):
+        id = 'fklajflkviojaiojhvahjf'
+        with pytest.raises(KeyError):
+            response = client.get_by_id(id)
+
+    def test_get_by_id_pass(self, client):
+        list_name = 'ioavhyuihrvunbcjkva'
+        response = client.list_create(list_name)
+        returned_dict = client.get_by_id(response)
+        assert returned_dict['id'] == response
+        client.list_delete(response)
+
+    def test_get_by_id_fail(self, client):
+        list_name = 'ioavhyuihrvunbcjkva'
+        response = client.list_create(list_name)
+        returned_dict = client.get_by_id(response, search_key='tasks')
+        assert returned_dict == {}
+        client.list_delete(response)
+
