@@ -241,7 +241,7 @@ class TickTickClient:
     #   List (Project) Methods
 
     @logged_in
-    def list_create(self, list_name: str, color_id: str = None, list_type: str = 'TASK', ) -> str:
+    def list_create(self, list_name: str, color_id: str = None, list_type: str = 'TASK', group_id: str = None) -> str:
         """
         Creates a list (project) with the specified parameters.
         :param list_name: Name of the project to be created
@@ -253,6 +253,12 @@ class TickTickClient:
         id_list = self.get_id(search_key='lists', name=list_name)
         if id_list:
             raise ValueError(f"Invalid List Name '{list_name}' -> It Already Exists")
+
+        # Determine if parent list exists
+        if group_id is not None:
+            parent = self.get_by_id(group_id)
+            if not parent:
+                raise ValueError(f"Parent Id {group_id} Does Not Exist")
 
         # Make sure list type is valid
         if list_type != 'TASK' and list_type != 'NOTE':
@@ -268,6 +274,7 @@ class TickTickClient:
             'add': [{'name': list_name,
                      'color': color_id,
                      'kind': list_type,
+                     'groupId': group_id
                      }]
         }
         response = self._post(url, json=payload, cookies=self.cookies)
@@ -329,7 +336,7 @@ class TickTickClient:
         payload = {
             'delete': [list_id],
         }
-        response = self._post(url, json=payload, cookies=self.cookies)
+        self._post(url, json=payload, cookies=self.cookies)
         for j in range(len(self.state['lists'])):
             if self.state['lists'][j]['id'] == list_id:
                 break
@@ -345,20 +352,19 @@ class TickTickClient:
         :return:id of the folder deleted
         """
         # Check if the id exists
-        exists = False
-        for ids in range(len(self.state['list_folders'])):
-            if self.state['list_folders'][ids]['id'] == folder_id:
-                exists = True
-                break
-
-        if not exists:
+        obj = self.get_by_id(folder_id)
+        if not obj:
             raise KeyError(f"Folder id '{folder_id}' Does Not Exist To Delete")
+
         url = self.BASE_URL + 'batch/projectGroup'
         payload = {
             'delete': [folder_id]
         }
         self._post(url, json=payload, cookies=self.cookies)
-        del self.state['list_folders'][ids]
+        for k in range(len(self.state['lists'])):
+            if self.state['lists'][k]['id'] == folder_id:
+                break
+
         return folder_id
 
     @logged_in
@@ -369,20 +375,16 @@ class TickTickClient:
         :return: String specifying the archive was successful
         """
         # Check if the name exists
-        exists = False
-        for ids in range(len(self.state['lists'])):
-            if self.state['lists'][ids]['id'] == list_id:
-                exists = True
-                break
-        if not exists:
+        obj = self.get_by_id(list_id)
+        if not obj:
             raise KeyError(f"List id '{list_id}' Does Not Exist To Archive")
 
         # Check if the list is already archived
-        if self.state['lists'][ids]['closed'] is False or self.state['lists'][ids]['closed'] is None:
+        if obj['closed'] is False or obj['closed'] is None:
             url = self.BASE_URL + 'batch/project'
-            self.state['lists'][ids]['closed'] = True
+            obj['closed'] = True
             payload = {
-                'update': [self.state['lists'][ids]]
+                'update': [obj]
             }
             self._post(url, json=payload, cookies=self.cookies)
 
@@ -491,4 +493,4 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    response = client.list_create('client')
+

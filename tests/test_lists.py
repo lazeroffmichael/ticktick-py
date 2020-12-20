@@ -108,25 +108,17 @@ class TestLists:
         """List should be created and exist in client.list_groups"""
         name = 'Test Group List'
         response = client.list_create_folder(name)
-        exists = False
-        for list_id in client.state['list_folders']:
-            if response == list_id['id']:
-                exists = True
-        assert exists
+        obj = client.get_by_id(response)
+        assert obj
 
     def test_delete_list_folder(self, client):
         """Test Deletion of an already created folder"""
-        name = 'Test Group List'
-        list_id = ''
-        # Find it
-        for nm in client.state['list_folders']:
-            if nm['name'] == name:
-                list_id = nm['id']
+        name1 = 'Test Group List'
+        folder_id = client.get_id(name=name1, search_key='list_folders')
 
-        response = client.list_delete_folder(list_id)
-        for j in client.state['list_folders']:
-            if j['id'] == response:
-                assert False
+        response = client.list_delete_folder(folder_id[0])
+        obj = client.get_by_id(response)
+        assert obj
 
     def test_delete_list_folder_fail(self, client):
         """Test failed deletion of a non existent folder"""
@@ -136,7 +128,15 @@ class TestLists:
 
     def test_non_deletion_of_grouped_tasks(self, client):
         """Asserts that if a parent folder is deleted the lists are not deleted"""
-        pass
+        parent = client.list_create_folder('nfkladjf;fioaoivnm')
+        child1 = client.list_create('nfkdsanc;ioajf', group_id=parent)
+        child2 = client.list_create('nfkreanfviorenvklfs', group_id=parent)
+        deleted_parent = client.list_delete_folder(parent)
+        obj = client.get_by_id(child1)
+        obj2 = client.get_by_id(child2)
+        assert obj and obj2
+        client.list_delete(obj['id'])
+        client.list_delete(obj2['id'])
 
 
 
