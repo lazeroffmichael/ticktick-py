@@ -76,3 +76,21 @@ class TestClient:
         assert returned_dict == {}
         client.list_delete(response)
 
+    def test_no_args_entered(self, client):
+        with pytest.raises(ValueError):
+            client.get_id()
+        with pytest.raises(Exception):
+            client.get_by_id()
+
+    def test_get_etag(self, client):
+        pass
+
+    def test_get_etag_fail_get_by_etag(self, client):
+        etag = 'iofahionioahfgoirhgioh'
+        assert client.get_by_etag(etag) == {}
+
+    def test_get_etag_fail_get_etag(self, client):
+        with pytest.raises(Exception):
+            client.get_by_etag()
+            client.get_etag()
+

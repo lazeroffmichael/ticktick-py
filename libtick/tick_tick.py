@@ -164,7 +164,7 @@ class TickTickClient:
         :param kwargs: fields to look for
         :return: list containing the ids
         """
-        if kwargs is None:
+        if kwargs == {}:
             raise ValueError('Must Include Field(s) To Be Searched For')
 
         if search_key is not None and search_key not in self.state:
@@ -215,7 +215,6 @@ class TickTickClient:
     def get_by_id(self, id_number: str, search_key: str = None) -> dict:
         """
         Returns the dictionary object of the item corresponding to the passed id
-        NOTE: DOES NOT WORK FOR TAGS SINCE THEY USE ETAG ONLY AND NOT ID
         :param id_number: Id of the item to be returned
         :param search_key: Top level key of self.state which makes the search quicker
         :return: Dictionary object containing the item (or empty dictionary)
@@ -233,6 +232,82 @@ class TickTickClient:
                     if 'id' not in our_object:
                         break
                     if our_object['id'] == id_number:
+                        return our_object
+        # Return empty dictionary if not found
+        return {}
+
+    def get_etag(self, search_key=None, **kwargs) -> list:
+        """
+        Gets the etag based on the past fields
+        :param search_key: Specific state list to look into
+        :param kwargs: Fields to compare for
+        :return: List of the etags found corresponding to the fields
+        """
+        if kwargs == {}:
+            raise ValueError('Must Include Field(s) To Be Searched For')
+
+        if search_key is not None and search_key not in self.state:
+            raise KeyError(f"'{search_key}' Is Not Present In self.state Dictionary")
+
+        id_list = []
+        if search_key is not None:
+            # If a specific key was passed for self.state
+            # Go through self.state[key_name] and see if all the fields in kwargs match
+            # If all don't match return empty list
+            for index in self.state[search_key]:
+                all_match = True
+                for field in kwargs:
+                    if kwargs[field] != index[field]:
+                        all_match = False
+                        break
+                if all_match:
+                    id_list.append(index['etag'])
+
+        else:
+            # No key passed, search entire self.state dictionary
+            # Search the first level of the state dictionary
+            for primarykey in self.state:
+                skip_primary_key = False
+                all_match = True
+                middle_key = 0
+                # Search the individual lists of the dictionary
+                for middle_key in range(len(self.state[primarykey])):
+                    if skip_primary_key:
+                        break
+                    # Match the fields in the kwargs dictionary to the specific object -> if all match add index
+                    for fields in kwargs:
+                        # if the field doesn't exist, we can assume every other item in the list doesn't have the
+                        # field either -> so skip this primary_key entirely
+                        if fields not in self.state[primarykey][middle_key]:
+                            all_match = False
+                            skip_primary_key = True
+                            break
+                        if kwargs[fields] == self.state[primarykey][middle_key][fields]:
+                            all_match = True
+                        else:
+                            all_match = False
+                    if all_match:
+                        id_list.append(self.state[primarykey][middle_key]['etag'])
+
+        return id_list
+
+    def get_by_etag(self, etag: str, search_key: str = None):
+        if etag is None:
+            raise ValueError("Must Pass Etag")
+
+        # Search just in the desired list
+        if search_key is not None:
+            for index in self.state[search_key]:
+                if index['etag'] == etag:
+                    return index
+
+        else:
+            # Search all items in self.state
+            for prim_key in self.state:
+                for our_object in self.state[prim_key]:
+                    if 'etag' not in our_object:
+                        break
+                    if our_object['etag'] == etag:
                         return our_object
         # Return empty dictionary if not found
         return {}
@@ -256,7 +331,7 @@ class TickTickClient:
 
         # Determine if parent list exists
         if group_id is not None:
-            parent = self.get_by_id(group_id)
+            parent = self.get_by_id(group_id, search_key='list_folders')
             if not parent:
                 raise ValueError(f"Parent Id {group_id} Does Not Exist")
 
@@ -275,24 +350,6 @@ class TickTickClient:
                      'color': color_id,
                      'kind': list_type,
                      'groupId': group_id
-                     }]
-        }
-        response = self._post(url, json=payload, cookies=self.cookies)
-        self._sync()
-        return self._parse_id(response)
-
-    @logged_in
-    def list_create_folder(self, folder_name: str) -> httpx:
-        """
-        Creates a list folder
-        :param folder_name: Name of the folder
-        :return: httpx response
-        """
-        # Folder names can be reused
-        url = self.BASE_URL + 'batch/projectGroup'
-        payload = {
-            'add': [{'name': folder_name,
-                     'listType': 'group'
                      }]
         }
         response = self._post(url, json=payload, cookies=self.cookies)
@@ -345,29 +402,6 @@ class TickTickClient:
         return list_id
 
     @logged_in
-    def list_delete_folder(self, folder_id: str) -> str:
-        """
-        Deletes the folder and ungroups the tasks inside
-        :param folder_id:id of the folder
-        :return:id of the folder deleted
-        """
-        # Check if the id exists
-        obj = self.get_by_id(folder_id)
-        if not obj:
-            raise KeyError(f"Folder id '{folder_id}' Does Not Exist To Delete")
-
-        url = self.BASE_URL + 'batch/projectGroup'
-        payload = {
-            'delete': [folder_id]
-        }
-        self._post(url, json=payload, cookies=self.cookies)
-        for k in range(len(self.state['lists'])):
-            if self.state['lists'][k]['id'] == folder_id:
-                break
-
-        return folder_id
-
-    @logged_in
     def list_archive(self, list_id: str) -> str:
         """
         Moves the passed list to "Archived Lists" instead of deleting
@@ -391,25 +425,146 @@ class TickTickClient:
         # List still exists so don't delete
         return list_id
 
+    @logged_in
+    def list_create_folder(self, folder_name: str) -> httpx:
+        """
+        Creates a list folder
+        :param folder_name: Name of the folder
+        :return: httpx response
+        """
+        # Folder names can be reused
+        url = self.BASE_URL + 'batch/projectGroup'
+        payload = {
+            'add': [{'name': folder_name,
+                     'listType': 'group'
+                     }]
+        }
+        response = self._post(url, json=payload, cookies=self.cookies)
+        self._sync()
+        return self._parse_id(response)
+
+    @logged_in
+    def list_update_folder(self, folder_id: str) -> str:
+        """
+        Updates an already created list remotely
+        :param folder_id: Id of the folder to be updated
+        :return: Id of the folder updated
+        """
+        # Check if the id exists
+        obj = self.get_by_id(folder_id, search_key='list_folders')
+        if not obj:
+            raise KeyError(f"Folder id '{folder_id}' Does Not Exist To Update")
+
+        url = self.BASE_URL + 'batch/projectGroup'
+        payload = {
+            'update': [obj]
+        }
+        response = self._post(url, json=payload, cookies=self.cookies)
+        self._sync()
+        return folder_id
+
+    @logged_in
+    def list_delete_folder(self, folder_id: str) -> str:
+        """
+        Deletes the folder and ungroups the lists inside
+        :param folder_id:id of the folder
+        :return:id of the folder deleted
+        """
+        # Check if the id exists
+        obj = self.get_by_id(folder_id)
+        if not obj:
+            raise KeyError(f"Folder id '{folder_id}' Does Not Exist To Delete")
+
+        url = self.BASE_URL + 'batch/projectGroup'
+        payload = {
+            'delete': [folder_id]
+        }
+        self._post(url, json=payload, cookies=self.cookies)
+        for k in range(len(self.state['list_folders'])):
+            if self.state['list_folders'][k]['id'] == folder_id:
+                break
+
+        del self.state['list_folders'][k]
+
+        return folder_id
+
     def list_create_smart_list(self):
         pass
 
     #   ---------------------------------------------------------------------------------------------------------------
     #   Task and Tag Methods
-    def create_task(self, task_name: str):
+    def task_create(self,
+                    task_name: str,
+                    date: datetime = None,
+                    priority: int = 0,
+                    parent_id: str = None,
+                    project_id: str = None,
+                    tag_etags: list = []
+                    ) -> str:
+        """
+        Creates a task. The only required parameter is the task_name. If no project_id is entered,
+        it will default to the inbox.
+        :param task_name:
+        :param date:
+        :param priority:
+        :param parent_id:
+        :param project_id:
+        :param tag_etags:
+        :return:
+        """
+        # If a parent id was provided, first check to see if the parent_id exists
+        if parent_id is not None:
+            parent_obj = self.get_by_id(parent_id)
+            if not parent_obj:
+                raise ValueError(f"Parent id '{parent_id}' Does Not Exist")
+            # The project_id is going to match the parent_id projectId
+            project_id = parent_obj['projectId']
+
+        # If the project id is not provided, it will default to the user's inbox string
+        if project_id is None:
+            project_id = self.state['inbox_id']
+
+        # Check that the priority is 0, 1, 3, or 5
+        if priority not in {0, 1, 3, 5}:
+            raise ValueError(f"Priority must be 0, 1, 3, or 5")
+
+        # Check that all etags for the tags exist
+
+
+
+
+
+
+    def task_update(self, task_id: str):
         pass
 
-    def complete_task(self):
+    def task_complete(self):
         pass
 
-    def delete_task(self):
-        pass
+    def task_delete(self, task_id: str) -> str:
+        """
+        Deletes the task with the passed id remotely if it exists.
+        :param task_id: Id of the task to be deleted
+        :return: Id of the task deleted
+        """
+        # Check if the id exists
+        obj = self.get_by_id(task_id, search_key='tasks')
+        if not obj:
+            raise ValueError(f"Task Id '{task_id}' Does Not Exist")
 
-    def create_tag(self):
-        pass
-
-    def get_all_uncompleted_tasks(self):
-        pass
+        url = self.BASE_URL + 'batch/task'
+        payload = {
+            'delete': [{
+                'taskId': task_id,
+                'projectId': obj['projectId']
+            }]
+        }
+        response = self._post(url, json=payload, cookies=self.cookies)
+        for k in range(len(self.state['tasks'])):
+            if self.state['tasks'][k]['id'] == task_id:
+                break
+        del self.state['tasks'][k]
+        return task_id
 
     @logged_in
     def get_summary(self, start_date: datetime, end_date: datetime = None, full_day: bool = True, time_zone: str = None) -> list:
@@ -464,6 +619,17 @@ class TickTickClient:
         return response.json()
 
     #   ---------------------------------------------------------------------------------------------------------------
+    #   Tag Methods
+    def tag_create(self):
+        pass
+
+    def tag_update(self):
+        pass
+
+    def tag_delete(self):
+        pass
+
+    #   ---------------------------------------------------------------------------------------------------------------
     #   Habit Methods
     def create_habit(self):
         pass
@@ -493,4 +659,4 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-
+    re = client.get_id()

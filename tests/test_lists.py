@@ -1,6 +1,5 @@
 """Testing module for list related operations"""
 import pytest
-import json
 
 
 class TestLists:
@@ -93,9 +92,8 @@ class TestLists:
         task = client.list_create(name)
         # Archive the test list
         archive = client.list_archive(task)
-        for list_id in client.state['lists']:
-            if task == list_id['id']:
-                assert list_id['closed'] is True
+        obj = client.get_by_id(archive)
+        assert obj['closed'] is True
         # Delete the test list
         client.list_delete(archive)
 
@@ -118,7 +116,7 @@ class TestLists:
 
         response = client.list_delete_folder(folder_id[0])
         obj = client.get_by_id(response)
-        assert obj
+        assert not obj
 
     def test_delete_list_folder_fail(self, client):
         """Test failed deletion of a non existent folder"""
@@ -137,6 +135,16 @@ class TestLists:
         assert obj and obj2
         client.list_delete(obj['id'])
         client.list_delete(obj2['id'])
+
+    def test_update_list_folder(self, client):
+        """Tests that updating list folder properties works"""
+        parent = client.list_create_folder('75823y5847208927584275fgsggrsgfCa')
+        obj = client.get_by_id(parent)
+        obj['name'] = 'Changed Name'
+        updated = client.list_update_folder(parent)
+        updated_obj = client.get_by_id(updated)
+        assert updated_obj['name'] == 'Changed Name'
+        client.list_delete_folder(updated)
 
 
 
