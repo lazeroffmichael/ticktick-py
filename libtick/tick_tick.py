@@ -499,17 +499,18 @@ class TickTickClient:
                     priority: int = 0,
                     parent_id: str = None,
                     project_id: str = None,
-                    tag_etags: list = []
+                    tags: list = [],
+                    content: str = None
                     ) -> str:
         """
-        Creates a task. The only required parameter is the task_name. If no project_id is entered,
-        it will default to the inbox.
+        Creates a Task.
         :param task_name:
         :param date:
         :param priority:
         :param parent_id:
         :param project_id:
-        :param tag_etags:
+        :param tags:
+        :param content:
         :return:
         """
         # If a parent id was provided, first check to see if the parent_id exists
@@ -528,12 +529,22 @@ class TickTickClient:
         if priority not in {0, 1, 3, 5}:
             raise ValueError(f"Priority must be 0, 1, 3, or 5")
 
-        # Check that all etags for the tags exist
-
-
-
-
-
+        url = self.BASE_URL + 'batch/task'
+        payload = {
+            'add': [{
+                'title': task_name,
+                #'startDate': date,
+                #'priority': priority,
+                #'tags': tags,
+                #'projectId': project_id,
+                #'parentId': parent_id,
+                #'content': content,
+                #'timeZone': self.time_zone
+            }]
+        }
+        response = self._post(url, json=payload, cookies=self.cookies)
+        self._sync()
+        self._parse_id(response)
 
     def task_update(self, task_id: str):
         pass
@@ -659,4 +670,6 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    re = client.get_id()
+    name = 'new task'
+    response = client.task_create(name)
+    print(response)
