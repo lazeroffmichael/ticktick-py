@@ -504,6 +504,7 @@ class TickTickClient:
                     ) -> str:
         """
         Creates a Task.
+        Note: An unknown server exception is thrown when a task is created, but the task is still created.
         :param task_name:
         :param date:
         :param priority:
@@ -533,18 +534,25 @@ class TickTickClient:
         payload = {
             'add': [{
                 'title': task_name,
-                #'startDate': date,
-                #'priority': priority,
-                #'tags': tags,
-                #'projectId': project_id,
-                #'parentId': parent_id,
-                #'content': content,
-                #'timeZone': self.time_zone
+                'dueDate': date.strftime(DATE_FORMAT),
+                'priority': priority,
+                'tags': tags,
+                'projectId': project_id,
+                'parentId': parent_id,
+                'content': content,
+                'timeZone': self.time_zone
             }]
         }
-        response = self._post(url, json=payload, cookies=self.cookies)
+        response = httpx.post(url, json=payload, cookies=self.cookies)
+        if response.status_code != 200 and response.status_code != 500:
+            raise RuntimeError('Could Not Complete Request')
         self._sync()
-        self._parse_id(response)
+        # Since an unknown exception is occurring, the response is not returning a proper id.
+        # We have to find the newly created task in self.state['tasks'] manually to return the id
+        # We can start the traversal from the end of the list though.
+        for task in self.state['tasks'][::-1]:
+            if task['title'] == task_name:
+                return task['id']
 
     def task_update(self, task_id: str):
         pass
@@ -670,6 +678,27 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    name = 'new task'
-    response = client.task_create(name)
-    print(response)
+    name = 'giorahgoi4hginfkvnczlmvnkf'
+    date = datetime(2098, 12, 12)
+    priority = 3
+    # Lets create a project for it to go in other than inbox
+    project = client.list_create('kanoiejfoaqjkndlkvn,cnv')
+    # Lets add a tag
+    tag = ['459043u09']
+    # Lets add a description
+    description = "This is a created task"
+    task_create = client.task_create(name,
+                                     date=date,
+                                     priority=priority,
+                                     project_id=project,
+                                     content=description,
+                                     tags=tag)
+    # Find the task and make sure all fields match
+    task = client.get_by_id(task_create)
+    if (task['title'] == name and task['dueDate'] == date and
+            task['priority'] == priority and task['id'] == task_create and
+            task['projectId'] == project and task['content'] == description and
+            task['tags'] == tag):
+            match = True
+
+    print(match)
