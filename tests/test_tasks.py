@@ -3,20 +3,21 @@ Testing module for task functionality
 """
 import pytest
 from datetime import datetime
+import uuid
 
 
 class TestTasks:
 
-    def test_create_task_just_name(self, client):
-        name = 'iovhaoh48hh94u90q09h4hgihfkanvl'
-        task = client.task_create(name)
-        for tk in client.state['tasks']:
-            if tk['id'] == task:
-                created = True
-
-        assert created
+    def test_create_task_just_title(self, client):
+        """Tests task creation with just title"""
+        title = 'iovhaoh48hh94u90q09h4hgihfkanvl'
+        task = client.task_create(title)
+        task_obj = client.get_by_id(task)
+        assert task_obj
+        assert task_obj['projectId'] == client.state['inbox_id']
 
     def test_delete_task(self, client):
+        """Tests task deletion"""
         name = 'iovhaoh48hh94u90q09h4hgihfkanvl'
         # Find the task
         task_find = client.get_id(title=name)
@@ -25,31 +26,52 @@ class TestTasks:
         make_sure = client.get_by_id(delete)
         assert not make_sure
 
-    def test_create_task_no_name(self, client):
-        """Should raise exception"""
-        with pytest.raises(Exception):
-            client.task_create()
+    def test_create_task_title_and_priority(self, client):
+        """Tests task creation for title and priority"""
+        title = str(uuid.uuid4())
+        priority = 3    # Medium
+        task = client.task_create(title, priority=priority)
+        task_obj = client.get_by_id(task)
+        assert task_obj  # Make sure object was created
+        assert task_obj['priority'] == priority  # Assert priority matches
+        client.task_delete(task)    # Delete task
 
-    def test_create_task_all_fields_no_parent(self, client):
-        name = 'giorahgoi4hginfkvnczlmvnkf'
-        date = datetime(2098, 12, 12)
-        priority = 3
-        # Lets create a project for it to go in other than inbox
-        project = client.list_create('kanoiejfoaqjkndlkvn,cnv')
-        # Lets add a tag
-        tag = ['459043u09']
-        # Lets add a description
-        description = "This is a created task"
-        task_create = client.task_create(name,
-                                         date=date,
-                                         priority=priority,
-                                         project_id=project,
-                                         content=description)
-        # Find the task and make sure all fields match
-        for task in client.state['tasks']:
-            if (task['title'] == name and task['dueDate'] == date and
-                    task['priority'] == priority and task['id'] == task_create and
-                    task['projectId'] == project and task['content'] == description):
-                match = True
+    def test_create_task_title_and_priority_fail(self, client):
+        """Tests task creation for invalid priority value"""
+        title = str(uuid.uuid4())
+        priority = 56
+        with pytest.raises(ValueError):
+            client.task_create(title, priority=priority)
 
-        assert match
+    def test_create_task_different_list(self, client):
+        """Tests task creation with set project id"""
+        list_title = str(uuid.uuid4())
+        list_id = client.list_create(list_title)    # Create list
+        task_title = str(uuid.uuid4())
+        task_id = client.task_create(task_title, list_id=list_id, priority=3)    # Create task in list
+        get_task = client.get_by_id(task_id)
+        assert get_task
+        assert get_task['projectId'] == list_id
+        client.list_delete(list_id)
+        client.task_delete(task_id)
+
+    def test_create_task_different_list_fail(self, client):
+        """Tests exception thrown if list doesn't exist"""
+        with pytest.raises(ValueError):
+            client.task_create(str(uuid.uuid4()), list_id=str(uuid.uuid4()))
+
+    def test_create_task_with_tags(self, client):
+        """Tests creating a list with tags"""
+        tag = [str(uuid.uuid4())]
+        title = str(uuid.uuid4())
+        task_id = client.task_create(title, tags=tag)
+        task_obj = client.get_by_id(task_id)
+        assert task_obj
+        assert task_obj['tags'] == tag
+        # Delete the tags
+
+
+
+
+
+

@@ -2,8 +2,9 @@ import httpx
 import os
 import pytz
 import re
+import datetime
+import uuid
 
-from datetime import datetime
 from helpers.time_zone import convert_local_time_to_utc
 from helpers.constants import DATE_FORMAT, VALID_HEX_VALUES
 
@@ -143,6 +144,15 @@ class TickTickClient:
 
     def _get(self, url, **kwargs):
         response = self.session.get(url, **kwargs)
+        self.check_status_code(response, 'Could Not Complete Request')
+
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
+
+    def _delete(self, url, **kwargs):
+        response = self.session.delete(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -319,6 +329,7 @@ class TickTickClient:
     def list_create(self, list_name: str, color_id: str = None, list_type: str = 'TASK', group_id: str = None) -> str:
         """
         Creates a list (project) with the specified parameters.
+        :param group_id:
         :param list_name: Name of the project to be created
         :param color_id: Desired color for the project in hex
         :param list_type: Defaults to normal "TASK" type, or specify 'NOTE' for note type list
@@ -497,53 +508,57 @@ class TickTickClient:
                     task_name: str,
                     date: datetime = None,
                     priority: int = 0,
-                    parent_id: str = None,
-                    project_id: str = None,
-                    tags: list = [],
-                    content: str = None
+                    list_id: str = None,
+                    tags: list = None,
+                    content: str = '',
+                    time_zone: str = None
                     ) -> str:
-        """
-        Creates a Task.
-        Note: An unknown server exception is thrown when a task is created, but the task is still created.
-        :param task_name:
-        :param date:
-        :param priority:
-        :param parent_id:
-        :param project_id:
-        :param tags:
-        :param content:
-        :return:
-        """
-        # If a parent id was provided, first check to see if the parent_id exists
-        if parent_id is not None:
-            parent_obj = self.get_by_id(parent_id)
-            if not parent_obj:
-                raise ValueError(f"Parent id '{parent_id}' Does Not Exist")
-            # The project_id is going to match the parent_id projectId
-            project_id = parent_obj['projectId']
-
-        # If the project id is not provided, it will default to the user's inbox string
-        if project_id is None:
-            project_id = self.state['inbox_id']
-
-        # Check that the priority is 0, 1, 3, or 5
+        # task_name: -> No checks have to occur because task names can be repeated
+        # priority: -> Have to make sure that it is {0, 1, 3, or 5}, Raise Exception If Otherwise
+        if tags is None:
+            tags = []
         if priority not in {0, 1, 3, 5}:
             raise ValueError(f"Priority must be 0, 1, 3, or 5")
+
+        # project_id -> Default project id will be none
+        if list_id is None:
+            list_id = self.state['inbox_id']
+        else:
+            project_obj = self.get_by_id(list_id)
+            if not project_obj:
+                raise ValueError(f"Project id '{list_id}' Does Not Exist")
+
+        # Tag list does not matter -> The user can enter any tag names they want in the list
+        if tags is None:
+            tags = []
+
+        # Content can be whatever string that the user wants to pass
+
+        # If another time zone is not entered, default to the profile
+        if time_zone is None:
+            time_zone = self.time_zone
+        # Date
+        if date is not None:
+            date = convert_local_time_to_utc(date, time_zone)
+            date = date.replace(tzinfo=datetime.timezone.utc).isoformat()
+            # ISO 8601 Format Example: 2020-12-23T01:56:07+00:00
+            # TickTick Required Format: 2020-12-23T01:56:07+0000 -> Where the last colon is removed for timezone
+            # Remove the last colon from the string
+            date = date[::-1].replace(":", "", 1)[::-1]
 
         url = self.BASE_URL + 'batch/task'
         payload = {
             'add': [{
                 'title': task_name,
-                'dueDate': date.strftime(DATE_FORMAT),
                 'priority': priority,
                 'tags': tags,
-                'projectId': project_id,
-                'parentId': parent_id,
+                'projectId': list_id,
                 'content': content,
-                'timeZone': self.time_zone
+                'timeZone': self.time_zone,
+                'startDate': date
             }]
         }
-        response = httpx.post(url, json=payload, cookies=self.cookies)
+        response = self.session.post(url, json=payload, cookies=self.cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
         self._sync()
@@ -552,7 +567,23 @@ class TickTickClient:
         # We can start the traversal from the end of the list though.
         for task in self.state['tasks'][::-1]:
             if task['title'] == task_name:
-                return task['id']
+                task_id = task['id']
+
+        return task_id
+
+    def task_create_subtask(self, task_id: str):
+        """
+        /batch/taskParent
+        Create a null task
+        Call taskParent
+        Update the null task
+        :param task_id:
+        :return:
+        """
+        pass
+
+    def task_set_repeat(self, task_id: str):
+        pass
 
     def task_update(self, task_id: str):
         pass
@@ -616,13 +647,13 @@ class TickTickClient:
 
         # Single Day Entry
         if end_date is None:
-            start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
-            end_date = datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
+            start_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
+            end_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
 
         # Multi DAy -> Full Day Entry
         elif full_day is True and end_date is not None:
-            start_date = datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
-            end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+            start_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
+            end_date = datetime.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
 
         # Convert Local Time to UTC time based off the time_zone string specified
         start_date = convert_local_time_to_utc(start_date, time_zone)
@@ -645,8 +676,30 @@ class TickTickClient:
     def tag_update(self):
         pass
 
-    def tag_delete(self):
-        pass
+    def tag_delete(self, tag_name: str):
+        """
+        Deletes the tag with the name if it exists
+        :param tag_name:
+        :return:
+        """
+        # Determine if the tag exists
+        tag_obj = self.get_etag(name=tag_name, search_key='tags')
+        tag_obj = self.get_by_etag(tag_obj[0])
+        if not tag_obj:
+            raise ValueError(f"Tag '{tag_name}' Does Not Exist To Delete")
+
+        url = self.BASE_URL + 'tag'
+        params = {
+            'name': tag_name
+        }
+        response = self._delete(url, params=params, cookies=self.cookies)
+        # Find the tag
+        for tag in range(len(self.state['tags'])):
+            if self.state['tags'][tag]['etag'] == tag_obj['etag']:
+                del self.state['tags'][tag]
+                break
+
+        return tag_obj['etag']
 
     #   ---------------------------------------------------------------------------------------------------------------
     #   Habit Methods
@@ -678,27 +731,7 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    name = 'giorahgoi4hginfkvnczlmvnkf'
-    date = datetime(2098, 12, 12)
-    priority = 3
-    # Lets create a project for it to go in other than inbox
-    project = client.list_create('kanoiejfoaqjkndlkvn,cnv')
-    # Lets add a tag
-    tag = ['459043u09']
-    # Lets add a description
-    description = "This is a created task"
-    task_create = client.task_create(name,
-                                     date=date,
-                                     priority=priority,
-                                     project_id=project,
-                                     content=description,
-                                     tags=tag)
-    # Find the task and make sure all fields match
-    task = client.get_by_id(task_create)
-    if (task['title'] == name and task['dueDate'] == date and
-            task['priority'] == priority and task['id'] == task_create and
-            task['projectId'] == project and task['content'] == description and
-            task['tags'] == tag):
-            match = True
+    response = client.tag_delete('hello')
+    print(response)
 
-    print(match)
+
