@@ -94,10 +94,37 @@ def test_no_args_entered(client):
         client.get_id()
     with pytest.raises(Exception):
         client.get_by_id()
+    with pytest.raises(Exception):
+        client.get_etag()
+    with pytest.raises(Exception):
+        client.get_by_etag()
 
 
 def test_get_etag(client):
-    pass
+    # Create a tag
+    name = str(uuid.uuid4())
+    etag = client.tag.create(name)
+    # Get the tag from the name
+    find_etag = client.get_etag(name=name)
+    assert find_etag[0] == etag
+    client.tag.delete(etag)
+
+
+def test_get_etag_with_search_key_fail(client):
+    # Create a tag
+    name = str(uuid.uuid4())
+    etag = client.tag.create(name)
+    search = client.get_etag(name=name, search_key='lists')
+    assert not search
+    client.tag.delete(etag)
+
+
+def test_get_by_etag_pass(client):
+    name = str(uuid.uuid4())
+    etag = client.tag.create(name)
+    search = client.get_by_etag(etag)
+    assert search
+    client.tag.delete(etag)
 
 
 def test_get_etag_fail_get_by_etag(client):

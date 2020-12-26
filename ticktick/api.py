@@ -1,5 +1,6 @@
 import httpx
 import os
+import uuid
 
 from ticktick.managers.check_logged_in import logged_in
 from ticktick.managers.lists import ListManager
@@ -164,6 +165,12 @@ class TickTickClient:
         id_tag = list(id_tag.keys())
         return id_tag[0]
 
+    @staticmethod
+    def parse_etag(response: httpx) -> str:
+        etag = response['id2etag']
+        etag2 = list(etag.keys())
+        return etag[etag2[0]]
+
     def get_id(self, search_key: str = None, **kwargs) -> list:
         """
         Gets the id of the object with the matching fields. If serach_key is specified, it
@@ -319,10 +326,3 @@ class TickTickClient:
                         return our_object
         # Return empty dictionary if not found
         return {}
-
-if __name__ == '__main__':
-    usern = os.getenv('TICKTICK_USER')
-    passw = os.getenv('TICKTICK_PASS')
-    client = TickTickClient(usern, passw)
-
-

@@ -67,8 +67,15 @@ def test_create_task_with_tags(client):
     """Tests creating a list with tags"""
     # tag = [str(uuid.uuid4())]
     # title = str(uuid.uuid4())
-    # task_id = client.task_create(title, tags=tag)
+    # task_id = client.task.create(title, tags=tag)
     # task_obj = client.get_by_id(task_id)
     # assert task_obj
     # assert task_obj['tags'] == tag
     # # Delete the tags
+    # # Find the tag
+    # tag_obj = client.get_etag('etag' = tag[0], search_key='tags')
+    # tag_etag = tag_obj['etag']
+    # # Delete the tag
+    # client.tag.delete(tag_etag)
+    # # Delete the task
+    # client.task.delete(task_id)
