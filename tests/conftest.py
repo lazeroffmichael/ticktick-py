@@ -1,6 +1,6 @@
 import pytest
 import os
-from libtick.tick_tick import TickTickClient
+from ticktick.tick_tick import TickTickClient
 
 
 @pytest.fixture(scope='session')

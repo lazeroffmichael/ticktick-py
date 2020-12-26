@@ -1,151 +1,163 @@
-"""Testing module for list related operations"""
+"""
+Testing module for ListManager class
+"""
 import pytest
+import uuid
 
 
-class TestLists:
-
-    def test_create_list_success(self, client):
-        """Tests creating a list and having it populate the class list dictionary"""
-        name = 'Created List from Python'
-        color = "#e070ff"
-        task = client.list_create(name, color)
-        get_object = client.get_by_id(task, search_key='lists')
-        assert get_object['name'] == name
-        client.list_delete(task)
-
-    def test_update_success(self, client):
-        """Tests updating an already existing list"""
-        name = 'dnioanfknravndiojfioreajfior'
-        task = client.list_create(name)
-        get_object = client.get_by_id(task, search_key='lists')
-        assert get_object['name'] == name
-        update_name = 'jiocajiofhraoiv'
-        get_object['name'] = update_name
-        task2 = client.list_update(get_object['id'])
-        get_object2 = client.get_by_id(task2, search_key='lists')
-        assert get_object2['name'] == update_name
-        assert get_object['id'] == get_object2['id']
-        assert get_object['id'] == task2
-        client.list_delete(task2)
-
-    def test_create_list_type_note_success(self, client):
-        """Tests creating a list with type note"""
-        name = 'Test Note Type List'
-        color = "#b20000"
-        list_type = 'NOTE'
-        task = client.list_create(name, color, list_type)
-        my_object = client.get_by_id(task, search_key='lists')
-        assert my_object
-        client.list_delete(task)
-
-    def test_create_list_duplicate_failure(self, client):
-        """Tests no list creation if the same name already exists"""
-        name = 'hhdfhaovnoanrvoi'
-        duplicate_name = name
-        task = client.list_create(name)
-        with pytest.raises(ValueError):
-            client.list_create(duplicate_name)
-        client.list_delete(task)
-
-    def test_delete_list_pass(self, client):
-        """Tests list is properly deleted"""
-        # Get id for 'Created List From Python'
-        name = 'konvoanfopkndlkva'
-        name2 = 'nkojvon;slkvn;sfnv'
-        task1 = client.list_create(name)
-        task2 = client.list_create(name2)
-        # Delete List
-        task1 = client.list_delete(task1)
-        task2 = client.list_delete(task2)
-        obj1 = client.get_by_id(task1)
-        obj2 = client.get_by_id(task2)
-        assert not obj1
-        assert not obj2
-
-    def test_delete_list_fail(self, client):
-        """Tests deletion will not occur if list name does not exist"""
-        list_id = 'Yeah this project does not exist'
-        with pytest.raises(KeyError):
-            client.list_delete(list_id)
-
-    def test_wrong_list_type(self, client):
-        """Tests wrong list type entered"""
-        type = "Wrong list"
-        with pytest.raises(ValueError):
-            client.list_create('List Name', list_type=type)
-
-    def test_wrong_hex_string_input(self, client):
-        """Tests wrong input for hex color"""
-        fail = "Yeah this not right"
-        with pytest.raises(ValueError):
-            client.list_create('', color_id=fail)
-
-    def test_wrong_hex_string_input_2(self, client):
-        """Tests another wrong input for hex color"""
-        fail = "#DD730CDD"
-        with pytest.raises(ValueError):
-            client.list_create('', color_id=fail)
-
-    def test_archive_list_success(self, client):
-        # Create a test list
-        name = 'Test Archive List'
-        task = client.list_create(name)
-        # Archive the test list
-        archive = client.list_archive(task)
-        obj = client.get_by_id(archive)
-        assert obj['closed'] is True
-        # Delete the test list
-        client.list_delete(archive)
-
-    def test_archive_list_failure(self, client):
-        name = 'Fake Archive List'
-        with pytest.raises(KeyError):
-            client.list_archive(name)
-
-    def test_create_list_folder(self, client):
-        """List should be created and exist in client.list_groups"""
-        name = 'Test Group List'
-        response = client.list_create_folder(name)
-        obj = client.get_by_id(response)
-        assert obj
-
-    def test_delete_list_folder(self, client):
-        """Test Deletion of an already created folder"""
-        name1 = 'Test Group List'
-        folder_id = client.get_id(name=name1, search_key='list_folders')
-
-        response = client.list_delete_folder(folder_id[0])
-        obj = client.get_by_id(response)
-        assert not obj
-
-    def test_delete_list_folder_fail(self, client):
-        """Test failed deletion of a non existent folder"""
-        folder_id = 'nope no folder with this id'
-        with pytest.raises(KeyError):
-            client.list_delete_folder(folder_id)
-
-    def test_non_deletion_of_grouped_tasks(self, client):
-        """Asserts that if a parent folder is deleted the lists are not deleted"""
-        parent = client.list_create_folder('nfkladjf;fioaoivnm')
-        child1 = client.list_create('nfkdsanc;ioajf', group_id=parent)
-        child2 = client.list_create('nfkreanfviorenvklfs', group_id=parent)
-        deleted_parent = client.list_delete_folder(parent)
-        obj = client.get_by_id(child1)
-        obj2 = client.get_by_id(child2)
-        assert obj and obj2
-        client.list_delete(obj['id'])
-        client.list_delete(obj2['id'])
-
-    def test_update_list_folder(self, client):
-        """Tests that updating list folder properties works"""
-        parent = client.list_create_folder('75823y5847208927584275fgsggrsgfCa')
-        obj = client.get_by_id(parent)
-        obj['name'] = 'Changed Name'
-        updated = client.list_update_folder(parent)
-        updated_obj = client.get_by_id(updated)
-        assert updated_obj['name'] == 'Changed Name'
-        client.list_delete_folder(updated)
+def test_create_list_success(client):
+    """Tests creating a list and having it populate the class list dictionary"""
+    name = str(uuid.uuid4())
+    color = "#e070ff"
+    task = client.list.create(name, color)
+    get_object = client.get_by_id(task, search_key='lists')
+    assert get_object['name'] == name
+    client.list.delete(task)
 
 
+def test_update_success(client):
+    """Tests updating an already existing list"""
+    name = str(uuid.uuid4())
+    task = client.list.create(name)
+    get_object = client.get_by_id(task, search_key='lists')
+    assert get_object['name'] == name
+    update_name = str(uuid.uuid4())
+    get_object['name'] = update_name
+    task2 = client.list.update(get_object['id'])
+    get_object2 = client.get_by_id(task2, search_key='lists')
+    assert get_object2['name'] == update_name
+    assert get_object['id'] == get_object2['id']
+    assert get_object['id'] == task2
+    client.list.delete(task2)
 
 
+def test_create_list_type_note_success(client):
+    """Tests creating a list with type note"""
+    name = str(uuid.uuid4())
+    color = "#b20000"
+    list_type = 'NOTE'
+    task = client.list.create(name, color, list_type)
+    my_object = client.get_by_id(task, search_key='lists')
+    assert my_object
+    client.list.delete(task)
+
+
+def test_create_list_duplicate_failure(client):
+    """Tests no list creation if the same name already exists"""
+    name = str(uuid.uuid4())
+    duplicate_name = name
+    task = client.list.create(name)
+    with pytest.raises(ValueError):
+        client.list.create(duplicate_name)
+    client.list.delete(task)
+
+
+def test_delete_list_pass(client):
+    """Tests list is properly deleted"""
+    # Get id for 'Created List From Python'
+    name = str(uuid.uuid4())
+    name2 = str(uuid.uuid4())
+    task1 = client.list.create(name)
+    task2 = client.list.create(name2)
+    # Delete List
+    task1 = client.list.delete(task1)
+    task2 = client.list.delete(task2)
+    obj1 = client.get_by_id(task1)
+    obj2 = client.get_by_id(task2)
+    assert not obj1
+    assert not obj2
+
+
+def test_delete_list_fail(client):
+    """Tests deletion will not occur if list name does not exist"""
+    list_id = str(uuid.uuid4())
+    with pytest.raises(KeyError):
+        client.list.delete(list_id)
+
+
+def test_wrong_list_type(client):
+    """Tests wrong list type entered"""
+    type = str(uuid.uuid4())
+    with pytest.raises(ValueError):
+        client.list.create('List Name', list_type=type)
+
+
+def test_wrong_hex_string_input(client):
+    """Tests wrong input for hex color"""
+    fail = str(uuid.uuid4())
+    with pytest.raises(ValueError):
+        client.list.create('', color_id=fail)
+
+
+def test_wrong_hex_string_input_2(client):
+    """Tests another wrong input for hex color"""
+    fail = "#DD730CDD"
+    with pytest.raises(ValueError):
+        client.list.create('', color_id=fail)
+
+
+def test_archive_list_success(client):
+    # Create a test list
+    name = str(uuid.uuid4())
+    task = client.list.create(name)
+    # Archive the test list
+    archive = client.list.archive(task)
+    obj = client.get_by_id(archive)
+    assert obj['closed'] is True
+    # Delete the test list
+    client.list.delete(archive)
+
+
+def test_archive_list_failure(client):
+    name = str(uuid.uuid4())
+    with pytest.raises(KeyError):
+        client.list.archive(name)
+
+
+def test_create_list_folder(client):
+    """List should be created and exist in client.list_groups"""
+    name = str(uuid.uuid4())
+    response = client.list.create_folder(name)
+    obj = client.get_by_id(response)
+    assert obj
+    client.list.delete_folder(response)
+
+
+def test_delete_list_folder(client):
+    """Test Deletion of an already created folder"""
+    name = str(uuid.uuid4())
+    response = client.list.create_folder(name)
+    deletion = client.list.delete_folder(response)
+    obj = client.get_by_id(deletion, search_key='list_folders')
+    assert not obj
+
+
+def test_delete_list_folder_fail(client):
+    """Test failed deletion of a non existent folder"""
+    folder_id = str(uuid.uuid4())
+    with pytest.raises(KeyError):
+        client.list.delete_folder(folder_id)
+
+
+def test_non_deletion_of_grouped_tasks(client):
+    """Asserts that if a parent folder is deleted the lists are not deleted"""
+    parent = client.list.create_folder(str(uuid.uuid4()))
+    child1 = client.list.create(str(uuid.uuid4()), folder_id=parent)
+    child2 = client.list.create(str(uuid.uuid4()), folder_id=parent)
+    client.list.delete_folder(parent)
+    obj = client.get_by_id(child1)
+    obj2 = client.get_by_id(child2)
+    assert obj and obj2
+    client.list.delete(obj['id'])
+    client.list.delete(obj2['id'])
+
+
+def test_update_list_folder(client):
+    """Tests that updating list folder properties works"""
+    parent = client.list.create_folder(str(uuid.uuid4()))
+    obj = client.get_by_id(parent)
+    obj['name'] = 'Changed Name'
+    updated = client.list.update_folder(parent)
+    updated_obj = client.get_by_id(updated)
+    assert updated_obj['name'] == 'Changed Name'
+    client.list.delete_folder(updated)
