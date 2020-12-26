@@ -3,7 +3,7 @@ import pytest
 import httpx
 import uuid
 
-from ticktick.tick_tick import TickTickClient
+from ticktick.api import TickTickClient
 
 
 def test_good_login(client):

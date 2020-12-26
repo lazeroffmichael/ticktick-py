@@ -324,7 +324,5 @@ if __name__ == '__main__':
     usern = os.getenv('TICKTICK_USER')
     passw = os.getenv('TICKTICK_PASS')
     client = TickTickClient(usern, passw)
-    client.list.create('hello')
-    print('hello')
 
 
