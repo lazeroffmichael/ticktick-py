@@ -1,7 +1,7 @@
 """Testing module for local timezone to UTC conversion"""
 
 from datetime import datetime
-from helpers.time_zone import convert_local_time_to_utc
+from ticktick.helpers.time_zone import convert_local_time_to_utc
 
 
 class TestTimeConversions:

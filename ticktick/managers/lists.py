@@ -1,6 +1,5 @@
-from helpers.constants import VALID_HEX_VALUES
+from ticktick.helpers.hex_color import check_hex_color
 from ticktick.managers.check_logged_in import logged_in
-import re
 
 
 class ListManager:
@@ -35,8 +34,7 @@ class ListManager:
             raise ValueError(f"Invalid List Type '{list_type}' -> Should be 'TASK' or 'NOTE'")
 
         if color_id is not None:
-            check_color = re.search(VALID_HEX_VALUES, color_id)
-            if not check_color:
+            if not check_hex_color(color_id):
                 raise ValueError('Invalid Hex Color String')
 
         url = self._client.BASE_URL + 'batch/project'

@@ -1,7 +1,7 @@
 import datetime
 import pytz
-from helpers.time_zone import convert_local_time_to_utc
-from helpers.constants import DATE_FORMAT
+from ticktick.helpers.time_zone import convert_local_time_to_utc
+from ticktick.helpers.constants import DATE_FORMAT
 from ticktick.managers.check_logged_in import logged_in
 
 

@@ -1,6 +1,4 @@
 import httpx
-import os
-import uuid
 
 from ticktick.managers.check_logged_in import logged_in
 from ticktick.managers.lists import ListManager
@@ -152,6 +150,15 @@ class TickTickClient:
 
     def http_delete(self, url, **kwargs):
         response = self.session.delete(url, **kwargs)
+        self.check_status_code(response, 'Could Not Complete Request')
+
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
+
+    def http_put(self, url, **kwargs):
+        response = self.session.put(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
