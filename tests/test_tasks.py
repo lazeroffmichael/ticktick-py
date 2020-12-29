@@ -3,6 +3,8 @@ Testing module for task functionality
 """
 import pytest
 import uuid
+import datetime
+from ticktick.helpers.time_methods import convert_iso_to_tick_tick_format
 
 
 def test_create_task_just_title(client):
@@ -17,6 +19,71 @@ def test_create_task_just_title(client):
     found = client.get_by_id(task['id'])
     assert not found
     assert deleted not in client.state['tasks']
+
+
+def test_create_task_title_not_string(client):
+    """Tests a value error is raised if the title is not a string"""
+    with pytest.raises(ValueError):
+        client.task.create(1234)
+    with pytest.raises(ValueError):
+        client.task.create(uuid.uuid4())
+
+
+def test_create_task_start_date_only_all_day(client):
+    """Tests using only a start date that is all day"""
+    start = datetime.datetime(2022, 12, 31)
+    task = client.task.create('hello', start_date=start)
+    assert task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_start_date_only_not_all_day(client):
+    """Tests using a start date that is not all day"""
+    start = datetime.datetime(2022, 12, 31, 14, 30, 45, 32)
+    task = client.task.create('hello', start_date=start)
+    assert not task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_end_date_only_all_day(client):
+    """Tests using an end  date that is all day"""
+    start = datetime.datetime(2022, 12, 31)
+    task = client.task.create('hello', start_date=start)
+    assert task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_end_date_only_not_all_day(client):
+    """Tests creating a task using only end_date"""
+    end = datetime.datetime(2022, 12, 31, 14, 30, 45, 32)
+    task = client.task.create('hello', end_date=end)
+    assert not task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_both_dates_all_day(client):
+    """Tests creating a task using both start and end dates"""
+    start = datetime.datetime(2023, 1, 4)
+    end = datetime.datetime(2023, 1, 6)
+    task = client.task.create('hello', start_date=start, end_date=end)
+    assert not task['isAllDay']
+
+
+def test_create_task_both_dates_not_all_day(client):
+    assert 1==0
+
+
+def test_create_task_start_date_after_end_date(client):
+    assert 1 == 0
+
+
+def test_create_task_not_datetime_dates(client):
+    with pytest.raises(ValueError):
+        task1 = client.task.create('hello', start_date='yeah this not a datetime')
+    with pytest.raises(ValueError):
+        task2 = client.task.create('hello', end_date='yeah this not a datetime')
+    with pytest.raises(ValueError):
+        task3 = client.task.create('hello', start_date='nope', end_date='yeah this not a datetime')
 
 
 def test_create_task_title_and_priority(client):
@@ -80,6 +147,27 @@ def test_create_task_with_content(client):
     obj = client.task.create(name, content=content)
     assert obj['content'] == content
     client.task.delete(obj['id'])
+
+
+def test_create_task_with_date_all_day(client):
+    """Tests creating a task with a date"""
+    date = datetime.datetime(2022, 12, 31)
+    task = client.task.create(str(uuid.uuid4()), start_date=date)
+    assert task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_with_specific_time(client):
+    """Tests creating a task with a specific time"""
+    date = datetime.datetime(2022, 12, 31, 14, 30)  # 2:30 PM
+    task = client.task.create(str(uuid.uuid4()), start_date=date)
+    assert not task['isAllDay']
+    client.task.delete(task['id'])
+
+
+def test_create_task_with_start_and_end(client):
+    assert 1 == 0
+
 
 
 def test_get_from_list(client):
@@ -151,4 +239,3 @@ def test_move_from_inbox(client):
     # Delete the created task
     client.task.delete(task['id'])
     client.list.delete(list_['id'])
-

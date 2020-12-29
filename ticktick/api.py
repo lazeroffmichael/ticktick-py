@@ -258,61 +258,6 @@ class TickTickClient:
         # Return empty dictionary if not found
         return {}
 
-    # def get_etag(self, search=None, **kwargs) -> list:
-    #     """
-    #     Gets the etag based on the past fields
-    #     :param search: Specific state list to look into
-    #     :param kwargs: Fields to compare for
-    #     :return: List of the objects found corresponding to the fields
-    #     """
-    #     if kwargs == {}:
-    #         raise ValueError('Must Include Field(s) To Be Searched For')
-    #
-    #     if search is not None and search not in self.state:
-    #         raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
-    #
-    #     id_list = []
-    #     if search is not None:
-    #         # If a specific key was passed for self.state
-    #         # Go through self.state[key_name] and see if all the fields in kwargs match
-    #         # If all don't match return empty list
-    #         for index in self.state[search]:
-    #             all_match = True
-    #             for field in kwargs:
-    #                 if kwargs[field] != index[field]:
-    #                     all_match = False
-    #                     break
-    #             if all_match:
-    #                 id_list.append(index)
-    #
-    #     else:
-    #         # No key passed, search entire self.state dictionary
-    #         # Search the first level of the state dictionary
-    #         for primarykey in self.state:
-    #             skip_primary_key = False
-    #             all_match = True
-    #             middle_key = 0
-    #             # Search the individual lists of the dictionary
-    #             for middle_key in range(len(self.state[primarykey])):
-    #                 if skip_primary_key:
-    #                     break
-    #                 # Match the fields in the kwargs dictionary to the specific object -> if all match add index
-    #                 for fields in kwargs:
-    #                     # if the field doesn't exist, we can assume every other item in the list doesn't have the
-    #                     # field either -> so skip this primary_key entirely
-    #                     if fields not in self.state[primarykey][middle_key]:
-    #                         all_match = False
-    #                         skip_primary_key = True
-    #                         break
-    #                     if kwargs[fields] == self.state[primarykey][middle_key][fields]:
-    #                         all_match = True
-    #                     else:
-    #                         all_match = False
-    #                 if all_match:
-    #                     id_list.append(self.state[primarykey][middle_key])
-    #
-    #     return id_list
-
     def get_by_etag(self, etag: str, search: str = None):
         if etag is None:
             raise ValueError("Must Pass Etag")

@@ -2,12 +2,14 @@ import datetime
 import pytz
 import time
 
-from ticktick.helpers.time_zone import convert_local_time_to_utc
+from ticktick.helpers.time_methods import convert_local_time_to_utc, convert_iso_to_tick_tick_format
 from ticktick.helpers.constants import DATE_FORMAT
 from ticktick.managers.check_logged_in import logged_in
 
 
 class TaskManager:
+
+    PRIORITY_DICTIONARY = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
 
     def __init__(self, client_class):
         self._client = client_class
@@ -16,62 +18,113 @@ class TaskManager:
     @logged_in
     def create(self,
                task_name: str,
-               date: datetime = None,
-               priority: int = 0,
+               start_date: datetime = None,
+               end_date: datetime = None,
+               priority: str = 'none',
                list_id: str = None,
                tags: list = None,
                content: str = '',
                time_zone: str = None
                ) -> str:
-        # task_name: -> No checks have to occur because task names can be repeated
-        # priority: -> Have to make sure that it is {0, 1, 3, or 5}, Raise Exception If Otherwise
-        if tags is None:
-            tags = []
-        if priority not in {0, 1, 3, 5}:
-            raise ValueError(f"Priority must be 0, 1, 3, or 5")
+        # task_name: -> Make sure task_name is a string
+        if not isinstance(task_name, str):
+            raise ValueError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
+
+        # Date
+        # If another time zone is not entered, default to the profile
+        if time_zone is None:
+            time_zone = self._client.time_zone
+        else:
+            if time_zone not in pytz.all_timezones_set():
+                raise ValueError(f"Timezone '{time_zone}' Is Invalid")
+
+        all_day = None  # all day will begin at none
+        # Lets first check if both dates  are passed in, and if they are if start date comes before end date
+        if start_date is not None and end_date is not None:
+            if not isinstance(start_date, datetime.datetime):
+                raise ValueError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
+            if not isinstance(start_date, datetime.datetime):
+                raise ValueError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
+
+            # Check that start_date comes before end_date
+            if start_date > end_date:
+                raise ValueError(f"Start Date: '{start_date}' cannot come after End Date: '{end_date}'")
+            if (start_date.hour != 0 or start_date.minute != 0 or start_date.second != 0 or start_date.microsecond != 0
+                    or end_date.hour != 0 or end_date.minute != 0 or end_date.second != 0 or end_date.microsecond != 0):
+                # A specific hour, minute, second, or microsecond was given - so all day is not false and there
+                # is a specific time.
+                all_day = False
+            else:
+                all_day = True
+            start_date = convert_iso_to_tick_tick_format(start_date, time_zone)
+            end_date = convert_iso_to_tick_tick_format(end_date, time_zone)
+
+        # start_date passed but end_date not passed
+        elif start_date is not None and end_date is None:
+            if not isinstance(start_date, datetime.datetime):
+                raise ValueError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
+            # Determine all day
+            if start_date.hour != 0 or start_date.minute != 0 or start_date.second != 0 or start_date.microsecond != 0:
+                all_day = False
+            else:
+                all_day = True
+            # Parse start_date
+            start_date = convert_iso_to_tick_tick_format(start_date, time_zone)
+
+        # end_date passed but start_date not passed
+        elif end_date is not None and start_date is None:
+            if not isinstance(end_date, datetime.datetime):
+                raise ValueError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
+            # Determine all day
+            if end_date.hour != 0 or end_date.minute != 0 or end_date.second != 0 or end_date.microsecond != 0:
+                all_day = False
+            else:
+                all_day = True
+            # But end_date will actually take the place of start_date
+            start_date = convert_iso_to_tick_tick_format(end_date, time_zone)
+
+        # priority:
+        # Lowercase the input and make sure that it is in the priority dictionary
+        if priority.lower() not in self.PRIORITY_DICTIONARY:
+            raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+
+        priority = self.PRIORITY_DICTIONARY[priority]
 
         # project_id -> Default project id will be none
-        if list_id is None:
+        if list_id is None or list_id == self._client.state['inbox_id']:
             list_id = self._client.state['inbox_id']
         else:
             project_obj = self._client.get_by_id(list_id, search='lists')
             if not project_obj:
-                raise ValueError(f"Project id '{list_id}' Does Not Exist")
+                raise ValueError(f"List id '{list_id}' Does Not Exist")
 
         # Tag list does not matter -> The user can enter any tag names they want in the list
         if tags is None:
             tags = []
 
         # Content can be whatever string that the user wants to pass
-
-        # If another time zone is not entered, default to the profile
-        if time_zone is None:
-            time_zone = self._client.time_zone
-        # Date
-        if date is not None:
-            date = convert_local_time_to_utc(date, time_zone)
-            date = date.replace(tzinfo=datetime.timezone.utc).isoformat()
-            # ISO 8601 Format Example: 2020-12-23T01:56:07+00:00
-            # TickTick Required Format: 2020-12-23T01:56:07+0000 -> Where the last colon is removed for timezone
-            # Remove the last colon from the string
-            date = date[::-1].replace(":", "", 1)[::-1]
+        if not isinstance(content, str):
+            raise ValueError(f"Content Must Be A String")
 
         url = self._client.BASE_URL + 'batch/task'
         payload = {
             'add': [{
                 'title': task_name,
+                'startDate': start_date,
+                'dueDate': end_date,
+                'isAllDay': all_day,
                 'priority': priority,
                 'tags': tags,
                 'projectId': list_id,
                 'content': content,
-                'timeZone': self._client.time_zone,
-                'startDate': date
+                'timeZone': self._client.time_zone
             }]
         }
         response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
         if tags:
+            # A delay has to be added to allow for proper sync of tags created from the server
             time.sleep(2)
 
         self._client.sync()
@@ -111,8 +164,6 @@ class TaskManager:
         obj = self._client.get_by_fields(id=task_id, search='tasks')
         if not obj:
             raise ValueError(f"Task Id '{task_id}' Does Not Exist")
-
-
 
         pass
 
