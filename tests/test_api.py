@@ -49,90 +49,123 @@ def test_settings(client):
     assert client.time_zone != ''
 
 
-def test_get_id(client):
+def test_get_by_fields_generic(client):
     """Tests getting an id by an object field"""
     list_name = str(uuid.uuid4())
-    response = client.list.create(list_name)
-    found_id = client.get_id(name=list_name)
-    assert response in found_id
-    client.list.delete(response)
+    fake_obj = {'name': list_name}
+    client.state['lists'].append(fake_obj)  # Append the fake object
+    found = client.get_by_fields(name=list_name)
+    assert found
+    assert found[0]['name'] == list_name
+    client.delete_from_local_state(search='lists', name=list_name)
+    assert not client.get_by_fields(name=list_name)
 
 
-def test_get_id_key_specified(client):
+def test_get_by_fields_search_specified(client):
     """Tests getting an id"""
     list_name = str(uuid.uuid4())
-    response = client.list.create(list_name)
-    found_id = client.get_id(name=list_name, search_key='lists')
-    assert response in found_id
-    client.list.delete(response)
+    fake_obj = {'name': list_name}
+    client.state['lists'].append(fake_obj)  # Append the fake object
+    found = client.get_by_fields(name=list_name, search='lists')
+    assert found
+    assert found[0]['name'] == list_name
+    client.delete_from_local_state(search='lists', name=list_name)  # Delete the fake object
+    assert not client.get_by_fields(name=list_name)
+
+
+def test_get_by_fields_no_results(client):
+    """Tests getting an empty list if no objects match the fields"""
+    name = str(uuid.uuid4())
+    assert not client.get_by_fields(name=name)
+
+
+def test_get_by_fields_search_key_wrong(client):
+    """Tests raises an exception when search key doesn't exist"""
+    with pytest.raises(KeyError):
+        client.get_by_fields(search=str(uuid.uuid4()), name='')
 
 
 def test_get_by_id_fail(client):
+    """Tests returning an empty object if the id doesn't exist"""
     id_str = str(uuid.uuid4())
-    with pytest.raises(KeyError):
-        client.get_by_id(id_str)
+    assert not client.get_by_id(id_str)
 
 
 def test_get_by_id_pass(client):
-    list_name = str(uuid.uuid4())
-    response = client.list.create(list_name)
-    returned_dict = client.get_by_id(response)
-    assert returned_dict['id'] == response
-    client.list.delete(response)
+    """Tests getting an object by its id"""
+    list_id = str(uuid.uuid4())
+    fake_obj = {'id': list_id}
+    client.state['lists'].append(fake_obj)  # Append the fake object
+    found = client.get_by_id(list_id)
+    assert found
+    assert found['id'] == list_id
+    client.delete_from_local_state(search='lists', id=list_id)  # Delete the fake object
+    assert not client.get_by_id(list_id)
 
 
-def test_get_by_id_fail(client):
-    list_name = str(uuid.uuid4())
-    response = client.list.create(list_name)
-    returned_dict = client.get_by_id(response, search_key='tasks')
-    assert returned_dict == {}
-    client.list.delete(response)
+def test_get_by_id_search_key_wrong(client):
+    """Tests searching in the wrong list wont find the object"""
+    list_id = str(uuid.uuid4())
+    fake_obj = {'id': list_id}
+    client.state['lists'].append(fake_obj)  # Append the fake object
+    found = client.get_by_id(list_id, search='tasks')
+    assert not found
+    client.delete_from_local_state(id=list_id, search='lists')
+    assert not client.get_by_id(list_id)
 
 
 def test_no_args_entered(client):
     with pytest.raises(ValueError):
-        client.get_id()
+        client.get_by_fields()
     with pytest.raises(Exception):
         client.get_by_id()
     with pytest.raises(Exception):
-        client.get_etag()
-    with pytest.raises(Exception):
         client.get_by_etag()
-
-
-def test_get_etag(client):
-    # Create a tag
-    name = str(uuid.uuid4())
-    etag = client.tag.create(name)
-    # Get the tag from the name
-    find_etag = client.get_etag(name=name)
-    assert find_etag[0] == etag
-    client.tag.delete(etag)
-
-
-def test_get_etag_with_search_key_fail(client):
-    # Create a tag
-    name = str(uuid.uuid4())
-    etag = client.tag.create(name)
-    search = client.get_etag(name=name, search_key='lists')
-    assert not search
-    client.tag.delete(etag)
+    with pytest.raises(Exception):
+        client.delete_from_local_state()
 
 
 def test_get_by_etag_pass(client):
-    name = str(uuid.uuid4())
-    etag = client.tag.create(name)
-    search = client.get_by_etag(etag)
-    assert search
-    client.tag.delete(etag)
-
-
-def test_get_etag_fail_get_by_etag(client):
+    """Tests getting an object by etag works"""
     etag = str(uuid.uuid4())
-    assert client.get_by_etag(etag) == {}
+    obj = {'etag': etag}
+    client.state['tags'].append(obj)  # Append the fake object
+    assert client.get_by_etag(etag)
+    client.delete_from_local_state(etag=etag, search='tags')
+    assert not client.get_by_etag(etag)
 
 
-def test_get_etag_fail_get_etag(client):
-    with pytest.raises(Exception):
-        client.get_by_etag()
-        client.get_etag()
+def test_get_by_etag_fail(client):
+    """Asserts that object is empty if the etag doesn't exist"""
+    etag = str(uuid.uuid4())
+    assert not client.get_by_etag(etag)
+
+
+def test_delete_from_local_state_pass(client):
+    """Tests successfully deleting an item from local state"""
+    name = str(uuid.uuid4())
+    item = {'name': name}
+    client.state['lists'].append(item)  # Append the item to the local state
+    obj = client.get_by_fields(name=name, search='lists')  # Make sure append worked
+    assert obj
+    deleted = client.delete_from_local_state(name=name, search='lists')
+    obj = client.get_by_fields(name=name, search='lists')
+    assert not obj  # Assert that deletion worked
+
+
+def test_delete_from_local_state_no_key(client):
+    name = str(uuid.uuid4())
+    item = {'name': name}
+    client.state['lists'].append(item)  # Append the item to the local state
+    obj = client.get_by_fields(name=name)  # Make sure append worked
+    assert obj
+    deleted = client.delete_from_local_state(name=name)
+    obj = client.get_by_fields(name=name)  # Search for the object
+    assert not obj  # Assert the object doesn't exist anymore
+
+
+def test_delete_from_local_state_null(client):
+    """Tests nothing is deleted if an item doesn't exist"""
+    name = str(uuid.uuid4())
+    deleted = client.delete_from_local_state(name=name)
+    assert not deleted  # Assert that nothing was deleted

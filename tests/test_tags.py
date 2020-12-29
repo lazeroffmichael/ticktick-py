@@ -3,6 +3,7 @@ Testing Module For TagManager
 """
 import uuid
 import pytest
+import time
 
 from ticktick.helpers.hex_color import generate_hex_color
 
@@ -10,23 +11,25 @@ from ticktick.helpers.hex_color import generate_hex_color
 def test_tag_create(client):
     """Tests a successful creation of a tag"""
     name = str(uuid.uuid4())
-    tag_create = client.tag.create(name)
-    tag_obj = client.get_by_etag(tag_create)  # Find the tag
-    assert tag_obj
-    client.tag.delete(tag_create)  # Delete the tag
+    tag_ = client.tag.create(name)
+    assert tag_
+    client.tag.delete(name)  # Delete the tag
 
 
 def test_tag_delete(client):
     """Tests a successful deletion of a tag"""
     name = str(uuid.uuid4())
-    tag_create = client.tag.create(name)
-    # Find the tag
-    tag_obj = client.get_by_etag(tag_create)
-    assert tag_obj
+    tag_ = client.tag.create(name)
+    assert tag_
     # Delete the tag
-    tag_delete = client.tag.delete(tag_create)
-    find = client.get_by_etag(tag_delete)
+    tag_delete = client.tag.delete(name)
+    find = client.get_by_etag(tag_delete['etag'])
     assert not find
+
+
+def test_tag_delete_with_task(client):
+    """Tests that a tag is removed properly from a task"""
+    assert 1 == 0
 
 
 def test_tag_delete_fail(client):
@@ -39,21 +42,20 @@ def test_tag_delete_fail(client):
 def test_tag_create_with_duplicate_name_fail(client):
     """Tests attempting to create a tag with a name that already exists"""
     name = str(uuid.uuid4())
-    etag = client.tag.create(name)  # Create tag
+    tag_ = client.tag.create(name)  # Create tag
     with pytest.raises(ValueError):
         client.tag.create(name)  # Creating a tag with a duplicate name should raise error
-    client.tag.delete(etag)  # Delete tag
+    client.tag.delete(name)  # Delete tag
 
 
 def test_tag_create_with_color(client):
     """Tests creating a tag with color"""
     name = str(uuid.uuid4())
     color = "#b20000"
-    tag_etag = client.tag.create(name, color_id=color)
-    tag_obj = client.get_by_etag(tag_etag)
-    assert tag_obj
-    assert tag_obj['color'] == color
-    client.tag.delete(tag_etag)
+    tag_ = client.tag.create(name, color=color)
+    assert tag_
+    assert tag_['color'] == color
+    client.tag.delete(name)
 
 
 def test_tag_create_with_color_fail(client):
@@ -61,27 +63,23 @@ def test_tag_create_with_color_fail(client):
     name = str(uuid.uuid4())
     color = str(uuid.uuid4())
     with pytest.raises(ValueError):
-        client.tag.create(name, color_id=color)
+        client.tag.create(name, color=color)
 
 
 def test_tag_create_with_parent_etag(client):
     """Tests a successful creation of a tag that has a parent tag"""
     parent = str(uuid.uuid4())
     child = str(uuid.uuid4())
-    # Create parent task
-    parent_etag = client.tag.create(parent)
-    # Create child task
-    child_etag = client.tag.create(child, parent_etag=parent_etag)
-    # Obtain the object of the child task
-    child_obj = client.get_by_etag(child_etag)
-    # Obtain the object of the parent task
-    parent_obj = client.get_by_etag(parent_etag)
-    assert child_obj['parent'] == parent_obj['name']
-    client.tag.delete(parent_etag)
+    # Create parent tag
+    parent_ = client.tag.create(parent)
+    # Create child tag
+    child_ = client.tag.create(child, parent_name=parent_['name'])
+    assert child_['parent'] == parent_['name']
+    client.tag.delete(parent_['name'])
     # Assert that child still exists
-    child_obj = client.get_by_etag(child_etag)
+    child_obj = client.get_by_etag(child_['etag'])
     assert child_obj
-    client.tag.delete(child_etag)
+    client.tag.delete(child)
 
 
 def test_tag_create_with_parent_etag_fail(client):
@@ -89,7 +87,7 @@ def test_tag_create_with_parent_etag_fail(client):
     child = str(uuid.uuid4())
     # Creating the child task with parent_etag that doesn't exist should raise error
     with pytest.raises(ValueError):
-        client.tag.create(child, parent_etag=str(uuid.uuid4()))
+        client.tag.create(child, parent_name=str(uuid.uuid4()))
 
 
 def test_tag_create_with_sort_pass(client):
@@ -100,111 +98,102 @@ def test_tag_create_with_sort_pass(client):
                    3: 'priority'}
     for digit in sort_values:
         name = str(uuid.uuid4())
-        etag = client.tag.create(name, sort_type=digit)  # Create the tag
-        obj = client.get_by_etag(etag)
+        obj = client.tag.create(name, sort=digit)  # Create the tag
         assert obj['sortType'] == sort_values[digit]  # Make sure sort type matches
-        client.tag.delete(etag)
+        client.tag.delete(name)
 
 
 def test_tag_create_with_sort_fail(client):
     """Tests failure to create a tag with a bad sort value"""
     sort_value = 56  # Invalid
     with pytest.raises(ValueError):
-        etag = client.tag.create(str(uuid.uuid4()), sort_type=sort_value)
+        client.tag.create(str(uuid.uuid4()), sort=sort_value)
 
 
 def test_tag_create_with_all_fields(client):
     """Tests creating a tag with all fields"""
     parent_name = str(uuid.uuid4())
-    parent_etag = client.tag.create(parent_name)  # Parent tag
+    parent_ = client.tag.create(parent_name)  # Parent tag
     child_name = str(uuid.uuid4())
     color = generate_hex_color()
     # Task with all fields
-    child_etag = client.tag.create(child_name, color_id=color, parent_etag=parent_etag, sort_type=2)
-    child_obj = client.get_by_etag(child_etag)
-    assert child_obj['name'] == child_name
-    assert child_obj['color'] == color
-    assert child_obj['sortType'] == 'title'
-    parent_obj = client.get_by_etag(parent_etag)
-    assert child_obj['parent'] == parent_obj['name']
-    client.tag.delete(child_etag)
-    client.tag.delete(parent_etag)
+    child_ = client.tag.create(child_name, color=color, parent_name=parent_name, sort=2)
+    assert child_['name'] == child_name
+    assert child_['color'] == color
+    assert child_['sortType'] == 'title'
+    assert child_['parent'] == parent_['name']
+    client.tag.delete(child_name)
+    client.tag.delete(parent_name)
 
 
 def test_tag_update_name(client):
     """Tests updating an existing tags name"""
     parent = str(uuid.uuid4())
     # Create tag
-    parent_etag = client.tag.create(parent)
+    parent_ = client.tag.create(parent)
     # Update the name of the tag
     new_name = str(uuid.uuid4())
-    new_etag = client.tag.update(parent_etag, new_name=new_name)
-    # Get the newly updated object
-    updated_obj = client.get_by_etag(new_etag)
-    # Assert that updated_obj exists
-    assert updated_obj
-    assert updated_obj['name'] == new_name
+    new_ = client.tag.update(old_name=parent, new_name=new_name)
+    # Assert that new_
+    assert new_
+    assert new_['name'] == new_name
     # Assert that the original object etag does not exist
-    old_obj = client.get_by_etag(parent_etag)
+    old_obj = client.get_by_etag(parent_['etag'])
     assert not old_obj
     # Delete the tag
-    client.tag.delete(new_etag)
+    client.tag.delete(new_name)
 
 
 def test_tag_update_name_fail(client):
     """Tests updating an existing tags name fail because of a fake etag"""
-    fake_etag = str(uuid.uuid4())
+    fake_name = str(uuid.uuid4())
     new_name = str(uuid.uuid4())
     with pytest.raises(ValueError):
-        client.tag.update(fake_etag, new_name=new_name)
+        client.tag.update(old_name=fake_name, new_name=new_name)
 
 
 def test_update_color_success(client):
     """Tests updating an existing tag with a new color"""
     name = str(uuid.uuid4())
-    etag = client.tag.create(name)  # Create new tag
+    tag = client.tag.create(name)  # Create new tag
     color = generate_hex_color()  # New color
-    new_etag = client.tag.update(etag, color=color)
-    color_obj = client.get_by_etag(new_etag)
-    assert color_obj['color'] == color
-    with pytest.raises(ValueError):  # Since the etag has been replaced, this should raise an error
-        client.tag.delete(etag)
-    client.tag.delete(new_etag)  # Delete the tag
+    new_ = client.tag.update(name, color=color)
+    assert new_['color'] == color
+    client.tag.delete(name)  # Delete the tag
 
 
 def test_update_color_fail(client):
     """Tests failure to update if the color id is not valid"""
     name = str(uuid.uuid4())
-    etag = client.tag.create(name)
+    tag = client.tag.create(name)
     color = str(uuid.uuid4())
     with pytest.raises(ValueError):
-        client.tag.update(etag, color=color)
-    client.tag.delete(etag)
+        client.tag.update(name, color=color)
+    client.tag.delete(name)
 
 
 def test_update_parent_success(client):
+    """Tests updating parent success"""
     """Tests updating parent success"""
     parent_name = str(uuid.uuid4())
     child_name = str(uuid.uuid4())
     parent_etag = client.tag.create(parent_name)  # Create the parent tag
     child_etag = client.tag.create(child_name)  # Create the child tag
     # Update the child tag
-    updated = client.tag.update(child_etag, parent_etag=parent_etag)
-    # Get the object
-    updated_obj = client.get_by_etag(updated[child_name])
-    assert updated_obj['parent'] == parent_name
-    client.tag.delete(updated[child_name])
-    client.tag.delete(updated[parent_name])
+    updated = client.tag.update(child_name, parent_name=parent_name)
+    assert updated['parent'] == parent_name
+    client.tag.delete(child_name)
+    client.tag.delete(parent_name)
 
 
 def test_update_parent_fail(client):
     """Tests updating with a parent that doesn't exist raises an exception"""
     child_name = str(uuid.uuid4())
     child_etag = client.tag.create(child_name)
-    parent_etag = str(uuid.uuid4())  # Not an actual etag
+    parent_name = str(uuid.uuid4())  # Not an actual etag
     with pytest.raises(ValueError):
-        client.tag.update(child_etag, parent_etag=parent_etag)
-    client.tag.delete(child_etag)
+        client.tag.update(child_name, parent_name=parent_name)
+    client.tag.delete(child_name)
 
 
 def test_update_sort_pass(client):
@@ -214,9 +203,49 @@ def test_update_sort_pass(client):
                    2: 'title',
                    3: 'priority'}
     for digit in sort_values:
-        etag = client.tag.create(str(uuid.uuid4()))  # Create tag
-        updated = client.tag.update(etag, sort=digit)  # Update the tag
-        updated_obj = client.get_by_etag(updated)  # Get the object
-        assert updated_obj['sortType'] == sort_values[digit]
-        client.tag.delete(updated)  # Delete the tag
+        name = str(uuid.uuid4())
+        obj = client.tag.create(name)  # Create tag
+        updated = client.tag.update(name, sort=digit)  # Update the tag
+        assert updated['sortType'] == sort_values[digit]
+        client.tag.delete(name)  # Delete the tag
 
+
+def test_update_all_pass(client):
+    """Tests updating all fields at once works"""
+    parent_name = str(uuid.uuid4())
+    parent_obj = client.tag.create(parent_name)  # Create parent tag
+    color = generate_hex_color()
+    sort = 3
+    child_name = str(uuid.uuid4())
+    updated_name = str(uuid.uuid4())
+    child_obj = client.tag.create(child_name, sort=2)
+    updated_obj = client.tag.update(child_name,
+                                    new_name=updated_name,
+                                    color=color,
+                                    sort=sort,
+                                    parent_name=parent_name)
+    assert updated_obj['name'] == updated_name
+    assert updated_obj['color'] == color
+    assert updated_obj['sortType'] == 'priority'
+    assert updated_obj['parent'] == parent_name
+    client.tag.delete(updated_name)
+    client.tag.delete(parent_name)
+
+
+def test_merge_success_two_tags(client):
+    """Tests successful merge of the tasks of two tags"""
+    name1 = str(uuid.uuid4())
+    name2 = str(uuid.uuid4())
+    tag1 = client.tag.create(name1)  # Create tag
+    tag2 = client.tag.create(name2)  # Create tag
+    # Merge tag1 <-- tag2
+    merge = client.tag.merge(name1, name2)
+    # Make sure that name2 doesn't exist anymore
+    tag2 = client.get_by_fields(name=name2)
+    assert not tag2
+    client.tag.delete(name1)  # Delete the remaining tag
+
+
+def test_merge_success_four_tags(client):
+    """Tests the successful merge of the tasks of four tags"""
+    assert 8 == 0

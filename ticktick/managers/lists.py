@@ -1,4 +1,4 @@
-from ticktick.helpers.hex_color import check_hex_color
+from ticktick.helpers.hex_color import check_hex_color, generate_hex_color
 from ticktick.managers.check_logged_in import logged_in
 
 
@@ -9,23 +9,23 @@ class ListManager:
         self.access_token = self._client.access_token
 
     @logged_in
-    def create(self, list_name: str, color_id: str = None, list_type: str = 'TASK', folder_id: str = None) -> str:
+    def create(self, name: str, color: str = 'random', list_type: str = 'TASK', folder_id: str = None) -> str:
         """
         Creates a list (project) with the specified parameters.
         :param folder_id:
-        :param list_name: Name of the project to be created
-        :param color_id: Desired color for the project in hex
+        :param name: Name of the project to be created
+        :param color: Desired color for the project in hex
         :param list_type: Defaults to normal "TASK" type, or specify 'NOTE' for note type list
         :return: Id of the created list
         """
         # Go through self.state['lists'] and determine if the name already exists
-        id_list = self._client.get_id(search_key='lists', name=list_name)
+        id_list = self._client.get_by_fields(search='lists', name=name)
         if id_list:
-            raise ValueError(f"Invalid List Name '{list_name}' -> It Already Exists")
+            raise ValueError(f"Invalid List Name '{name}' -> It Already Exists")
 
         # Determine if parent list exists
         if folder_id is not None:
-            parent = self._client.get_by_id(folder_id, search_key='list_folders')
+            parent = self._client.get_by_id(folder_id, search='list_folders')
             if not parent:
                 raise ValueError(f"Parent Id {folder_id} Does Not Exist")
 
@@ -33,21 +33,24 @@ class ListManager:
         if list_type != 'TASK' and list_type != 'NOTE':
             raise ValueError(f"Invalid List Type '{list_type}' -> Should be 'TASK' or 'NOTE'")
 
-        if color_id is not None:
-            if not check_hex_color(color_id):
+        # Check color_id
+        if color == 'random':
+            color = generate_hex_color()  # Random color will be generated
+        elif color is not None:
+            if not check_hex_color(color):
                 raise ValueError('Invalid Hex Color String')
 
         url = self._client.BASE_URL + 'batch/project'
         payload = {
-            'add': [{'name': list_name,
-                     'color': color_id,
+            'add': [{'name': name,
+                     'color': color,
                      'kind': list_type,
                      'groupId': folder_id
                      }]
         }
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
         self._client.sync()
-        return self._client.parse_id(response)
+        return self._client.get_by_id(self._client.parse_id(response), search='lists')
 
     @logged_in
     def update(self, list_id: str) -> str:
@@ -58,7 +61,7 @@ class ListManager:
         :return: list_id
         """
         # Check if the id exists
-        returned_object = self._client.get_by_id(list_id, search_key='lists')
+        returned_object = self._client.get_by_id(list_id, search='lists')
         if not returned_object:
             raise KeyError(f"List id '{list_id}' Does Not Exist To Update")
 
@@ -68,31 +71,50 @@ class ListManager:
         }
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
         self._client.sync()
-        return self._client.parse_id(response)
+        return self._client.get_by_id(self._client.parse_id(response), search='lists')
 
     @logged_in
-    def delete(self, list_id: str) -> str:
+    def delete(self, list_id: str, preserve_tasks: bool = False, move_to_list: str = None) -> dict:
         """
         Deletes the list with the passed list_id if it exists
+        :param move_to_list: ID of the list to move to -> Default is inbox
+        :param preserve_tasks: If set to True -> All tasks inside of the deleted list will be
+            moved to preserved_list_id.
         :param list_id: Id of the list to be deleted
         :return: id of the list that was deleted
         """
         # Check if the id exists
-        list_object = self._client.get_by_id(list_id, search_key='lists')
+        list_object = self._client.get_by_id(list_id, search='lists')
         if not list_object:
             raise KeyError(f"List id '{list_id}' Does Not Exist To Delete")
 
+        # Move tasks if preserve_tasks is true
+        if preserve_tasks:
+            # Set the default move location to the inbox if none is provided
+            if not move_to_list:
+                move_to_list = self._client.state['inbox_id']
+            # Check that the move location exists if it was provided
+            else:
+                move_obj = self._client.get_by_id(move_to_list, search='lists')
+                if not move_obj:
+                    raise KeyError(f"List id '{move_to_list}' Does Not Exist To Delete")
+            # Move the tasks
+            self._client.task.move_lists(old_list_id=list_id, new_list_id=move_to_list)
+
+        # Delete the task
         url = self._client.BASE_URL + 'batch/project'
         payload = {
             'delete': [list_id],
         }
         self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        for j in range(len(self._client.state['lists'])):
-            if self._client.state['lists'][j]['id'] == list_id:
-                break
-        del self._client.state['lists'][j]
+        # Delete the list
+        deleted_list = self._client.delete_from_local_state(id=list_id, search='lists')
+        # Delete the tasks from the list
+        tasks = self._client.get_by_fields(projectId=list_id, search='tasks')
+        for item in tasks:
+            self._client.delete_from_local_state(id=item['id'], search='tasks')
 
-        return list_id
+        return list_object
 
     @logged_in
     def archive(self, list_id: str) -> str:
@@ -116,7 +138,7 @@ class ListManager:
             self._client.http_post(url, json=payload, cookies=self._client.cookies)
 
         # List still exists so don't delete
-        return list_id
+        return obj
 
     @logged_in
     def create_folder(self, folder_name: str) -> dict:
@@ -134,7 +156,7 @@ class ListManager:
         }
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
         self._client.sync()
-        return self._client.parse_id(response)
+        return self._client.get_by_id(self._client.parse_id(response), search='list_folders')
 
     @logged_in
     def update_folder(self, folder_id: str) -> str:
@@ -144,7 +166,7 @@ class ListManager:
         :return: Id of the folder updated
         """
         # Check if the id exists
-        obj = self._client.get_by_id(folder_id, search_key='list_folders')
+        obj = self._client.get_by_id(folder_id, search='list_folders')
         if not obj:
             raise KeyError(f"Folder id '{folder_id}' Does Not Exist To Update")
 
@@ -154,7 +176,7 @@ class ListManager:
         }
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
         self._client.sync()
-        return folder_id
+        return self._client.get_by_id(self._client.parse_id(response), search='list_folders')
 
     @logged_in
     def delete_folder(self, folder_id: str) -> str:
@@ -179,7 +201,8 @@ class ListManager:
 
         del self._client.state['list_folders'][k]
 
-        return folder_id
+        return obj
+
 
     def create_smart_list(self):
         pass

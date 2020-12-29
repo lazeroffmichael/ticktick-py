@@ -178,33 +178,33 @@ class TickTickClient:
         etag2 = list(etag.keys())
         return etag[etag2[0]]
 
-    def get_id(self, search_key: str = None, **kwargs) -> list:
+    def get_by_fields(self, search: str = None, **kwargs) -> list:
         """
-        Gets the id of the object with the matching fields. If serach_key is specified, it
-        will only search that key in self.state
-        :param search_key: object in self.state
+        Finds the objects that match the inputted fields.
+        If search is specified, it will only search the specific state list.
+        :param search: object in self.state
         :param kwargs: fields to look for
-        :return: list containing the ids
+        :return: List containing the objects
         """
         if kwargs == {}:
             raise ValueError('Must Include Field(s) To Be Searched For')
 
-        if search_key is not None and search_key not in self.state:
-            raise KeyError(f"'{search_key}' Is Not Present In self.state Dictionary")
+        if search is not None and search not in self.state:
+            raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
 
-        id_list = []
-        if search_key is not None:
+        objects = []
+        if search is not None:
             # If a specific key was passed for self.state
             # Go through self.state[key_name] and see if all the fields in kwargs match
             # If all don't match return empty list
-            for index in self.state[search_key]:
+            for index in self.state[search]:
                 all_match = True
                 for field in kwargs:
                     if kwargs[field] != index[field]:
                         all_match = False
                         break
                 if all_match:
-                    id_list.append(index['id'])
+                    objects.append(index)
 
         else:
             # No key passed, search entire self.state dictionary
@@ -230,21 +230,21 @@ class TickTickClient:
                         else:
                             all_match = False
                     if all_match:
-                        id_list.append(self.state[primarykey][middle_key]['id'])
+                        objects.append(self.state[primarykey][middle_key])
 
-        return id_list
+        return objects
 
-    def get_by_id(self, id_number: str, search_key: str = None) -> dict:
+    def get_by_id(self, id: str, search: str = None) -> dict:
         """
         Returns the dictionary object of the item corresponding to the passed id
-        :param id_number: Id of the item to be returned
-        :param search_key: Top level key of self.state which makes the search quicker
+        :param id: Id of the item to be returned
+        :param search: Top level key of self.state which makes the search quicker
         :return: Dictionary object containing the item (or empty dictionary)
         """
         # Search just in the desired list
-        if search_key is not None:
-            for index in self.state[search_key]:
-                if index['id'] == id_number:
+        if search is not None:
+            for index in self.state[search]:
+                if index['id'] == id:
                     return index
 
         else:
@@ -253,73 +253,73 @@ class TickTickClient:
                 for our_object in self.state[prim_key]:
                     if 'id' not in our_object:
                         break
-                    if our_object['id'] == id_number:
+                    if our_object['id'] == id:
                         return our_object
         # Return empty dictionary if not found
         return {}
 
-    def get_etag(self, search_key=None, **kwargs) -> list:
-        """
-        Gets the etag based on the past fields
-        :param search_key: Specific state list to look into
-        :param kwargs: Fields to compare for
-        :return: List of the etags found corresponding to the fields
-        """
-        if kwargs == {}:
-            raise ValueError('Must Include Field(s) To Be Searched For')
+    # def get_etag(self, search=None, **kwargs) -> list:
+    #     """
+    #     Gets the etag based on the past fields
+    #     :param search: Specific state list to look into
+    #     :param kwargs: Fields to compare for
+    #     :return: List of the objects found corresponding to the fields
+    #     """
+    #     if kwargs == {}:
+    #         raise ValueError('Must Include Field(s) To Be Searched For')
+    #
+    #     if search is not None and search not in self.state:
+    #         raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
+    #
+    #     id_list = []
+    #     if search is not None:
+    #         # If a specific key was passed for self.state
+    #         # Go through self.state[key_name] and see if all the fields in kwargs match
+    #         # If all don't match return empty list
+    #         for index in self.state[search]:
+    #             all_match = True
+    #             for field in kwargs:
+    #                 if kwargs[field] != index[field]:
+    #                     all_match = False
+    #                     break
+    #             if all_match:
+    #                 id_list.append(index)
+    #
+    #     else:
+    #         # No key passed, search entire self.state dictionary
+    #         # Search the first level of the state dictionary
+    #         for primarykey in self.state:
+    #             skip_primary_key = False
+    #             all_match = True
+    #             middle_key = 0
+    #             # Search the individual lists of the dictionary
+    #             for middle_key in range(len(self.state[primarykey])):
+    #                 if skip_primary_key:
+    #                     break
+    #                 # Match the fields in the kwargs dictionary to the specific object -> if all match add index
+    #                 for fields in kwargs:
+    #                     # if the field doesn't exist, we can assume every other item in the list doesn't have the
+    #                     # field either -> so skip this primary_key entirely
+    #                     if fields not in self.state[primarykey][middle_key]:
+    #                         all_match = False
+    #                         skip_primary_key = True
+    #                         break
+    #                     if kwargs[fields] == self.state[primarykey][middle_key][fields]:
+    #                         all_match = True
+    #                     else:
+    #                         all_match = False
+    #                 if all_match:
+    #                     id_list.append(self.state[primarykey][middle_key])
+    #
+    #     return id_list
 
-        if search_key is not None and search_key not in self.state:
-            raise KeyError(f"'{search_key}' Is Not Present In self.state Dictionary")
-
-        id_list = []
-        if search_key is not None:
-            # If a specific key was passed for self.state
-            # Go through self.state[key_name] and see if all the fields in kwargs match
-            # If all don't match return empty list
-            for index in self.state[search_key]:
-                all_match = True
-                for field in kwargs:
-                    if kwargs[field] != index[field]:
-                        all_match = False
-                        break
-                if all_match:
-                    id_list.append(index['etag'])
-
-        else:
-            # No key passed, search entire self.state dictionary
-            # Search the first level of the state dictionary
-            for primarykey in self.state:
-                skip_primary_key = False
-                all_match = True
-                middle_key = 0
-                # Search the individual lists of the dictionary
-                for middle_key in range(len(self.state[primarykey])):
-                    if skip_primary_key:
-                        break
-                    # Match the fields in the kwargs dictionary to the specific object -> if all match add index
-                    for fields in kwargs:
-                        # if the field doesn't exist, we can assume every other item in the list doesn't have the
-                        # field either -> so skip this primary_key entirely
-                        if fields not in self.state[primarykey][middle_key]:
-                            all_match = False
-                            skip_primary_key = True
-                            break
-                        if kwargs[fields] == self.state[primarykey][middle_key][fields]:
-                            all_match = True
-                        else:
-                            all_match = False
-                    if all_match:
-                        id_list.append(self.state[primarykey][middle_key]['etag'])
-
-        return id_list
-
-    def get_by_etag(self, etag: str, search_key: str = None):
+    def get_by_etag(self, etag: str, search: str = None):
         if etag is None:
             raise ValueError("Must Pass Etag")
 
         # Search just in the desired list
-        if search_key is not None:
-            for index in self.state[search_key]:
+        if search is not None:
+            for index in self.state[search]:
                 if index['etag'] == etag:
                     return index
 
@@ -333,3 +333,61 @@ class TickTickClient:
                         return our_object
         # Return empty dictionary if not found
         return {}
+
+    def delete_from_local_state(self, search: str = None, **kwargs) -> list:
+        """
+        Deletes the object that match the fields in the search list from the local state.
+        Does not delete objects remotely, and only deletes a single object
+        :param search: List to look through in self.state
+        :param kwargs: Fields to look for
+        :return: Objects that were deleted
+        """
+        # Check that kwargs is not empty
+        if kwargs == {}:
+            raise ValueError('Must Include Field(s) To Be Searched For')
+
+        if search is not None and search not in self.state:
+            raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
+
+        # Search just in the desired list
+        if search is not None:
+            # Go through the state dictionary list and delete the object that matches the fields
+            for item in range(len(self.state[search])):
+                all_match = True
+                for field in kwargs:
+                    if kwargs[field] != self.state[search][item][field]:
+                        all_match = False
+                        break
+                if all_match:
+                    deleted = self.state[search][item]
+                    # Delete the item
+                    del self.state[search][item]
+                    return deleted
+
+        else:
+            # No key passed, search entire self.state dictionary
+            # Search the first level of the state dictionary
+            for primary_key in self.state:
+                skip_primary_key = False
+                all_match = True
+                middle_key = 0
+                # Search the individual lists of the dictionary
+                for middle_key in range(len(self.state[primary_key])):
+                    if skip_primary_key:
+                        break
+                    # Match the fields in the kwargs dictionary to the specific object -> if all match add index
+                    for fields in kwargs:
+                        # if the field doesn't exist, we can assume every other item in the list doesn't have the
+                        # field either -> so skip this primary_key entirely
+                        if fields not in self.state[primary_key][middle_key]:
+                            all_match = False
+                            skip_primary_key = True
+                            break
+                        if kwargs[fields] == self.state[primary_key][middle_key][fields]:
+                            all_match = True
+                        else:
+                            all_match = False
+                    if all_match:
+                        deleted = self.state[primary_key][middle_key]
+                        del self.state[primary_key][middle_key]
+                        return deleted

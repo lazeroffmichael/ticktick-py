@@ -1,5 +1,7 @@
 import datetime
 import pytz
+import time
+
 from ticktick.helpers.time_zone import convert_local_time_to_utc
 from ticktick.helpers.constants import DATE_FORMAT
 from ticktick.managers.check_logged_in import logged_in
@@ -11,6 +13,7 @@ class TaskManager:
         self._client = client_class
         self.access_token = self._client.access_token
 
+    @logged_in
     def create(self,
                task_name: str,
                date: datetime = None,
@@ -31,7 +34,7 @@ class TaskManager:
         if list_id is None:
             list_id = self._client.state['inbox_id']
         else:
-            project_obj = self._client.get_by_id(list_id)
+            project_obj = self._client.get_by_id(list_id, search='lists')
             if not project_obj:
                 raise ValueError(f"Project id '{list_id}' Does Not Exist")
 
@@ -68,16 +71,20 @@ class TaskManager:
         response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
+        if tags:
+            time.sleep(2)
+
         self._client.sync()
-        # Since an unknown exception is occurring, the response is not returning a proper id.
+        # Since an unknown server exception is occurring, the response is not returning a proper id.
         # We have to find the newly created task in self.state['tasks'] manually to return the id
         # We can start the traversal from the end of the list though.
         for task in self._client.state['tasks'][::-1]:
             if task['title'] == task_name:
                 task_id = task['id']
 
-        return task_id
+        return self._client.get_by_id(task_id, search='tasks')
 
+    @logged_in
     def create_subtask(self, task_id: str):
         """
         /batch/taskParent
@@ -89,15 +96,31 @@ class TaskManager:
         """
         pass
 
+    @logged_in
     def set_repeat(self, task_id: str):
         pass
 
+    @logged_in
     def update(self, task_id: str):
+        """
+        Pushes any changes remotely that have been done to the task with the id.
+        :param task_id:
+        :return: Updated object received from the server
+        """
+        # Find the object
+        obj = self._client.get_by_fields(id=task_id, search='tasks')
+        if not obj:
+            raise ValueError(f"Task Id '{task_id}' Does Not Exist")
+
+
+
         pass
 
+    @logged_in
     def complete(self):
         pass
 
+    @logged_in
     def delete(self, task_id: str) -> str:
         """
         Deletes the task with the passed id remotely if it exists.
@@ -105,7 +128,7 @@ class TaskManager:
         :return: Id of the task deleted
         """
         # Check if the id exists
-        obj = self._client.get_by_id(task_id, search_key='tasks')
+        obj = self._client.get_by_id(task_id, search='tasks')
         if not obj:
             raise ValueError(f"Task Id '{task_id}' Does Not Exist")
 
@@ -117,14 +140,73 @@ class TaskManager:
             }]
         }
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        for k in range(len(self._client.state['tasks'])):
-            if self._client.state['tasks'][k]['id'] == task_id:
-                break
-        del self._client.state['tasks'][k]
-        return task_id
+        return self._client.delete_from_local_state(id=task_id, search='tasks')
 
     @logged_in
-    def get_summary(self, start_date: datetime, end_date: datetime = None, full_day: bool = True, time_zone: str = None) -> list:
+    def get_trash(self):
+        pass
+
+    @logged_in
+    def move_lists(self, old_list_id: str, new_list_id: str) -> dict:
+        """
+        Moves all the tasks of the old list into the new list
+        :param old_list_id: Id of the old list where the tasks currently reside
+        :param new_list_id: Id of the new list where the tasks will be moved
+        :return: Object of the list that contains all the tasks.
+        """
+        # Make sure that old and new id's exist
+        if old_list_id != self._client.state['inbox_id']:
+            old_list = self._client.get_by_fields(id=old_list_id, search='lists')
+            if not old_list:
+                raise ValueError(f"List Id '{old_list_id}' Does Not Exist")
+            old_list = old_list[0]
+
+        if new_list_id != self._client.state['inbox_id']:
+            new_list = self._client.get_by_fields(id=new_list_id, search='lists')
+            if not new_list:
+                raise ValueError(f"List Id '{new_list_id}' Does Not Exist")
+            new_list = new_list[0]
+
+        # Get the tasks from the old list
+        tasks = self.get_from_list(old_list_id)
+        if not tasks:
+            return new_list  # No tasks to move so just return the new list
+        task_project = []  # List containing all the tasks that will be updated
+
+        for task in tasks:
+            task_project.append({
+                'fromProjectId': old_list_id,
+                'taskId': task['id'],
+                'toProjectId': new_list_id
+            })
+
+        url = self._client.BASE_URL + 'batch/taskProject'
+        url2 = self._client.BASE_URL + 'batch/task'
+        # Make the initial call to move the tasks
+        self._client.http_post(url, json=task_project, cookies=self._client.cookies)
+
+        self._client.sync()
+        # Return the new_list_id object
+        return self._client.get_by_id(new_list_id)
+
+    @logged_in
+    def get_from_list(self, list_id: str) -> list:
+        """
+        Obtains the tasks that are contained in the list with the id
+        :param list_id: Id of the list to get the tasks from
+        :return: List of task objects
+        """
+        # Make sure that old and new id's exist
+        if list_id != self._client.state['inbox_id']:
+            obj = self._client.get_by_fields(id=list_id, search='lists')
+            if not obj:
+                raise ValueError(f"List Id '{list_id}' Does Not Exist")
+
+        # Get the list of tasks that share the project id
+        return self._client.get_by_fields(projectId=list_id, search='tasks')
+
+    @logged_in
+    def get_completed(self, start_date: datetime, end_date: datetime = None, full_day: bool = True, time_zone: str = None) -> list:
         """
         Obtains all the attributes for all the completed tasks on the date or range of dates passed.
 
@@ -173,4 +255,3 @@ class TaskManager:
         }
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
         return response
-
