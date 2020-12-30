@@ -9,31 +9,17 @@ from calendar import monthrange
 
 
 class TaskManager:
-
-    PRIORITY_DICTIONARY = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
+    PRIORITY_DICTIONARY = {'none': 0, 'low': 1, 'medium': 3, 'high': 5} # TODO: MAke this 0-3 like tags
 
     def __init__(self, client_class):
         self._client = client_class
         self.access_token = self._client.access_token
 
-    @logged_in
-    def create(self,
-               task_name: str,
-               start_date: datetime = None,
-               end_date: datetime = None,
-               priority: str = 'none',
-               list_id: str = None,
-               tags: list = None,
-               content: str = '',
-               time_zone: str = None
-               ) -> str:
-        # When entering a duration of dates -> include start date but only up until end date
-        # Example -> Creating a task from an all day task from Jan 4 to Jan 6 will create a task
-        # that starts from jan 4 and goes up until jan 6 -> which means the task is from Jan 4 - Jan 5
-        # task_name: -> Make sure task_name is a string
-        if not isinstance(task_name, str):
-            raise ValueError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
-
+    def _time_checks(self, start_date: datetime = None, end_date: datetime = None, time_zone: str = None):
+        """
+        Performs the proper checks and conversions for converting datetime object to TickTick time string
+        :return: (start_date, end_date)
+        """
         # Date
         # If another time zone is not entered, default to the profile
         if time_zone is None:
@@ -111,12 +97,42 @@ class TaskManager:
             end_date = convert_iso_to_tick_tick_format(end_date, time_zone)
             start_date = end_date
 
-        # priority:
-        # Lowercase the input and make sure that it is in the priority dictionary
+        return {'startDate': start_date, 'dueDate': end_date, 'isAllDay': all_day, 'timeZone': time_zone}
+
+    def _task_field_checks(self,
+                           start_date: datetime = None,
+                           end_date: datetime = None,
+                           time_zone: str = None,
+                           task_name: str = None,
+                           priority: str = 'none',
+                           list_id: str = None,
+                           tags: list = None,
+                           content: str = '',
+                           ):
+        """
+        Performs error checks on the remaining task fields.
+        :param task_name:
+        :param priority:
+        :param list_id:
+        :param tags:
+        :param content:
+        :return:
+        """
+        dates = self._time_checks(start_date=start_date, end_date=end_date, time_zone=time_zone)
+        # task_name: -> Make sure task_name is a string
+        if not isinstance(task_name, str):
+            raise ValueError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
+
+        # priority: -> Make sure it is a string
+        if not isinstance(priority, str):
+            raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+
+        # Lower case the input and make sure it is one of the four options
         lower = priority.lower()
         if lower not in self.PRIORITY_DICTIONARY:
             raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
 
+        # Priority is now an integer value
         priority = self.PRIORITY_DICTIONARY[lower]
 
         # project_id -> Default project id will be none
@@ -141,35 +157,90 @@ class TaskManager:
             else:
                 raise ValueError(f"Tags Must Be Passed A Single String, Or As A List Of Strings For Multiple Tags")
 
-        # When TickTick uses a tag through a task call, it creates the tag in all lowercase. To preserve the
-        # case of the tag we will have to make the call to create the tag beforehand.
-        # TickTick stores the uppercase labels as 'label' where lowercase is 'name' in the tag object
-        for tag in range(len(tags)):
-            # Search for the tag first, don't create if it already exists
-            search = self._client.get_by_fields(label=tags[tag], search='tags')
-            if not search:  # Create the tag if it doesn't exist
-                created = self._client.tag.create(tags[tag])
-                tags[tag] = created['name']
-            else:
-                tags[tag] = search[0]['name']
-
         # Content can be whatever string that the user wants to pass but make sure its a string
         if not isinstance(content, str):
             raise ValueError(f"Content Must Be A String")
 
+        fields = {'title': task_name, 'priority': priority, 'projectId': list_id, 'tags': tags, 'content': content}
+
+        return {**dates, **fields}  # Merge the dictionaries
+
+    def build(self,
+              task_name: str,
+              start_date: datetime = None,
+              end_date: datetime = None,
+              priority: str = 'none',
+              list_id: str = None,
+              tags: list = None,
+              content: str = '',
+              time_zone: str = None
+              ) -> dict:
+        """
+        Builds a task object with the passed fields. Performs proper error checking.
+        :param task_name: Name of the task -> Required
+        :param start_date: Start date of the task
+        :param end_date: End date of the task
+        :param priority: Priority level of the task
+        :param list_id: Id of the list that the task should be created in
+        :param tags: Tags that you want to include for the task
+        :param content: Content that you want to include for the task
+        :param time_zone: Timezone that you want to create the task in
+        :return: Dictionary object containing all the values
+        """
+
+        return self._task_field_checks(task_name=task_name,
+                                       priority=priority,
+                                       list_id=list_id,
+                                       tags=tags,
+                                       content=content,
+                                       start_date=start_date,
+                                       end_date=end_date,
+                                       time_zone=time_zone)
+
+    @logged_in
+    def create(self,
+               task_name: str,
+               start_date: datetime = None,
+               end_date: datetime = None,
+               priority: str = 'none',
+               list_id: str = None,
+               tags: list = None,
+               content: str = '',
+               time_zone: str = None,
+               ) -> dict:
+        """
+        # TODO: Doc String
+        :param task_name:
+        :param start_date:
+        :param end_date:
+        :param priority:
+        :param list_id:
+        :param tags:
+        :param content:
+        :param time_zone:
+        :return:
+        """
+        if isinstance(task_name, list):
+            # If task name is a list, we will batch create objects
+            obj = task_name
+            batch = True
+        # Get task object
+        else:
+            batch = False
+            obj = self.build(task_name=task_name,
+                             start_date=start_date,
+                             end_date=end_date,
+                             priority=priority,
+                             list_id=list_id,
+                             tags=tags,
+                             content=content,
+                             time_zone=time_zone)
+
+        # TODO: Batch create the tags for batch or no batch
+
         url = self._client.BASE_URL + 'batch/task'
         payload = {
-            'add': [{
-                'title': task_name,
-                'startDate': start_date,
-                'dueDate': end_date,
-                'isAllDay': all_day,
-                'priority': priority,
-                'tags': tags,
-                'projectId': list_id,
-                'content': content,
-                'timeZone': time_zone
-            }]
+            'add': obj
         }
         response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
         if response.status_code != 200 and response.status_code != 500:
@@ -179,11 +250,24 @@ class TaskManager:
         # Since an unknown server exception is occurring, the response is not returning a proper id.
         # We have to find the newly created task in self.state['tasks'] manually to return the id
         # We can start the traversal from the end of the list though.
-        for task in self._client.state['tasks'][::-1]:
-            if task['title'] == task_name:
-                task_id = task['id']
+        new_list = []
+        if batch:
+            for item in obj:
+                for task in self._client.state['tasks'][::-1]:
+                    if task['title'] == item['title']:
+                        new_list.append(task)
+        else:
+            for task in self._client.state['tasks'][::-1]:
+                if task['title'] == task_name:
+                    return task
 
-        return self._client.get_by_id(task_id, search='tasks')
+
+        return new_list
+
+    @logged_in
+    def duplicate(self):
+        # TODO: Allow for specified amount of copies, whether to append copy or not.
+        pass
 
     @logged_in
     def create_subtask(self, task_id: str):
@@ -199,10 +283,12 @@ class TaskManager:
 
     @logged_in
     def set_repeat(self, task_id: str):
+        #TODO: Potentially add to create_task
         pass
 
     @logged_in
     def update(self, task_id: str):
+        # TODO
         """
         Pushes any changes remotely that have been done to the task with the id.
         :param task_id:
@@ -217,10 +303,12 @@ class TaskManager:
 
     @logged_in
     def complete(self):
+        # TODO
         pass
 
     @logged_in
     def delete(self, task_id: str) -> str:
+        # TODO: Implement multi arg feature
         """
         Deletes the task with the passed id remotely if it exists.
         :param task_id: Id of the task to be deleted
@@ -354,4 +442,3 @@ class TaskManager:
         }
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
         return response
-

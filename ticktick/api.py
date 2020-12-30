@@ -173,10 +173,16 @@ class TickTickClient:
         return id_tag[0]
 
     @staticmethod
-    def parse_etag(response: httpx) -> str:
+    def parse_etag(response: httpx, multiple: bool=False) -> str:
         etag = response['id2etag']
         etag2 = list(etag.keys())
-        return etag[etag2[0]]
+        if not multiple:
+            return etag[etag2[0]]
+        else:
+            etags = []
+            for key in range(len(etag2)):
+                etags.append(etag[etag2[key]])
+            return etags
 
     def get_by_fields(self, search: str = None, **kwargs) -> list:
         """

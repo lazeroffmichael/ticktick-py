@@ -215,3 +215,8 @@ def test_update_list_folder(client):
     updated_obj = client.get_by_id(updated['id'])
     assert updated_obj['name'] == 'Changed Name'
     client.list.delete_folder(updated['id'])
+
+
+def test_batch_delete(client):
+    object = client.list.create('hello')
+    object = client.list.delete(object['id'])
