@@ -1,7 +1,7 @@
 import pytz
-import datetime
 
 from ticktick.helpers.constants import DATE_FORMAT
+import datetime
 
 
 def convert_local_time_to_utc(original_time: datetime, time_zone: str):

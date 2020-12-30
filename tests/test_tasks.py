@@ -29,52 +29,151 @@ def test_create_task_title_not_string(client):
         client.task.create(uuid.uuid4())
 
 
-def test_create_task_start_date_only_all_day(client):
-    """Tests using only a start date that is all day"""
+def test_start_date_after_end_date(client):
+    """Tests an exception is raised if start date is after end date"""
+    start = datetime.datetime(2022, 1, 5)
+    end = datetime.datetime(2022, 1, 2)
+    with pytest.raises(ValueError):
+        client.task.create('hello', start_date=start, end_date=end)
+
+
+def test_create_task_start_date_with_time_zone(client):
+    """Tests passing a timezone different to the account"""
+    start = datetime.datetime(2022, 12, 31, 14, 30)
+    task = client.task.create('hello', start_date=start, time_zone='America/Louisville')
+    #  This timezone is GMT - 5
+    assert not task['isAllDay']
+    assert task['timeZone'] == 'America/Louisville'
+    assert task['startDate'] == '2022-12-31T19:30:00.000+0000'
+    assert task['dueDate'] == '2022-12-31T19:30:00.000+0000'
+    client.task.delete(task['id'])
+
+
+def test_create_task_start_date_with_time_zone_2(client):
+    """Tests another timezone"""
+    tz = 'Pacific/Fakaofo'
+    start = datetime.datetime(2022, 12, 31, 14, 30)
+    task = client.task.create('hello', start_date=start, time_zone=tz)
+    assert not task['isAllDay']
+    assert task['timeZone'] == tz
+    assert task['startDate'] == '2022-12-31T01:30:00.000+0000'
+    assert task['dueDate'] == '2022-12-31T01:30:00.000+0000'
+    client.task.delete(task['id'])
+
+
+def test_create_task_with_no_time_zone_given(client):
+    """Tests creation with the timezone found in the profile"""
+    # If your timezone is not US Pacific - this test will fail
     start = datetime.datetime(2022, 12, 31)
     task = client.task.create('hello', start_date=start)
     assert task['isAllDay']
+    assert task['startDate'] == '2022-12-31T08:00:00.000+0000'
+    assert task['dueDate'] == '2022-12-31T08:00:00.000+0000'
+    client.task.delete(task['id'])
+
+
+def test_create_task_start_date_only_all_day(client):
+    """Tests using only a start date that is all day"""
+    tz = 'America/Los_Angeles'
+    start = datetime.datetime(2022, 12, 31)
+    task = client.task.create('hello', start_date=start, time_zone=tz)
+    assert task['isAllDay']
+    assert task['startDate'] == '2022-12-31T08:00:00.000+0000'
+    assert task['dueDate'] == '2022-12-31T08:00:00.000+0000'
     client.task.delete(task['id'])
 
 
 def test_create_task_start_date_only_not_all_day(client):
     """Tests using a start date that is not all day"""
+    tz = 'America/Los_Angeles'
     start = datetime.datetime(2022, 12, 31, 14, 30, 45, 32)
-    task = client.task.create('hello', start_date=start)
+    task = client.task.create('hello', start_date=start, time_zone=tz)
     assert not task['isAllDay']
+    assert task['startDate'] == '2022-12-31T22:30:45.000+0000'
+    assert task['dueDate'] == '2022-12-31T22:30:45.000+0000'
     client.task.delete(task['id'])
 
 
 def test_create_task_end_date_only_all_day(client):
     """Tests using an end  date that is all day"""
-    start = datetime.datetime(2022, 12, 31)
-    task = client.task.create('hello', start_date=start)
+    tz = 'America/Los_Angeles'
+    end = datetime.datetime(2022, 12, 31)
+    task = client.task.create('hello', end_date=end, time_zone=tz)
     assert task['isAllDay']
+    assert task['startDate'] == '2022-12-31T08:00:00.000+0000'
+    assert task['dueDate'] == '2022-12-31T08:00:00.000+0000'
     client.task.delete(task['id'])
 
 
 def test_create_task_end_date_only_not_all_day(client):
     """Tests creating a task using only end_date"""
+    tz = 'America/Los_Angeles'
     end = datetime.datetime(2022, 12, 31, 14, 30, 45, 32)
-    task = client.task.create('hello', end_date=end)
+    task = client.task.create('hello', end_date=end, time_zone=tz)
     assert not task['isAllDay']
+    assert task['startDate'] == '2022-12-31T22:30:45.000+0000'
+    assert task['dueDate'] == '2022-12-31T22:30:45.000+0000'
     client.task.delete(task['id'])
 
 
 def test_create_task_both_dates_all_day(client):
     """Tests creating a task using both start and end dates"""
+    tz = 'America/Los_Angeles'
     start = datetime.datetime(2023, 1, 4)
-    end = datetime.datetime(2023, 1, 6)
-    task = client.task.create('hello', start_date=start, end_date=end)
-    assert not task['isAllDay']
+    end = datetime.datetime(2023, 1, 7)
+    task = client.task.create('hello', start_date=start, end_date=end, time_zone=tz)
+    assert task['isAllDay']
+    assert task['startDate'] == '2023-01-04T08:00:00.000+0000'
+    assert task['dueDate'] == '2023-01-08T08:00:00.000+0000'
+    client.task.delete(task['id'])
+
+
+def test_create_task_both_dates_all_day_last_day_of_month(client):
+    """Tests creating an all day task spanning multiple days on the last day of month"""
+    tz = 'America/Los_Angeles'
+    start = datetime.datetime(2023, 1, 28)
+    end = datetime.datetime(2023, 1, 31)
+    task = client.task.create('hello', start_date=start, end_date=end, time_zone=tz)
+    assert task['isAllDay']
+    assert task['startDate'] == '2023-01-28T08:00:00.000+0000'
+    assert task['dueDate'] == '2023-02-01T08:00:00.000+0000'
+    client.task.delete(task['id'])
+
+
+def test_create_task_both_dates_all_day_last_day_of_year(client):
+    """Tests creating an all day task spanning multiple days on the last day of the year"""
+    tz = 'America/Los_Angeles'
+    start = datetime.datetime(2023, 12, 28)
+    end = datetime.datetime(2023, 12, 31)
+    task = client.task.create('hello', start_date=start, end_date=end, time_zone=tz)
+    assert task['isAllDay']
+    assert task['startDate'] == '2023-12-28T08:00:00.000+0000'
+    assert task['dueDate'] == '2024-01-01T08:00:00.000+0000'
+    client.task.delete(task['id'])
 
 
 def test_create_task_both_dates_not_all_day(client):
-    assert 1==0
+    """Tests creating a task for a duration of time"""
+    tz = 'America/Los_Angeles'
+    start = datetime.datetime(2023, 1, 4, 14, 30)
+    end = datetime.datetime(2023, 12, 31, 8, 30)
+    task = client.task.create('hello', start_date=start, end_date=end, time_zone=tz)
+    assert not task['isAllDay']
+    assert task['startDate'] == '2023-01-04T22:30:00.000+0000'
+    assert task['dueDate'] == '2023-12-31T16:30:00.000+0000'
+    client.task.delete(task['id'])
 
 
-def test_create_task_start_date_after_end_date(client):
-    assert 1 == 0
+def test_create_task_both_dates_not_all_day_different_tz(client):
+    """Tests creating a duration task for a different timezone"""
+    tz = 'Kwajalein'
+    start = datetime.datetime(2023, 1, 4, 14, 30)
+    end = datetime.datetime(2023, 12, 31, 8, 30)
+    task = client.task.create('hello', start_date=start, end_date=end, time_zone=tz)
+    assert not task['isAllDay']
+    assert task['startDate'] == '2023-01-04T02:30:00.000+0000'
+    assert task['dueDate'] == '2023-12-30T20:30:00.000+0000'
+    client.task.delete(task['id'])
 
 
 def test_create_task_not_datetime_dates(client):
@@ -86,23 +185,39 @@ def test_create_task_not_datetime_dates(client):
         task3 = client.task.create('hello', start_date='nope', end_date='yeah this not a datetime')
 
 
-def test_create_task_title_and_priority(client):
+def test_create_task_title_and_priority_fail(client):
     """Tests task creation for title and priority"""
     title = str(uuid.uuid4())
     priority = 3  # Medium
-    task = client.task.create(title, priority=priority)
-    assert task  # Make sure object was created
-    assert task['priority'] == priority  # Assert priority matches
-    deleted = client.task.delete(task['id'])  # Delete task
-    assert deleted not in client.state['tasks']
+    with pytest.raises(Exception):
+        client.task.create(title, priority=priority)
 
 
-def test_create_task_title_and_priority_fail(client):
-    """Tests task creation for invalid priority value"""
+def test_create_task_title_and_priority_string_fail(client):
+    """Tests task creation fail with a string input"""
     title = str(uuid.uuid4())
-    priority = 56
+    priority = 'nope'
     with pytest.raises(ValueError):
         client.task.create(title, priority=priority)
+
+
+def test_create_task_priority_normal_pass(client):
+    """Tests task creation with priority for normal priority strings"""
+    priorities = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
+    for task in priorities:
+        created = client.task.create(task_name=str(uuid.uuid4()), priority=task)
+        assert created['priority'] == priorities[task]
+        client.task.delete(created['id'])
+
+
+def test_create_task_priority_different_cases(client):
+    """Tests task creation with priority for different case priority strings"""
+    priorities = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
+    cases = {'NoNe', 'NONE', 'LoW', 'MeDIUM', 'HIGH'}
+    for task in cases:
+        created = client.task.create(task_name=str(uuid.uuid4()), priority=task)
+        assert created['priority'] == priorities[task.lower()]
+        client.task.delete(created['id'])
 
 
 def test_create_task_different_list(client):
@@ -110,7 +225,7 @@ def test_create_task_different_list(client):
     list_title = str(uuid.uuid4())
     list_ = client.list.create(list_title)  # Create list
     task_title = str(uuid.uuid4())
-    task = client.task.create(task_title, list_id=list_['id'], priority=3)  # Create task in list
+    task = client.task.create(task_title, list_id=list_['id'], priority='medium')  # Create task in list
     assert task
     assert task['projectId'] == list_['id']  # Assert list id property matches
     client.list.delete(list_['id'])  # Deleting the list deletes the task
@@ -122,22 +237,74 @@ def test_create_task_different_list_fail(client):
         client.task.create(str(uuid.uuid4()), list_id=str(uuid.uuid4()))
 
 
+def test_create_task_with_explicit_inbox(client):
+    """Tests successful creation if inbox id is passed"""
+    task = client.task.create(str(uuid.uuid4()), list_id=client.state['inbox_id'])
+    assert task
+    assert task['projectId'] == client.state['inbox_id']
+    client.task.delete(task['id'])
+
+
+def test_create_task_tags_fail(client):
+    """Tests passing something other than a list as tags"""
+    tag = 0
+    name = str(uuid.uuid4())
+    with pytest.raises(ValueError):
+        client.task.create(name, tags=tag)
+
+
+def test_create_task_tags_fail_not_strings_in_list(client):
+    """Tests passing items that are not strings in the list"""
+    tag = ['yup', 'this one is valid', 5]
+    name = str(uuid.uuid4())
+    with pytest.raises(ValueError):
+        client.task.create(name, tags=tag)
+
+
+def test_create_task_tags_fail_dictionary(client):
+    """Tests passing tags as a dictionary and raising exception"""
+    tag = {'yup', 'this one is valid', 5}
+    name = str(uuid.uuid4())
+    with pytest.raises(ValueError):
+        client.task.create(name, tags=tag)
+
+
+def test_create_task_with_tag_single_string(client):
+    """Tests creating a task with a single tag as a string"""
+    tag = str(uuid.uuid4())
+    name = str(uuid.uuid4())
+    task = client.task.create(name, tags=tag)
+    assert task['tags'] == [tag]
+    client.task.delete(task['id'])
+    client.tag.delete(tag)
+
+
+def test_create_task_with_tag_spaces(client):
+    """Tests creating a tag with spaces in a task"""
+    tag = 'This is a tag with spaces'
+    name = str(uuid.uuid4())
+    task = client.task.create(name, tags=tag)
+    assert task['tags'] == [tag.lower()]
+    client.task.delete(task['id'])
+    client.tag.delete(tag.lower())
+
+
 def test_create_task_with_tags(client):
     """Tests creating a list with tags"""
-    tag = [str(uuid.uuid4())]
+    tag1 = str(uuid.uuid4())
+    tag2 = str(uuid.uuid4())
+    tag = [tag1, tag2]
     title = str(uuid.uuid4())
     task_obj = client.task.create(title, tags=tag)
     assert task_obj
-    assert task_obj['tags'] == tag
-    # Delete the tags
-    # Find the tag
-    tag_obj = client.get_by_fields(name=tag[0], search='tags')
-    assert tag_obj
-    tag_etag = tag_obj[0]
-    # Delete the tag
-    client.tag.delete(tag_etag['name'])
+    for task in task_obj['tags']:
+        assert task in tag
     # Delete the task
     client.task.delete(task_obj['id'])
+    # Delete the tags
+    # Find the tag
+    client.tag.delete(tag1)
+    client.tag.delete(tag2)
 
 
 def test_create_task_with_content(client):
@@ -167,7 +334,6 @@ def test_create_task_with_specific_time(client):
 
 def test_create_task_with_start_and_end(client):
     assert 1 == 0
-
 
 
 def test_get_from_list(client):

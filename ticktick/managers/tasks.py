@@ -5,6 +5,7 @@ import time
 from ticktick.helpers.time_methods import convert_local_time_to_utc, convert_iso_to_tick_tick_format
 from ticktick.helpers.constants import DATE_FORMAT
 from ticktick.managers.check_logged_in import logged_in
+from calendar import monthrange
 
 
 class TaskManager:
@@ -26,6 +27,9 @@ class TaskManager:
                content: str = '',
                time_zone: str = None
                ) -> str:
+        # When entering a duration of dates -> include start date but only up until end date
+        # Example -> Creating a task from an all day task from Jan 4 to Jan 6 will create a task
+        # that starts from jan 4 and goes up until jan 6 -> which means the task is from Jan 4 - Jan 5
         # task_name: -> Make sure task_name is a string
         if not isinstance(task_name, str):
             raise ValueError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
@@ -35,7 +39,7 @@ class TaskManager:
         if time_zone is None:
             time_zone = self._client.time_zone
         else:
-            if time_zone not in pytz.all_timezones_set():
+            if time_zone not in pytz.all_timezones_set:
                 raise ValueError(f"Timezone '{time_zone}' Is Invalid")
 
         all_day = None  # all day will begin at none
@@ -56,6 +60,28 @@ class TaskManager:
                 all_day = False
             else:
                 all_day = True
+
+            if all_day:
+                # All day is true, however normally right now if we were to use a date like Jan 1 - Jan 3,
+                # TickTick would create a task that is only Jan 1 - Jan 2 since the date would be up to Jan 3
+                # Lets account for that by making the date actually be one more than the current end date
+                # This will allow for more natural date input for all day tasks
+                days = monthrange(end_date.year, end_date.month)
+                if end_date.day + 1 > days[1]:  # Last day of the month
+                    if end_date.month + 1 > 12:  # Last month of the year
+                        year = end_date.year + 1  # Both last day of month and last day of year
+                        day = 1
+                        month = 1
+                    else:  # Not last month of year, just reset the day and increment the month
+                        year = end_date.year
+                        month = end_date.month + 1
+                        day = 1
+                else:  # Dont have to worry about incrementing year or month
+                    year = end_date.year
+                    day = end_date.day + 1
+                    month = end_date.month
+
+                end_date = datetime.datetime(year, month, day)  # No hours, mins, or seconds needed
             start_date = convert_iso_to_tick_tick_format(start_date, time_zone)
             end_date = convert_iso_to_tick_tick_format(end_date, time_zone)
 
@@ -70,6 +96,7 @@ class TaskManager:
                 all_day = True
             # Parse start_date
             start_date = convert_iso_to_tick_tick_format(start_date, time_zone)
+            end_date = start_date
 
         # end_date passed but start_date not passed
         elif end_date is not None and start_date is None:
@@ -81,14 +108,16 @@ class TaskManager:
             else:
                 all_day = True
             # But end_date will actually take the place of start_date
-            start_date = convert_iso_to_tick_tick_format(end_date, time_zone)
+            end_date = convert_iso_to_tick_tick_format(end_date, time_zone)
+            start_date = end_date
 
         # priority:
         # Lowercase the input and make sure that it is in the priority dictionary
-        if priority.lower() not in self.PRIORITY_DICTIONARY:
+        lower = priority.lower()
+        if lower not in self.PRIORITY_DICTIONARY:
             raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
 
-        priority = self.PRIORITY_DICTIONARY[priority]
+        priority = self.PRIORITY_DICTIONARY[lower]
 
         # project_id -> Default project id will be none
         if list_id is None or list_id == self._client.state['inbox_id']:
@@ -101,8 +130,30 @@ class TaskManager:
         # Tag list does not matter -> The user can enter any tag names they want in the list
         if tags is None:
             tags = []
+        else:
+            # Check if its a string
+            if isinstance(tags, str):
+                tags = [tags]
+            elif isinstance(tags, list):
+                for item in tags:
+                    if not isinstance(item, str):
+                        raise ValueError(f"Individual Tags Inside List Must Be In String Format")
+            else:
+                raise ValueError(f"Tags Must Be Passed A Single String, Or As A List Of Strings For Multiple Tags")
 
-        # Content can be whatever string that the user wants to pass
+        # When TickTick uses a tag through a task call, it creates the tag in all lowercase. To preserve the
+        # case of the tag we will have to make the call to create the tag beforehand.
+        # TickTick stores the uppercase labels as 'label' where lowercase is 'name' in the tag object
+        for tag in range(len(tags)):
+            # Search for the tag first, don't create if it already exists
+            search = self._client.get_by_fields(label=tags[tag], search='tags')
+            if not search:  # Create the tag if it doesn't exist
+                created = self._client.tag.create(tags[tag])
+                tags[tag] = created['name']
+            else:
+                tags[tag] = search[0]['name']
+
+        # Content can be whatever string that the user wants to pass but make sure its a string
         if not isinstance(content, str):
             raise ValueError(f"Content Must Be A String")
 
@@ -117,15 +168,12 @@ class TaskManager:
                 'tags': tags,
                 'projectId': list_id,
                 'content': content,
-                'timeZone': self._client.time_zone
+                'timeZone': time_zone
             }]
         }
         response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
-        if tags:
-            # A delay has to be added to allow for proper sync of tags created from the server
-            time.sleep(2)
 
         self._client.sync()
         # Since an unknown server exception is occurring, the response is not returning a proper id.
@@ -306,3 +354,4 @@ class TaskManager:
         }
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
         return response
+

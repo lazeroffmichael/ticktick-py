@@ -91,7 +91,7 @@ class ListManager:
         # Move tasks if preserve_tasks is true
         if preserve_tasks:
             # Set the default move location to the inbox if none is provided
-            if not move_to_list:
+            if move_to_list is None or move_to_list == self._client.state['inbox_id']:
                 move_to_list = self._client.state['inbox_id']
             # Check that the move location exists if it was provided
             else:

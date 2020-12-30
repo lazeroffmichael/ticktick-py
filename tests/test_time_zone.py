@@ -37,12 +37,11 @@ def test_tokyo_time():
 def test_convert_iso_to_tick_tick():
     date = datetime(2022, 12, 31, 14, 30, 45)
     expected = '2022-12-31T22:30:45+0000'
-    answer = convert_iso_to_tick_tick_format(datetime, 'US/Pacific')
-    assert answer == expected
+    assert convert_iso_to_tick_tick_format(date, 'US/Pacific') == expected
 
 
 def test_convert_iso_to_tick_tick_2():
     date = datetime(2022, 12, 31)
     expected = '2022-12-31T08:00:00+0000'
-    assert convert_iso_to_tick_tick_format(datetime, 'US/Pacific') == expected
+    assert convert_iso_to_tick_tick_format(date, 'US/Pacific') == expected
 

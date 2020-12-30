@@ -103,6 +103,18 @@ def test_delete_list_preserve_tasks_specified_new_list(client):
     assert not client.get_by_id(task1['id'])
 
 
+def test_delete_list_preserve_tasks_specified_inbox(client):
+    """Tests deleting a list and saving the tasks if the move location is the inbox"""
+    list1 = client.list.create(str(uuid.uuid4()))
+    # Add a task to list1
+    task1 = client.task.create(str(uuid.uuid4()), list_id=list1['id'])
+    delete = client.list.delete(list1['id'], preserve_tasks=True, move_to_list=client.state['inbox_id'])
+    assert not client.get_by_id(delete['id'])  # Make sure that the list doesn't exist
+    task1_obj = client.get_by_id(task1['id'])
+    assert task1_obj['projectId'] == client.state['inbox_id']
+    client.task.delete(task1['id'])  # Cant delete inbox so just delete the task directly
+
+
 def test_wrong_list_type(client):
     """Tests wrong list type entered"""
     type = str(uuid.uuid4())

@@ -6,3 +6,7 @@ class PomoManager:
 
     def start(self):
         pass
+
+    def statistics(self):
+        # https://api.ticktick.com/api/v2/statistics/general
+        pass
