@@ -89,7 +89,7 @@ def test_time_all_day_range_end_of_year(client):
 def test_task_field_checks_invalid_name(client):
     """Invalid name test"""
     name = 56
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         client.task._task_field_checks(task_name=name)
 
 
@@ -97,36 +97,36 @@ def test_task_field_checks_invalid_priority(client):
     """Invalid Priority test"""
     priority = 45
     priority1 = 'Yeah this not right'
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(priority=priority)
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(priority=priority1)
+    with pytest.raises(TypeError):
+        client.task._task_field_checks(task_name='', priority=priority)
+    with pytest.raises(TypeError):
+        client.task._task_field_checks(task_name='', priority=priority1)
 
 
 def test_task_field_checks_invalid_project(client):
     """Invalid list id"""
     with pytest.raises(ValueError):
-        client.task._task_field_checks(list_id='yeah no')
+        client.task._task_field_checks(task_name='', list_id='yeah no')
 
 
 def test_task_fields_checks_invalid_tags(client):
     """Tests invalid tags"""
     tag1 = 45
     with pytest.raises(ValueError):
-        client.task._task_field_checks(tags=tag1)
+        client.task._task_field_checks(task_name='', tags=tag1)
     tag2 = {67}
     with pytest.raises(ValueError):
-        client.task._task_field_checks(tags=tag2)
+        client.task._task_field_checks(task_name='', tags=tag2)
     tag3 = [3]
     with pytest.raises(ValueError):
-        client.task._task_field_checks(tags=tag3)
+        client.task._task_field_checks(task_name='', tags=tag3)
 
 
 def test_task_fields_content_invalid(client):
     """Tests invalid content"""
     content = {67}
     with pytest.raises(ValueError):
-        client.task._task_field_checks(content=content)
+        client.task._task_field_checks(task_name='', content=content)
 
 
 def test_task_fields_proper_return(client):
@@ -146,14 +146,14 @@ def test_task_fields_proper_return(client):
                                            content=content,
                                            start_date=start,
                                            end_date=end)
-    assert items['task_name'] == task_name
+    assert items['title'] == task_name
     assert items['priority'] == client.task.PRIORITY_DICTIONARY[priority]
-    assert items['list_id'] == list_id
+    assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['start_date'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['end_date'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
-    assert items['all_day']
+    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['isAllDay']
 
 
 def test_builder(client):
@@ -165,36 +165,30 @@ def test_builder(client):
     start = datetime.datetime(2022, 12, 28)
     end = datetime.datetime(2022, 12, 31)
     expected = datetime.datetime(2023, 1, 1)
-    items = client.task.build(task_name=task_name,
-                              priority=priority,
-                              list_id=list_id,
-                              tags=tags,
-                              content=content,
-                              start_date=start,
-                              end_date=end)
-    assert items['task_name'] == task_name
+    items = client.task.builder(task_name=task_name,
+                                priority=priority,
+                                list_id=list_id,
+                                tags=tags,
+                                content=content,
+                                start_date=start,
+                                end_date=end)
+    assert items['title'] == task_name
     assert items['priority'] == client.task.PRIORITY_DICTIONARY[priority]
-    assert items['list_id'] == list_id
+    assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['start_date'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['end_date'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
-    assert items['all_day']
+    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['isAllDay']
 
 
 def test_create_batch_raise_not_list(client):
     obj = {'title': 'yum'}
-    with pytest.raises(ValueError):
-        client.task.create_batch(obj)
+    with pytest.raises(TypeError):
+        client.task.create(obj)
     obj = {}
-    with pytest.raises(ValueError):
-        client.task.create_batch(obj)
-
-
-def test_create_batch_failed_item(client):
-    obj = [{'title': 'yum'}]
-    with pytest.raises(KeyError):
-        client.task.create_batch(obj)
+    with pytest.raises(TypeError):
+        client.task.create(obj)
 
 
 def test_create_batch_success(client):
@@ -204,29 +198,29 @@ def test_create_batch_success(client):
     priority = 'HigH'
     tags = [str(uuid.uuid4()).upper()]
     content = 'yessir'
-    task1 = client.task.build(task_name=name,
-                              start_date=start_date,
-                              end_date=end_date,
-                              priority=priority,
-                              tags=tags,
-                              content=content)
+    task1 = client.task.builder(task_name=name,
+                                start_date=start_date,
+                                end_date=end_date,
+                                priority=priority,
+                                tags=tags,
+                                content=content)
     name2 = 'Test Create Batch 2'
     start_date2 = datetime.datetime(2022, 12, 28)
     end_date2 = datetime.datetime(2022, 12, 31)
     priority2 = 'Medium'
     tags2 = [str(uuid.uuid4())]
     content2 = 'yessir'
-    task2 = client.task.build(task_name=name2,
-                              start_date=start_date2,
-                              end_date=end_date2,
-                              priority=priority2,
-                              tags=tags2,
-                              content=content2)
+    task2 = client.task.builder(task_name=name2,
+                                start_date=start_date2,
+                                end_date=end_date2,
+                                priority=priority2,
+                                tags=tags2,
+                                content=content2)
 
     the_batch = [task1, task2]
-    tasks = client.task.create_batch(the_batch)
 
-
+    tasks = client.task.create(the_batch)
+    client.task.delete()
 
 
 def test_create_task_just_title(client):
@@ -623,3 +617,141 @@ def test_move_from_inbox(client):
     # Delete the created task
     client.task.delete(task['id'])
     client.list.delete(list_['id'])
+
+
+def test_complete(client):
+    ids = [4535345, {}, set(), ()]
+    for id in ids:
+        with pytest.raises(TypeError):
+            client.task.complete(id)
+
+
+def test_complete_ids_dont_exist(client):
+    ids = str(uuid.uuid4())
+    ids2 = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
+    with pytest.raises(ValueError):
+        client.task.complete(ids)
+    with pytest.raises(ValueError):
+        client.task.complete(ids2)
+
+
+def test_complete_single(client):
+    task = 'hullo'
+    t = client.task.create(task)
+    try:
+        response = client.task.complete(t['id'])
+    except:
+        client.task.delete(t['id'])
+        assert False
+    else:
+        assert response['status'] == 2
+
+
+def test_complete_task_multiple(client):
+    task1 = client.task.builder('hello')
+    task2 = client.task.builder('hello')
+    task3 = client.task.builder('hello')
+    tasks = client.task.create([task1, task2, task3])
+    ids = [x['id'] for x in tasks]
+    try:
+        complete = client.task.complete(ids)
+    except:
+        # TODO Batch delete
+        client.task.delete(tasks[0]['id'])
+        client.task.delete(tasks[1]['id'])
+        client.task.delete(tasks[2]['id'])
+        assert False
+    else:
+        assert not client.get_by_fields(id=tasks[0]['id'], search='tasks')
+        assert not client.get_by_fields(id=tasks[1]['id'], search='tasks')
+        assert not client.get_by_fields(id=tasks[2]['id'], search='tasks')
+
+
+def test_update_fail(client):
+    obj = ['', 453535, (), set()]
+    for o in obj:
+        with pytest.raises(TypeError):
+            client.task.update(o)
+
+
+def test_update_single(client):
+    obj = client.task.create('hello')
+    obj['progress'] = 60
+    try:
+        response = client.task.update(obj)
+    except:
+        client.task.delete(obj['id'])
+        assert False
+    else:
+        client.task.delete(obj['id'])
+        assert response['progress'] == 60
+
+
+def test_update_multiple(client):
+    task3 = client.task.builder('yessir')
+    task2 = client.task.builder('yppper')
+    task1 = client.task.builder('d3r43r')
+    tasks = client.task.create([task1, task2, task3])
+    tasks[0]['progress'] = 60
+    tasks[1]['progress'] = 60
+    tasks[2]['progress'] = 60
+    try:
+        update = client.task.update(tasks)
+    except:
+        client.task.delete(tasks[0]['id'])
+        client.task.delete(tasks[1]['id'])
+        client.task.delete(tasks[2]['id'])
+        assert False
+    else:
+        client.task.delete(tasks[0]['id'])
+        client.task.delete(tasks[1]['id'])
+        client.task.delete(tasks[2]['id'])
+        assert update[0]['progress'] == 60
+        assert update[1]['progress'] == 60
+        assert update[2]['progress'] == 60
+
+
+def test_delete_single_fail(client):
+    name1 = 324234
+    name2 = {}
+    with pytest.raises(TypeError):
+        client.task.delete(name1)
+    with pytest.raises(TypeError):
+        client.task.delete(name2)
+
+
+def test_delete_single_task_doesnt_exist(client):
+    name1 = str(uuid.uuid4()).upper()
+    with pytest.raises(ValueError):
+        client.task.delete(name1)
+
+
+def test_delete_multi_task_doesnt_exist(client):
+    names = [str(uuid.uuid4()).upper(), str(uuid.uuid4()).upper(), str(uuid.uuid4()).upper()]
+    for name in names:
+        with pytest.raises(ValueError):
+            client.task.delete(name)
+
+
+def test_delete_single_success(client):
+    task = client.task.create('hello')
+    delete = client.task.delete(task['id'])
+    assert not client.get_by_id(task['id'])
+    assert not client.get_by_fields(id=task['id'])
+    assert delete == task
+
+
+def test_delete_multiple_success(client):
+    task1 = client.task.builder('hello')
+    task2 = client.task.builder('hello')
+    task3 = client.task.builder('hello')
+    tasks = client.task.create([task1, task2, task3])
+    delete = [task['id'] for task in tasks]
+    deleted = client.task.delete(delete)
+    assert not client.get_by_id(delete[0])
+    assert not client.get_by_id(delete[1])
+    assert not client.get_by_id(delete[2])
+    count = 0
+    for d in deleted:
+        assert delete[count] == d['id']
+        count += 1

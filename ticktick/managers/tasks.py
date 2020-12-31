@@ -32,9 +32,9 @@ class TaskManager:
         # Lets first check if both dates  are passed in, and if they are if start date comes before end date
         if start_date is not None and end_date is not None:
             if not isinstance(start_date, datetime.datetime):
-                raise ValueError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
+                raise TypeError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
             if not isinstance(start_date, datetime.datetime):
-                raise ValueError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
+                raise TypeError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
 
             # Check that start_date comes before end_date
             if start_date > end_date:
@@ -74,7 +74,7 @@ class TaskManager:
         # start_date passed but end_date not passed
         elif start_date is not None and end_date is None:
             if not isinstance(start_date, datetime.datetime):
-                raise ValueError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
+                raise TypeError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
             # Determine all day
             if start_date.hour != 0 or start_date.minute != 0 or start_date.second != 0 or start_date.microsecond != 0:
                 all_day = False
@@ -87,7 +87,7 @@ class TaskManager:
         # end_date passed but start_date not passed
         elif end_date is not None and start_date is None:
             if not isinstance(end_date, datetime.datetime):
-                raise ValueError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
+                raise TypeError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
             # Determine all day
             if end_date.hour != 0 or end_date.minute != 0 or end_date.second != 0 or end_date.microsecond != 0:
                 all_day = False
@@ -121,16 +121,16 @@ class TaskManager:
         dates = self._time_checks(start_date=start_date, end_date=end_date, time_zone=time_zone)
         # task_name: -> Make sure task_name is a string
         if not isinstance(task_name, str):
-            raise ValueError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
+            raise TypeError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
 
         # priority: -> Make sure it is a string
         if not isinstance(priority, str):
-            raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+            raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
 
         # Lower case the input and make sure it is one of the four options
         lower = priority.lower()
         if lower not in self.PRIORITY_DICTIONARY:
-            raise ValueError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+            raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
 
         # Priority is now an integer value
         priority = self.PRIORITY_DICTIONARY[lower]
@@ -165,16 +165,16 @@ class TaskManager:
 
         return {**dates, **fields}  # Merge the dictionaries
 
-    def build(self,
-              task_name: str,
-              start_date: datetime = None,
-              end_date: datetime = None,
-              priority: str = 'none',
-              list_id: str = None,
-              tags: list = None,
-              content: str = '',
-              time_zone: str = None
-              ) -> dict:
+    def builder(self,
+                task_name: str,
+                start_date: datetime = None,
+                end_date: datetime = None,
+                priority: str = 'none',
+                list_id: str = None,
+                tags: list = None,
+                content: str = '',
+                time_zone: str = None
+                ) -> dict:
         """
         Builds a task object with the passed fields. Performs proper error checking.
         :param task_name: Name of the task -> Required
@@ -227,14 +227,15 @@ class TaskManager:
         # Get task object
         else:
             batch = False
-            obj = self.build(task_name=task_name,
-                             start_date=start_date,
-                             end_date=end_date,
-                             priority=priority,
-                             list_id=list_id,
-                             tags=tags,
-                             content=content,
-                             time_zone=time_zone)
+            obj = self.builder(task_name=task_name,
+                               start_date=start_date,
+                               end_date=end_date,
+                               priority=priority,
+                               list_id=list_id,
+                               tags=tags,
+                               content=content,
+                               time_zone=time_zone)
+            obj = [obj]
 
         # TODO: Batch create the tags for batch or no batch
 
@@ -250,6 +251,8 @@ class TaskManager:
         # Since an unknown server exception is occurring, the response is not returning a proper id.
         # We have to find the newly created task in self.state['tasks'] manually to return the id
         # We can start the traversal from the end of the list though.
+        # TODO: Figure out effiecient way to find the created tasks
+        #   Right now it is repeating the tasks returned for batch create tasks
         new_list = []
         if batch:
             for item in obj:
@@ -260,7 +263,6 @@ class TaskManager:
             for task in self._client.state['tasks'][::-1]:
                 if task['title'] == task_name:
                     return task
-
 
         return new_list
 
@@ -287,47 +289,125 @@ class TaskManager:
         pass
 
     @logged_in
-    def update(self, task_id: str):
+    def update(self, obj):
         # TODO
         """
         Pushes any changes remotely that have been done to the task with the id.
-        :param task_id:
-        :return: Updated object received from the server
+        :param  obj: Object or list of objects that you want to update remotely.
+        :return: Updated object or list of objects retrieved from the server.
         """
-        # Find the object
-        obj = self._client.get_by_fields(id=task_id, search='tasks')
-        if not obj:
-            raise ValueError(f"Task Id '{task_id}' Does Not Exist")
+        if not isinstance(obj, dict) and not isinstance(obj, list):
+            raise TypeError("Task Objects Must Be A Dictionary or List of Dictionaries.")
 
-        pass
-
-    @logged_in
-    def complete(self):
-        # TODO
-        pass
-
-    @logged_in
-    def delete(self, task_id: str) -> str:
-        # TODO: Implement multi arg feature
-        """
-        Deletes the task with the passed id remotely if it exists.
-        :param task_id: Id of the task to be deleted
-        :return: Id of the task deleted
-        """
-        # Check if the id exists
-        obj = self._client.get_by_id(task_id, search='tasks')
-        if not obj:
-            raise ValueError(f"Task Id '{task_id}' Does Not Exist")
+        if isinstance(obj, dict):
+            tasks = [obj]
+        else:
+            tasks = obj
 
         url = self._client.BASE_URL + 'batch/task'
         payload = {
-            'delete': [{
-                'taskId': task_id,
-                'projectId': obj['projectId']
-            }]
+            'update': tasks
         }
+        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+        if response.status_code != 200 and response.status_code != 500:
+            raise RuntimeError('Could Not Complete Request')
+        response = response.json()
+
+        if len(tasks) == 1:
+            return self._client.get_by_id(self._client.parse_id(response), search='tasks')
+        else:
+            new_list = []
+            for item in obj:
+                for task in self._client.state['tasks'][::-1]:
+                    if task['title'] == item['title']:
+                        new_list.append(task)
+            return new_list
+
+    @logged_in
+    def complete(self, ids):
+        """
+        Marks the passed task with the id as complete.
+        :param ids: Single Id String or List of IDS
+        :return: The updated single object or list of objects
+        """
+        if not isinstance(ids, str) and not isinstance(ids, list):
+            raise TypeError("Ids Must Be A String Or List Of Ids")
+
+        tasks = []
+        if isinstance(ids, str):
+            task = self._client.get_by_fields(id=ids, search='tasks')
+            if not task:
+                raise ValueError('The Task Does Not Exist To Mark As Complete')
+            task[0]['status'] = 2  # Complete
+            tasks = task
+        else:
+            for id in ids:
+                task = self._client.get_by_fields(id=id, search='tasks')
+                if not task:
+                    raise ValueError(f"'Task Id '{id}' Does Not Exist'")
+                task[0]['status'] = 2  # Complete
+                tasks.append(task[0])
+
+        url = self._client.BASE_URL + 'batch/task'
+        payload = {
+            'update': tasks
+        }
+        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+        if response.status_code != 200 and response.status_code != 500:
+            raise RuntimeError('Could Not Complete Request')
+
+        self._client.sync()
+        if len(tasks) == 1:
+            return tasks[0]
+        else:
+            return tasks
+
+    @logged_in
+    def delete(self, ids) -> str:
+        # TODO: Implement multi arg feature
+        """
+        Deletes the task with the passed id remotely if it exists.
+        :param ids: Id of the task to be deleted
+        :return: Id of the task deleted
+        """
+        if not isinstance(ids, str) and not isinstance(ids, list):
+            raise TypeError('Ids Must Be A String or List Of Strings')
+        tasks = []
+        if isinstance(ids, str):
+            task = self._client.get_by_fields(id=ids, search='tasks')
+            if not task:
+                raise ValueError('The Task Does Not Exist To Delete')
+            task = task[0]
+            task = {'projectId': task['projectId'], 'taskId': ids}
+            tasks = [task]
+
+        else:
+            for id in ids:
+                task = self._client.get_by_fields(id=id, search='tasks')
+                if not task:
+                    raise ValueError(f"'Task Id '{id}' Does Not Exist'")
+                task = task[0]
+                task = {'projectId': task['projectId'], 'taskId': id}
+                tasks.append(task)
+
+
+        # Check if the id exists
+        obj = self._client.get_by_id(ids, search='tasks')
+        if not obj:
+            raise ValueError(f"Task Id '{ids}' Does Not Exist")
+
+        url = self._client.BASE_URL + 'batch/task'
+        payload = {'delete': tasks}
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        return self._client.delete_from_local_state(id=task_id, search='tasks')
+        if len(tasks) == 1:
+            return self._client.delete_from_local_state(id=ids, search='tasks')
+        else:
+            return_list = []
+            for item in tasks:
+                o = self._client.delete_from_local_state(id=item['taskId'], search='tasks')
+                return_list.append(o)
+            return return_list
+
 
     @logged_in
     def get_trash(self):
@@ -393,51 +473,52 @@ class TaskManager:
         return self._client.get_by_fields(projectId=list_id, search='tasks')
 
     @logged_in
-    def get_completed(self, start_date: datetime, end_date: datetime = None, full_day: bool = True, time_zone: str = None) -> list:
+    def get_completed(self, start: datetime, end: datetime = None, full: bool = True, tz: str = None) -> list:
         """
-        Obtains all the attributes for all the completed tasks on the date or range of dates passed.
+        Obtains the objects for all completed tasks from the given start date and end date
+        Note: There is a limit of 100 items for the request
 
         A full list of valid time_zone strings are in helpers -> timezones.txt
         SINGLE DAY SUMMARY: get_summary(time_zone, start_date)
         MULTI DAY SUMMARY: get_summary(time_zone, start_date, end_date)
         SPECIFIC TIME RANGE: get_summary(time_zone, start_date, end_date, full_day=False)
 
-        :param time_zone: String specifying the local time zone
-        :param start_date: Datetime object
-        :param end_date: Datetime object
-        :param full_day: Boolean specifying whether hours, minutes, and seconds are to be taken into account for the datetime objects
+        :param tz: String specifying the local time zone
+        :param start: Datetime object
+        :param end: Datetime object
+        :param full: Boolean specifying whether hours, minutes, and seconds are to be taken into account for the datetime objects
         :return: list containing all the tasks and their attributes
         """
         url = self._client.BASE_URL + 'project/all/completed'
 
-        if time_zone is None:
-            time_zone = self._client.time_zone
+        if tz is None:
+            tz = self._client.time_zone
 
         # Handles case when start_date occurs after end_date
-        if end_date is not None and start_date > end_date:
+        if end is not None and start > end:
             raise ValueError('Invalid Date Range: Start Date Occurs After End Date')
 
         # Handles invalid timezone argument
-        if time_zone not in pytz.all_timezones_set:
+        if tz not in pytz.all_timezones_set:
             raise KeyError('Invalid Time Zone')
 
         # Single Day Entry
-        if end_date is None:
-            start_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
-            end_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 23, 59, 59)
+        if end is None:
+            start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
+            end = datetime.datetime(start.year, start.month, start.day, 23, 59, 59)
 
         # Multi DAy -> Full Day Entry
-        elif full_day is True and end_date is not None:
-            start_date = datetime.datetime(start_date.year, start_date.month, start_date.day, 0, 0, 0)
-            end_date = datetime.datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+        elif full is True and end is not None:
+            start = datetime.datetime(start.year, start.month, start.day, 0, 0, 0)
+            end = datetime.datetime(end.year, end.month, end.day, 23, 59, 59)
 
         # Convert Local Time to UTC time based off the time_zone string specified
-        start_date = convert_local_time_to_utc(start_date, time_zone)
-        end_date = convert_local_time_to_utc(end_date, time_zone)
+        start = convert_local_time_to_utc(start, tz)
+        end = convert_local_time_to_utc(end, tz)
 
         parameters = {
-            'from': start_date.strftime(DATE_FORMAT),
-            'to': end_date.strftime(DATE_FORMAT),
+            'from': start.strftime(DATE_FORMAT),
+            'to': end.strftime(DATE_FORMAT),
             'limit': 100
         }
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)

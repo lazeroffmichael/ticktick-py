@@ -12,7 +12,7 @@ def test_get_summary_invalid_time_zone(client):
     end = datetime(2020, 12, 14)
     tz = 'THIS AINT IT CHIEF'
     with pytest.raises(KeyError):
-        client.task.get_completed(start, end, time_zone=tz)
+        client.task.get_completed(start, end, tz=tz)
 
 
 def test_get_summary_single_day_good_return(client):
@@ -25,7 +25,7 @@ def test_get_summary_single_day_good_return(client):
 def test_get_summary_single_day_full_day_false(client):
     """Tests that input still works for a single day even when full_day is false"""
     start = datetime(2020, 12, 14, 8)
-    tasks = client.task.get_completed(start, full_day=False)
+    tasks = client.task.get_completed(start, full=False)
     assert tasks[0] != ''
 
 
@@ -41,7 +41,7 @@ def test_get_summary_multi_day_not_full_day_good_return(client):
     """Tests that multi day with full_day=false returns a value"""
     start = datetime(2020, 12, 10, 12, 5, 6)
     end = datetime(2020, 12, 14, 12, 5, 6)
-    tasks = client.task.get_completed(start, end, full_day=False)
+    tasks = client.task.get_completed(start, end, full=False)
     assert tasks[0] != ''
 
 
