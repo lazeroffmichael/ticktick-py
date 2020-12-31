@@ -19,7 +19,6 @@ def _sort_string_value(sort_type: int) -> str:
 
 
 class TagsManager:
-
     SORT_DICTIONARY = {0: 'project',
                        1: 'dueDate',
                        2: 'title',
@@ -57,7 +56,7 @@ class TagsManager:
         if label is not None:
             # Make sure label is a string
             if not isinstance(label, str):
-                raise ValueError(f"Label Must Be A String")
+                raise TypeError(f"Label Must Be A String")
             # Tag names should not be repeated, so make sure passed name does not exist
             tag_list = self._client.get_by_fields(search='tags', name=label.lower())  # Name is lowercase version of label
             if tag_list:
@@ -65,7 +64,7 @@ class TagsManager:
 
         # Check color_id
         if not isinstance(color, str):
-            raise ValueError(f"Color Must Be A Hex Color String")
+            raise TypeError(f"Color Must Be A Hex Color String")
 
         if color.lower() == 'random':
             color = generate_hex_color()  # Random color will be generated
@@ -76,7 +75,7 @@ class TagsManager:
         # Check parent_name
         if parent_label is not None:
             if not isinstance(parent_label, str):
-                raise ValueError(f"Parent Name Must Be A String")
+                raise TypeError(f"Parent Name Must Be A String")
             parent_label = parent_label.lower()
             parent = self._client.get_by_fields(search='tags', name=parent_label)
             if not parent:
@@ -138,7 +137,7 @@ class TagsManager:
             batch = True
         else:
             if not isinstance(label, str):
-                raise ValueError('Required Positional Argument Must Be A String or List of Tag Objects')
+                raise TypeError('Required Positional Argument Must Be A String or List of Tag Objects')
             # Create a single object
             obj = self.builder(label=label, color=color, parent=parent, sort=sort)
 
@@ -174,7 +173,7 @@ class TagsManager:
         """
         # Check that both old and new are strings
         if not isinstance(old, str) or not isinstance(new, str):
-            raise ValueError('Old and New Must Be Strings')
+            raise TypeError('Old and New Must Be Strings')
 
         # Make sure the old tag exists
         old = old.lower()
@@ -212,7 +211,7 @@ class TagsManager:
         :return: Updated Dictionary Object
         """
         if not isinstance(label, str) or not isinstance(color, str):
-            raise ValueError('Label and Color Must Be Strings')
+            raise TypeError('Label and Color Must Be Strings')
 
         # Get the object
         label = label.lower()
@@ -244,7 +243,7 @@ class TagsManager:
         :return:
         """
         if not isinstance(label, str) or not isinstance(sort, int):
-            raise ValueError('Label Must Be A String and Sort Must Be An Int')
+            raise TypeError('Label Must Be A String and Sort Must Be An Int')
 
         # Get the object
         label = label.lower()
@@ -265,107 +264,111 @@ class TagsManager:
         return self._client.get_by_etag(response['id2etag'][obj['name']])
 
     @logged_in
-    def move(self, label: str, parent: str):
+    def parent(self, label: str, parent: str):
         """
-        Moves the tag to the designated parent, or ungroups it.
-        :param label:
-        :param parent:
-        :return:
+        Moves the tag to the designated parent, or ungroups it if parent is None
+        :param label: Label of the tag to be changed
+        :param parent: Label of the parent tag
+        :return: Updated tag object
         """
+        if not isinstance(label, str):
+            raise TypeError('Inputs Must Be Strings')
 
-    @logged_in
-    def update(self, #TODO: Make 3 Seperate Functions For These and leave this as generic update
-               label: str,
-               color: str = None, # name it recolor
-               parent_name: str = None, # name it move
-               sort: int = None): # name it resort
-        """
-        Updates the tag with the passed etag based on the passed parameters
-        :param label: Label of the tag to be updated
-        :param color: Color that the tag should be set to
-        :param parent_name: Name of the parent to be set to
-        :param sort: Integer corresponding to the sort type for the tag
-            0: Sort By List
-            1: Sort By Time
-            2: Sort By Title
-            3: Sort By Tag
-            4: Sort By Priority
-        :return: Etag of the newly updated tag
-        """
-        # Check if params were passed
-        if color is None and parent_name is None and sort is None:
-            raise ValueError(f"Fields To Update Must Be Passed")
+        if parent is not None:
+            if not isinstance(parent, str):
+                raise TypeError('Inputs Must Be Strings')
 
-        # Check if the tag object exists
-        obj = self._client.get_by_fields(name=old_name, search='tags')
+        # Get the object
+        label = label.lower()
+        obj = self._client.get_by_fields(name=label, search='tags')
         if not obj:
-            raise ValueError(f"Tag '{old_name}' Does Not Exist To Update")
+            raise ValueError(f"Tag '{label}' Does Not Exist To Update")
         obj = obj[0]
-        # Updating the name -> Renaming requires a unique endpoint to do separate to color or parent
 
+        # Four Cases
+        # Case 1: No Parent -> Want a Parent
+        # Case 2: No Parent -> Doesn't Want a Parent
+        # Case 3: Has Parent -> Wants a Different Parent
+        # Case 4: Has Parent -> Doesn't Want a Parent
 
-        # Updating the color and sort
-        if color is not None or sort is not None:
-            new_etag = self._update_color_and_sort(color, sort, obj)
-            obj = self._client.get_by_etag(new_etag, search='tags')  # Get the updated obj
+        # Case 1: Determine if the object has a parent
+        try:
+            if obj['parent']:
+                # It has a parent
+                if parent is not None:  # Case 3
+                    # check if the parent is already the same, if it is just return
+                    if obj['parent'] == parent.lower():
+                        return obj
+                    else:
+                        new_p = parent.lower()
+                        obj['parent'] = new_p
+                else:
+                    new_p = obj['parent']  # Case 4
+                    obj['parent'] = ''
+            elif obj['parent'] is None:
+                raise ValueError('Parent Does Not Exist')
 
-        # Updating the parent
-        if parent_name is not None:
-            new_etag = self._update_parent(parent_name, obj)
+        except KeyError:
+            # It does not have a parent
+            if parent is not None:  # Wants a different parent
+                new_p = parent.lower()  # -> Case 1
+                obj['parent'] = new_p
+            else:  # Doesn't want a parent -> Case 2
+                return obj  # We don't have to do anything if no parent and doesn't want a parent
 
-        return self._client.get_by_etag(new_etag, search='tags')
+        # Have to find the project
+        pobj = self._client.get_by_fields(name=new_p, search='tags')
+        if not pobj:
+            raise ValueError(f"Tag '{parent}' Does Not Exist To Set As Parent")
+        pobj = pobj[0]  # Parent object found correctly
 
+        url = self._client.BASE_URL + 'batch/tag'
+        payload = {
+            'update': [pobj, obj]
+        }
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.sync()
+        return self._client.get_by_etag(response['id2etag'][obj['name']], search='tags')
 
     @logged_in
-    def _update_color_and_sort(self, color: str, sort_type: int, obj: dict) -> str:
+    def update(self, obj):  # TODO
         """
-        Updates the color of a tag object that already exists
-        :param color: New color to set
-        :param sort_type: Integer value of the sort type
-        :param obj: Object to change
-        :return: Etag of the updated tag object
+        Generic update method -> Change tag objects locally and pass them to this function to update
+        Note: Updating through this may not work as intended, its suggested you use the other class
+        methods to update a tags properties
+        :param obj: Tag object or list of tag objects that you want to update
+        :return: The updated tag object
         """
-        if sort_type is not None:
-            sort_type = _sort_string_value(sort_type)
+        batch = False  # Bool signifying batch create or not
+        if isinstance(obj, list):
+            # Batch tag creation triggered
+            obj_list = obj  # Assuming all correct objects
+            batch = True
         else:
-            sort_type = 'project'
+            if not isinstance(obj, dict):
+                raise TypeError('Required Positional Argument Must Be A String or List of Tag Objects')
 
-        obj['sortType'] = sort_type
-
-        if color is not None:
-            if not check_hex_color(color):
-                raise ValueError(f"Hex Color String '{color}' Is Not Valid")
-            obj['color'] = color
+        if not batch:
+            obj_list = [obj]
 
         url = self._client.BASE_URL + 'batch/tag'
-        payload = {
-            'update': [obj]
-        }
+        payload = {'update': obj_list}
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
         self._client.sync()
-        return response['id2etag'][obj['name']]
 
-    @logged_in
-    def _update_parent(self, parent_: str, obj: dict) -> str:
-        """
-        Updates
-        :param parent_:
-        :param obj:
-        :return:
-        """
-        # Check if the parent_etag exists
-        parent_obj = self._client.get_by_fields(name=parent_, search='tags')
-        if not parent_obj:
-            raise ValueError(f"'Parent '{parent_}' Does Not Exist")
-        parent_obj = parent_obj[0]
-        obj['parent'] = parent_
-        url = self._client.BASE_URL + 'batch/tag'
-        payload = {
-            'update': [parent_obj, obj]
-        }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        self._client.sync()
-        return response['id2etag'][obj['name']]
+        if not batch:
+            return self._client.get_by_etag(self._client.parse_etag(response), search='tags')
+        else:
+            etag = response['id2etag']
+            etag2 = list(etag.keys())  # Tag names are out of order
+            labels = [x['name'] for x in obj_list]  # Tag names are in order
+            items = [''] * len(obj_list)  # Create enough spots for the objects
+            for tag in etag2:
+                index = labels.index(tag)  # Object of the index is here
+                actual_etag = etag[tag]  # Get the actual etag
+                found = self._client.get_by_etag(actual_etag, search='tags')
+                items[index] = found  # Place at the correct index
+            return items
 
     @logged_in
     def merge(self, merged: str, *args):
