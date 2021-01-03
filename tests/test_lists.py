@@ -75,7 +75,7 @@ def test_delete_list_preserve_tasks_inbox(client):
     list_obj = client.list.create(list_name)
     # Create a task inside the list
     task_name = str(uuid.uuid4())
-    task_obj = client.task.create(task_name, list_id=list_obj['id'])
+    task_obj = client.task.create(task_name, project=list_obj['id'])
     assert task_obj['projectId'] == list_obj['id']
     # Delete the list with the preserve_task flag enabled
     delete = client.list.delete(list_obj['id'], preserve_tasks=True)
@@ -93,7 +93,7 @@ def test_delete_list_preserve_tasks_specified_new_list(client):
     list1 = client.list.create(str(uuid.uuid4()))
     list2 = client.list.create(str(uuid.uuid4()))
     # Add a task to list2
-    task1 = client.task.create(str(uuid.uuid4()), list_id=list2['id'])
+    task1 = client.task.create(str(uuid.uuid4()), project=list2['id'])
     delete = client.list.delete(list1['id'], preserve_tasks=True, move_to_list=list2['id'])
     assert not client.get_by_id(delete['id'])  # Make sure that the list doesn't exist
     assert client.get_by_id(list2['id'])
@@ -107,7 +107,7 @@ def test_delete_list_preserve_tasks_specified_inbox(client):
     """Tests deleting a list and saving the tasks if the move location is the inbox"""
     list1 = client.list.create(str(uuid.uuid4()))
     # Add a task to list1
-    task1 = client.task.create(str(uuid.uuid4()), list_id=list1['id'])
+    task1 = client.task.create(str(uuid.uuid4()), project=list1['id'])
     delete = client.list.delete(list1['id'], preserve_tasks=True, move_to_list=client.state['inbox_id'])
     assert not client.get_by_id(delete['id'])  # Make sure that the list doesn't exist
     task1_obj = client.get_by_id(task1['id'])

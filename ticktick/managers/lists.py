@@ -99,7 +99,7 @@ class ListManager:
                 if not move_obj:
                     raise KeyError(f"List id '{move_to_list}' Does Not Exist To Delete")
             # Move the tasks
-            self._client.task.move_lists(old_list_id=list_id, new_list_id=move_to_list)
+            self._client.task.move_projects(old=list_id, new=move_to_list)
 
         # Delete the task
         url = self._client.BASE_URL + 'batch/project'

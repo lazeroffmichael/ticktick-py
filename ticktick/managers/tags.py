@@ -267,6 +267,8 @@ class TagsManager:
     def parent(self, label: str, parent: str):
         """
         Moves the tag to the designated parent, or ungroups it if parent is None
+        NOTE: Cannot nest tags more than one level. If you try to nest a tag under a tag
+        that is already nested, the parent will no longer be nested anymore.
         :param label: Label of the tag to be changed
         :param parent: Label of the parent tag
         :return: Updated tag object
@@ -331,7 +333,7 @@ class TagsManager:
         return self._client.get_by_etag(response['id2etag'][obj['name']], search='tags')
 
     @logged_in
-    def update(self, obj):  # TODO
+    def update(self, obj):
         """
         Generic update method -> Change tag objects locally and pass them to this function to update
         Note: Updating through this may not work as intended, its suggested you use the other class
@@ -435,28 +437,37 @@ class TagsManager:
         return kept_obj
 
     @logged_in
-    def delete(self, label: str) -> dict:
+    def delete(self, label) -> dict:
         """
         Deletes the tag with the passed etag if it exists
-        Note: No batch deleting of tags can occur :(
+        Label str of list of label strings
         :param label: Name of the tag
         :return: Tag object deleted
         """
         # Determine if the tag exists
-        if not isinstance(label, str):
-            raise ValueError('Label Must Be A String')
-
-        label = label.lower()  # Process all labels as lowercase
-
-        tag_obj = self._client.get_by_fields(name=label, search='tags')
-        if not tag_obj:
-            raise ValueError(f"Tag '{label}' Does Not Exist To Delete")
-        tag_obj = tag_obj[0]  # We can assume that only one tag has the name
+        if not isinstance(label, str) and not isinstance(label, list):
+            raise TypeError('Label Must Be A String or List Of Strings')
 
         url = self._client.BASE_URL + 'tag'
-        params = {
-            'name': tag_obj['name']
-        }
-        response = self._client.http_delete(url, params=params, cookies=self._client.cookies)
-        # Find the tag in the tags list and delete it, then return the deleted object
-        return self._client.delete_from_local_state(search='tags', etag=tag_obj['etag'])
+        if isinstance(label, str):
+            label = [label]  # If a singular string we are going to add it to a list
+
+        objects = []
+        for lbl in label:
+            if not isinstance(lbl, str):
+                raise TypeError(f"'{lbl}' Must Be A String")
+            lbl = lbl.lower()
+            tag_obj = self._client.get_by_fields(name=lbl, search='tags')  # Get the tag object
+            if not tag_obj:
+                raise ValueError(f"Tag '{lbl}' Does Not Exist To Delete")
+            tag_obj = tag_obj[0]  # We can assume that only one tag has the name
+            params = {
+                'name': tag_obj['name']
+            }
+            response = self._client.http_delete(url, params=params, cookies=self._client.cookies)
+            # Find the tag in the tags list and delete it, then return the deleted object
+            objects.append(self._client.delete_from_local_state(search='tags', etag=tag_obj['etag']))
+        if len(objects) == 1:
+            return objects[0]
+        else:
+            return objects

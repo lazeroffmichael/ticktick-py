@@ -133,17 +133,40 @@ def test_tag_delete(client):
     assert not find
 
 
-def test_tag_delete_with_task(client):
-    """Tests that a tag is removed properly from a task"""
-    # TODO: Implement
-    pass
-
-
 def test_tag_delete_fail(client):
     """Tests a failed deletion of a tag"""
     name = str(uuid.uuid4())
     with pytest.raises(ValueError):
         client.tag.delete(name)
+
+
+def test_tag_delete_fail(client):
+    name = 84375903485
+    names = [65767567, 3478935045]
+    with pytest.raises(TypeError):
+        client.tag.delete(name)
+    with pytest.raises(TypeError):
+        client.tag.delete(names)
+
+
+def test_tag_delete_multiple(client):
+    tag1_name = str(uuid.uuid4()).upper()
+    tag2_name = str(uuid.uuid4()).upper()
+    tag3_name = str(uuid.uuid4()).upper()
+    tag1 = client.tag.builder(tag1_name)
+    tag2 = client.tag.builder(tag2_name)
+    tag3 = client.tag.builder(tag3_name)
+    tags = client.tag.create([tag1, tag2, tag3])
+    deleted = client.tag.delete([tag1_name, tag2_name, tag3_name])
+    found1 = client.get_by_etag(tags[0]['etag'])
+    found2 = client.get_by_etag(tags[1]['etag'])
+    found3 = client.get_by_etag(tags[2]['etag'])
+    assert not found1
+    assert not found2
+    assert not found3
+    assert tags[0]['label'] == deleted[0]['label']
+    assert tags[1]['label'] == deleted[1]['label']
+    assert tags[2]['label'] == deleted[2]['label']
 
 
 def test_tag_batch_create(client):
