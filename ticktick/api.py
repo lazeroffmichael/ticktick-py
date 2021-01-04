@@ -496,8 +496,6 @@ class TickTickClient:
         Returns:
             The dictionary of the object that was deleted.
 
-        Raises:
-            ValueError
         """
         # Check that kwargs is not empty
         if kwargs == {}:

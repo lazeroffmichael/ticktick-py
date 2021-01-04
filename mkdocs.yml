@@ -17,6 +17,9 @@ theme:
     - navigation.expand
     - toc.integrate
 
+extra_css:
+  - css/mkdocstrings.css
+
 plugins:
   - search
   - mkdocstrings:
@@ -36,3 +39,5 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.tabbed
   - pymdownx.superfences
+
+
