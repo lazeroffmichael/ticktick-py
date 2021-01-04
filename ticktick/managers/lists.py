@@ -6,7 +6,7 @@ class ListManager:
 
     def __init__(self, client_class):
         self._client = client_class
-        self.access_token = self._client.access_token
+        self._access_token = self._client._access_token
 
     @logged_in
     def create(self, name: str, color: str = 'random', list_type: str = 'TASK', folder_id: str = None) -> str:
@@ -48,7 +48,7 @@ class ListManager:
                      'groupId': folder_id
                      }]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client._cookies)
         self._client.sync()
         return self._client.get_by_id(self._client.parse_id(response), search='lists')
 
@@ -69,7 +69,7 @@ class ListManager:
         payload = {
             'update': [returned_object]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client._cookies)
         self._client.sync()
         return self._client.get_by_id(self._client.parse_id(response), search='lists')
 
@@ -106,7 +106,7 @@ class ListManager:
         payload = {
             'delete': [list_id],
         }
-        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.http_post(url, json=payload, cookies=self._client._cookies)
         # Delete the list
         deleted_list = self._client.delete_from_local_state(id=list_id, search='lists')
         # Delete the tasks from the list
@@ -135,7 +135,7 @@ class ListManager:
             payload = {
                 'update': [obj]
             }
-            self._client.http_post(url, json=payload, cookies=self._client.cookies)
+            self._client.http_post(url, json=payload, cookies=self._client._cookies)
 
         # List still exists so don't delete
         return obj
@@ -154,7 +154,7 @@ class ListManager:
                      'listType': 'group'
                      }]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client._cookies)
         self._client.sync()
         return self._client.get_by_id(self._client.parse_id(response), search='list_folders')
 
@@ -174,7 +174,7 @@ class ListManager:
         payload = {
             'update': [obj]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client._cookies)
         self._client.sync()
         return self._client.get_by_id(self._client.parse_id(response), search='list_folders')
 
@@ -194,7 +194,7 @@ class ListManager:
         payload = {
             'delete': [folder_id]
         }
-        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.http_post(url, json=payload, cookies=self._client._cookies)
         for k in range(len(self._client.state['list_folders'])):
             if self._client.state['list_folders'][k]['id'] == folder_id:
                 break

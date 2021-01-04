@@ -26,16 +26,16 @@ def test_time_checks_proper_parse_start(client):
     """Tests proper parsing of date with only start_date"""
     start = datetime.datetime(2022, 1, 5)
     dates = client.task._time_checks(start)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
     assert dates['isAllDay']
 
 
 def test_time_checks_proper_parse_end(client):
     end = datetime.datetime(2022, 1, 5)
     dates = client.task._time_checks(end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client._time_zone)
     assert dates['isAllDay']
 
 
@@ -43,16 +43,16 @@ def test_time_checks_proper_parse_start_not_all_day(client):
     """Tests proper date parse of not all day"""
     start = datetime.datetime(2022, 1, 5, 14, 56, 34)
     dates = client.task._time_checks(start)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
     assert not dates['isAllDay']
 
 
 def test_time_checks_proper_parse_end_not_all_day(client):
     end = datetime.datetime(2022, 1, 5, 16, 56, 45)
     dates = client.task._time_checks(end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client._time_zone)
     assert not dates['isAllDay']
 
 
@@ -61,8 +61,8 @@ def test_time_all_day_range(client):
     end = datetime.datetime(2022, 1, 8)
     expected = datetime.datetime(2022, 1, 9)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client._time_zone)
     assert dates['isAllDay']
 
 
@@ -71,8 +71,8 @@ def test_time_all_day_range_end_of_month(client):
     end = datetime.datetime(2022, 1, 31)
     expected = datetime.datetime(2022, 2, 1)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client._time_zone)
     assert dates['isAllDay']
 
 
@@ -81,8 +81,8 @@ def test_time_all_day_range_end_of_year(client):
     end = datetime.datetime(2022, 12, 31)
     expected = datetime.datetime(2023, 1, 1)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client._time_zone)
     assert dates['isAllDay']
 
 
@@ -151,8 +151,8 @@ def test_task_fields_proper_return(client):
     assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client._time_zone)
     assert items['isAllDay']
 
 
@@ -177,8 +177,8 @@ def test_builder(client):
     assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client._time_zone)
+    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client._time_zone)
     assert items['isAllDay']
 
 

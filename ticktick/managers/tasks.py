@@ -14,7 +14,7 @@ class TaskManager:
 
     def __init__(self, client_class):
         self._client = client_class
-        self.access_token = self._client.access_token
+        self._access_token = self._client._access_token
 
     @logged_in
     def create(self,
@@ -93,7 +93,7 @@ class TaskManager:
         payload = {
             'add': obj
         }
-        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+        response = self._client._session.post(url, json=payload, cookies=self._client._cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
 
@@ -156,7 +156,7 @@ class TaskManager:
         payload = {
             'update': tasks
         }
-        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+        response = self._client._session.post(url, json=payload, cookies=self._client._cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
         response = response.json()
@@ -204,7 +204,7 @@ class TaskManager:
         payload = {
             'update': tasks
         }
-        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+        response = self._client._session.post(url, json=payload, cookies=self._client._cookies)
         if response.status_code != 200 and response.status_code != 500:
             raise RuntimeError('Could Not Complete Request')
 
@@ -244,7 +244,7 @@ class TaskManager:
 
         url = self._client.BASE_URL + 'batch/task'
         payload = {'delete': tasks}
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client._cookies)
         if len(tasks) == 1:
             return self._client.delete_from_local_state(id=ids, search='tasks')
         else:
@@ -296,7 +296,7 @@ class TaskManager:
         url = self._client.BASE_URL + 'batch/taskProject'
         url2 = self._client.BASE_URL + 'batch/task'
         # Make the initial call to move the tasks
-        self._client.http_post(url, json=task_project, cookies=self._client.cookies)
+        self._client.http_post(url, json=task_project, cookies=self._client._cookies)
 
         self._client.sync()
         # Return the new_list_id object
@@ -338,7 +338,7 @@ class TaskManager:
         url = self._client.BASE_URL + 'project/all/completed'
 
         if tz is None:
-            tz = self._client.time_zone
+            tz = self._client._time_zone
 
         # Handles case when start_date occurs after end_date
         if end is not None and start > end:
@@ -367,7 +367,7 @@ class TaskManager:
             'to': end.strftime(DATE_FORMAT),
             'limit': 100
         }
-        response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
+        response = self._client.http_get(url, params=parameters, cookies=self._client._cookies)
         return response
 
     def _time_checks(self, start_date: datetime = None, end_date: datetime = None, time_zone: str = None):
@@ -378,7 +378,7 @@ class TaskManager:
         # Date
         # If another time zone is not entered, default to the profile
         if time_zone is None:
-            time_zone = self._client.time_zone
+            time_zone = self._client._time_zone
         else:
             if time_zone not in pytz.all_timezones_set:
                 raise ValueError(f"Timezone '{time_zone}' Is Invalid")

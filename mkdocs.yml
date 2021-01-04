@@ -1,1 +1,38 @@
-site_name: My Docs
+site_name: "TickTick-py"
+
+nav:
+  - Overview: index.md
+  - Usage:
+      - API and Important Information: usage/api.md
+      - Tasks: usage/tasks.md
+      - Projects: usage/projects.md
+
+theme:
+  name: "material"
+  palette:
+    primary:
+      purple
+  features:
+    - navigation.instant
+    - navigation.expand
+    - toc.integrate
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_source: true
+          setup_commands:
+            - import sys
+            - sys.path.append("ticktick")
+      watch:
+        - ticktick
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.superfences

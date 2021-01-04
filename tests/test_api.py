@@ -8,7 +8,7 @@ from ticktick.api import TickTickClient
 
 def test_good_login(client):
     """Tests login is valid in conftest.py"""
-    assert client.access_token != ''
+    assert client._access_token != ''
 
 
 def test_bad_login(client):
@@ -22,18 +22,18 @@ def test_bad_login(client):
 def test_check_status_code(client):
     """Tests that a failed httpx request raises an exception"""
     url = client.BASE_URL + str(uuid.uuid4())
-    response = httpx.get(url, cookies=client.cookies)
+    response = httpx.get(url, cookies=client._cookies)
     with pytest.raises(RuntimeError):
         client.check_status_code(response, 'Error')
 
 
 def test_not_logged_in(client):
     """Tests that an exception is raised when access_token is not alive"""
-    original_token = client.access_token
-    client.access_token = ''
+    original_token = client._access_token
+    client._access_token = ''
     with pytest.raises(RuntimeError):
         client.sync()
-    client.access_token = original_token
+    client._access_token = original_token
 
 
 def test_initial_sync(client):
@@ -46,7 +46,7 @@ def test_settings(client):
     """Tests _settings() retrieves values"""
     client._settings()
     assert client.profile_id is not None
-    assert client.time_zone != ''
+    assert client._time_zone != ''
 
 
 def test_get_by_fields_generic(client):
