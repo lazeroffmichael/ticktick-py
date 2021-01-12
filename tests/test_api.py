@@ -8,7 +8,7 @@ from ticktick.api import TickTickClient
 
 def test_good_login(client):
     """Tests login is valid in conftest.py"""
-    assert client._access_token != ''
+    assert client.access_token != ''
 
 
 def test_bad_login(client):
@@ -22,31 +22,25 @@ def test_bad_login(client):
 def test_check_status_code(client):
     """Tests that a failed httpx request raises an exception"""
     url = client.BASE_URL + str(uuid.uuid4())
-    response = httpx.get(url, cookies=client._cookies)
+    response = httpx.get(url, cookies=client.cookies)
     with pytest.raises(RuntimeError):
         client.check_status_code(response, 'Error')
 
 
 def test_not_logged_in(client):
     """Tests that an exception is raised when access_token is not alive"""
-    original_token = client._access_token
-    client._access_token = ''
+    original_token = client.access_token
+    client.access_token = ''
     with pytest.raises(RuntimeError):
         client.sync()
-    client._access_token = original_token
-
-
-def test_initial_sync(client):
-    """Tests sync() retrieves values"""
-    client.sync()
-    assert client.state['inbox_id'] != ''
+    client.access_token = original_token
 
 
 def test_settings(client):
     """Tests _settings() retrieves values"""
     client._settings()
     assert client.profile_id is not None
-    assert client._time_zone != ''
+    assert client.time_zone != ''
 
 
 def test_get_by_fields_generic(client):
@@ -56,7 +50,7 @@ def test_get_by_fields_generic(client):
     client.state['lists'].append(fake_obj)  # Append the fake object
     found = client.get_by_fields(name=list_name)
     assert found
-    assert found[0]['name'] == list_name
+    assert found['name'] == list_name
     client.delete_from_local_state(search='lists', name=list_name)
     assert not client.get_by_fields(name=list_name)
 
@@ -68,7 +62,7 @@ def test_get_by_fields_search_specified(client):
     client.state['lists'].append(fake_obj)  # Append the fake object
     found = client.get_by_fields(name=list_name, search='lists')
     assert found
-    assert found[0]['name'] == list_name
+    assert found['name'] == list_name
     client.delete_from_local_state(search='lists', name=list_name)  # Delete the fake object
     assert not client.get_by_fields(name=list_name)
 

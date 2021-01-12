@@ -10,9 +10,9 @@ as of **1/2/2021**, there is no official API for [TickTick](<https://www.ticktic
 
 
 ##Features
-The API automatically fetches all the tasks, tags, lists, and more linked to your profile and stores them in a dictionary named `state`.
+The API automatically fetches all the tasks, tags, lists, and more linked to your profile and stores them in a dictionary named [`state`](usage/api/#state).
 
- - Task Functionality
+ - [Tasks](usage/tasks.md)
     - Batch create, update, and delete tasks.
     - Acquire all your uncompleted tasks.
     - Acquire all completed tasks in a certain date range
@@ -63,9 +63,10 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
         
     Most methods will return the object that was changed. Consult the individual documentation for more information on specific methods.
 
-
+###Full Usage Guide [Here](usage/api.md)
 
 ##Future Plans
  - Smart List Support
  - Enhanced Team Support
+ - Notification and Repeats For Tasks
  - Local cache with explicit commit feature for pushing changes to the TickTick servers

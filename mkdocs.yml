@@ -1,4 +1,8 @@
 site_name: "TickTick-py"
+site_description: "Unofficial TickTick API For Python 3"
+site_url: "https://lazeroffmichael.github.io/TickTick-py"
+repo_url: "https://github.com/lazeroffmichael/TickTick-py"
+repo_name: "lazeroffmichael/TickTick-py"
 
 nav:
   - Overview: index.md
@@ -6,6 +10,8 @@ nav:
       - API and Important Information: usage/api.md
       - Tasks: usage/tasks.md
       - Projects: usage/projects.md
+      - Tags: usage/tags.md
+      - Time Zones: usage/timezones.md
 
 theme:
   name: "material"
@@ -15,7 +21,6 @@ theme:
   features:
     - navigation.instant
     - navigation.expand
-    - toc.integrate
 
 extra_css:
   - css/mkdocstrings.css
@@ -39,5 +44,7 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.tabbed
   - pymdownx.superfences
+  - toc:
+      permalink: true
 
 

@@ -1,0 +1,2 @@
+::: managers.projects
+

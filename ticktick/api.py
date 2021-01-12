@@ -1,7 +1,9 @@
+
+
 import httpx
 
 from ticktick.managers.check_logged_in import logged_in
-from ticktick.managers.lists import ListManager
+from ticktick.managers.projects import ProjectManager
 from ticktick.managers.tasks import TaskManager
 from ticktick.managers.focus import FocusTimeManager
 from ticktick.managers.habits import HabitManager
@@ -12,7 +14,7 @@ from ticktick.managers.tags import TagsManager
 
 class TickTickClient:
     """
-    The `TickTickClient` class is the origin for interactions with the API.
+    The [`TickTickClient`][api.TickTickClient] class is the origin for interactions with the API.
     It is important to understand how the local data for your profile is stored and
     the names that you will interact with in order to access the different features.
 
@@ -28,7 +30,7 @@ class TickTickClient:
         client = api.TickTickClient('username', 'password')  # Enter correct username and password
         ```
 
-        Once you have initialized your session, all interactions will occur through the reference, in this case: ```client```
+        Once you have initialized your session, all interactions will occur through the instance, in this case: ```client```
 
     ##State
 
@@ -39,15 +41,14 @@ class TickTickClient:
 
         === "Members"
 
-            The lists are comprised of dictionaries that contain all the fields for each type of object: tasks, tags, etc.
+            The lists are comprised of dictionaries that contain all the fields for each type of TickTick object: tasks, tags, etc.
 
             | Member        | Type |   Contains                          |
             | -----------   | -----|------------------------------------  |
             | `tasks`       | `list` |     All uncompleted task objects |
             | `tags`        | `list` |     All tag objects |
-            | `lists`       | `list` |     All list objects |
-            | `list_folders`| `list` |     All list folder objects|
-            | `inbox_id`    | `str` |      The inbox id for your profile |
+            | `projects`       | `list` |     All project objects |
+            | `project_folders`| `list` |     All project folder objects|
 
         === "Accessing"
 
@@ -56,7 +57,7 @@ class TickTickClient:
             ```python
             # Assumes that 'client' is the name that references the TickTickClient class.
 
-            uncompleted_tasks = client.state['lists']
+            uncompleted_tasks = client.state['tasks']
             all_tags = client.state['tags']
             ```
 
@@ -68,49 +69,92 @@ class TickTickClient:
 
     ##Functionality
 
-    Different functionality can be accessed through different public members of the `TickTickClient` class:
+    Different functionality can be accessed through different public members of the `TickTickClient` instance:
 
-    !!! info "Method Managers"
+    !!! example "Functionality"
 
+        === "Method Managers"
 
-        | Member   | Functionality         |
-        | ----------- | -------------------|
-        | `task`      |       Task Methods |
-        | `tag`       |       List Methods |
-        | `list`      |       List Methods |
-        | `habit`     |      Habit Methods |
-        | `pomo`      |       Pomo Methods |
-        | `focus`     |      Focus Methods |
+            Accessing the methods for each type of member is easy. It is in this format:
+
+            `client`(or whatever name references the `TickTickClient` instance).`manager`(members in table below).`method()`
+
+            | Member   | Functionality         |
+            | ----------- | -------------------|
+            | `task`      |       Task Methods |
+            | `tag`       |       Tag Methods |
+            | `project`      |       List Methods |
+            | `habit`     |      Habit Methods |
+            | `pomo`      |       Pomo Methods |
+            | `focus`     |      Focus Methods |
+
+        === "Example Usage"
+
+            ```python
+            # Assumes that 'client' is the name that references the TickTickClient instance.
+
+            created_task = client.task.create('My Created Task')
+            deleted_project = client.list.delete(list_id)
+            ```
+
+            Make sure to check the individual documentation for the different method managers.
 
     !!! info "Other Public Members"
 
-        | Member   |     Type   |Description                          |
-        | ----------- | --------|---------------------------- |
-        | `profile_id`| `str`         | Id assigned to your profile |
-        | `state` |      `dict`       | Holds all the item objects in your profile (described above)|
+        === "Useful Members"
+
+            | Member   |     Type   |Description                          |
+            | ----------- | --------|---------------------------- |
+            | `profile_id`| `str`         | Id assigned to your profile |
+            | `inbox_id`  | `str`         | Id assigned to your profile|
+            | `time_zone` | `str`         | Timezone string linked to your TickTick profile |
+            | `state` |      `dict`       | Holds all the item objects in your profile (described above)|
+
+        === "Members That Shouldn't Be Messed With"
+
+            Messing with these values could produce unwanted effects.
+
+            | Member   |     Type   |Description                          |
+            | ----------- | --------|---------------------------- |
+            | `access_token`| `str`         | Instance token generated by TickTick for your session. |
+            | `cookies`  | `dict`         | Cookies required for your session.|
 
     ## Useful Methods
 
     `TickTickClient` has a lot of helper functions in its documentation...however these should be the only of use methods to you:
 
+    !!! tip
+        It's recommended that you look at the documentation for these three methods to see how to obtain / delete objects from
+        the local `state` dictionary - an important feature that will be useful when updating / deleting TickTick objects remotely.
+
     - [`delete_from_local_state`][api.TickTickClient.delete_from_local_state]
     - [`get_by_fields`][api.TickTickClient.get_by_fields]
     - [`get_by_id`][api.TickTickClient.get_by_id]
+    - [`get_by_etag`][api.TickTickClient.get_by_etag]
 
+    ## That's It!
+
+    That's all the required information for how to get started with the API! To see how to use individual features, check these out next:
+
+    - [Tasks](tasks.md)
+    - [Projects][managers.lists.ListManager]
+    - [Tags][managers.tags.TagsManager]
     ---
 
-    ## `TickTickClient` Class Documentation
+    ## `TickTickClient Documentation`
     """
+
     BASE_URL = 'https://api.ticktick.com/api/v2/'
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
     #   ---------------------------------------------------------------------------------------------------------------
     #   Client Initialization
 
+    # TODO : Change lists to projects and list_folders to project_folders
     def __init__(self, username: str, password: str) -> None:
         """
         Initializes a client session. In order to interact with the API
-        a successful login must occur. See how to login above.
+        a successful login must occur. See [Logging In](#logging-in) for help.
 
         Arguments:
             username: TickTick Username
@@ -121,11 +165,12 @@ class TickTickClient:
         """
         # Class members
 
-        self._access_token = ''
-        self._cookies = {}
-        self._session = httpx.Client()
-        self._time_zone = ''
+        self.access_token = ''
+        self.cookies = {}
+        self.session = httpx.Client()
+        self.time_zone = ''
         self.profile_id = ''
+        self.inbox_id = ''
         self.state = {}
         self.reset_local_state()
 
@@ -136,7 +181,7 @@ class TickTickClient:
         # Mangers for the different operations
         self.focus = FocusTimeManager(self)
         self.habit = HabitManager(self)
-        self.list = ListManager(self)
+        self.project = ProjectManager(self)
         self.pomo = PomoManager(self)
         self.settings = SettingsManager(self)
         self.tag = TagsManager(self)
@@ -144,16 +189,15 @@ class TickTickClient:
 
     def reset_local_state(self):
         """
-        Resets the contents of the items in the `state` dictionary.
+        Resets the contents of the items in the [`state`](#state) dictionary.
 
         """
         self.state = {
-            'lists': [],
-            'list_folders': [],
+            'projects': [],
+            'project_folders': [],
             'tags': [],
             'tasks': [],
             'user_settings': {},
-            'inbox_id': '',
             'profile': {}
         }
 
@@ -161,8 +205,10 @@ class TickTickClient:
         """
         Logs in to TickTick and sets the instance access token.
 
-        :param username: TickTick Username
-        :param password: TickTick Password
+        Arguments:
+            username: TickTick Username
+            password: TickTick Password
+
         """
         url = self.BASE_URL + 'user/signon'
         user_info = {
@@ -176,8 +222,8 @@ class TickTickClient:
 
         response = self.http_post(url, json=user_info, params=parameters)
 
-        self._access_token = response['token']
-        self._cookies['t'] = self._access_token
+        self.access_token = response['token']
+        self.cookies['t'] = self.access_token
 
     @staticmethod
     def check_status_code(response, error_message: str) -> None:
@@ -209,7 +255,7 @@ class TickTickClient:
         }
         response = self.http_get(url, params=parameters)
 
-        self._time_zone = response['timeZone']
+        self.time_zone = response['timeZone']
         self.profile_id = response['id']
 
         return response
@@ -217,7 +263,7 @@ class TickTickClient:
     @logged_in
     def sync(self):
         """
-        Populates the TickTickClient 'state' dictionary with the contents of your account.
+        Populates the `TickTickClient` [`state`](#state) dictionary with the contents of your account.
 
         **This method is called when necessary by other methods and does not need to be explicitly called.**
 
@@ -227,14 +273,14 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.http_get(self.INITIAL_BATCH_URL, cookies=self._cookies)
+        response = self.http_get(self.INITIAL_BATCH_URL, cookies=self.cookies)
 
         # Inbox Id
-        self.state['inbox_id'] = response['inboxId']
+        self.inbox_id = response['inboxId']
         # Set list groups
-        self.state['list_folders'] = response['projectGroups']
+        self.state['project_folders'] = response['projectGroups']
         # Set lists
-        self.state['lists'] = response['projectProfiles']
+        self.state['projects'] = response['projectProfiles']
         # Set Uncompleted Tasks
         self.state['tasks'] = response['syncTaskBean']['update']
         # Set tags
@@ -244,11 +290,11 @@ class TickTickClient:
 
     def http_post(self, url, **kwargs):
         """
-        Sends an http post request to the specified url and keyword arguments.
+        Sends an http post request with the specified url and keyword arguments.
 
         Arguments:
             url (str): Url to send the request.
-            kwargs: Arguments to send with the request.
+            **kwargs: Arguments to send with the request.
 
         Returns:
             dict: The json parsed response if possible or just a string of the response text if not.
@@ -256,7 +302,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self._session.post(url, **kwargs)
+        response = self.session.post(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -266,11 +312,11 @@ class TickTickClient:
 
     def http_get(self, url, **kwargs):
         """
-        Sends an http get request to the specified url and keyword arguments.
+        Sends an http get request with the specified url and keyword arguments.
 
         Arguments:
-            url (str): Url to send the request
-            kwargs: Arguments to send with the request
+            url (str): Url to send the request.
+            **kwargs: Arguments to send with the request.
 
         Returns:
             dict: The json parsed response if possible or just a string of the response text if not.
@@ -278,7 +324,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self._session.get(url, **kwargs)
+        response = self.session.get(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -288,11 +334,11 @@ class TickTickClient:
 
     def http_delete(self, url, **kwargs):
         """
-        Sends an http delete request to the specified url and keyword arguments.
+        Sends an http delete request with the specified url and keyword arguments.
 
         Arguments:
-            url (str): Url to send the request
-            kwargs: Arguments to send with the request
+            url (str): Url to send the request.
+            **kwargs: Arguments to send with the request.
 
         Returns:
             dict: The json parsed response if possible or just a string of the response text if not.
@@ -300,7 +346,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self._session.delete(url, **kwargs)
+        response = self.session.delete(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -310,11 +356,11 @@ class TickTickClient:
 
     def http_put(self, url, **kwargs):
         """
-        Sends an http put request to the specified url and keyword arguments.
+        Sends an http put request with the specified url and keyword arguments.
 
         Arguments:
-            url (str): Url to send the request
-            kwargs: Arguments to send with the request
+            url (str): Url to send the request.
+            **kwargs: Arguments to send with the request.
 
         Returns:
             dict: The json parsed response if possible or just a string of the response text if not.
@@ -322,7 +368,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self._session.put(url, **kwargs)
+        response = self.session.put(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -340,7 +386,7 @@ class TickTickClient:
             ```md
             {'id2etag': {'5ff2bcf68f08093e5b745a30': '3okkc2xm'}, 'id2error': {}}
             ```
-            We want to obtain '5ff2bcf68f08093e5b745a30' in this example - the Id of the object.
+            We want to obtain '5ff2bcf68f08093e5b745a30' in this example - the id of the object.
 
         Arguments:
             response: Dictionary containing the Dd from the TickTick servers.
@@ -384,11 +430,47 @@ class TickTickClient:
 
     def get_by_fields(self, search: str = None, **kwargs) -> list:
         """
-        Finds the objects that match the inputted fields.
-        If search is specified, it will only search the specific state list.
-        :param search: object in self.state
-        :param kwargs: fields to look for
-        :return: List containing the objects
+        Finds and returns the objects in `state` that match the inputted fields.
+
+        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+
+        !!! example
+            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            comparing any fields contained in those objects.
+
+            For example: Lets say we have 3 task objects that are titled 'Hello', and we want to obtain all of them.
+
+            The call to the function would look like this:
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_objs = client.get_by_fields(title='Hello')
+            ```
+            `found_objs` would now reference a list containing the 3 objects with titles 'Hello'.
+
+            Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+            specifying the key its located under in the [`state`](#state) dictionary.
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_obj = client.get_by_fields(title='Hello', search='tasks')
+            ```
+
+            The search will now only look through `tasks` in [`state`](#state).
+
+
+        Arguments:
+            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+            **kwargs: Matching fields in the object to look for.
+
+        Returns:
+            If a single object -> the dictionary of the object. For multiple objects, a list of dictionaries. If nothing was found -> an empty list.
+
+        Raises:
+            ValueError: If no key word arguments are provided.
+            KeyError: If the search key provided is not a key in `state`.
         """
         if kwargs == {}:
             raise ValueError('Must Include Field(s) To Be Searched For')
@@ -436,19 +518,61 @@ class TickTickClient:
                     if all_match:
                         objects.append(self.state[primarykey][middle_key])
 
-        return objects
+        if len(objects) == 1:
+            return objects[0]
+        else:
+            return objects
 
-    def get_by_id(self, id: str, search: str = None) -> dict:
+    def get_by_id(self, obj_id: str, search: str = None) -> dict:
         """
-        Returns the dictionary object of the item corresponding to the passed id
-        :param id: Id of the item to be returned
-        :param search: Top level key of self.state which makes the search quicker
-        :return: Dictionary object containing the item (or empty dictionary)
+        Returns the dictionary of the object corresponding to the passed id.
+
+        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+
+
+        !!! example
+            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            comparing the id fields.
+
+            For example: Lets get the object that corresponds to an id referenced by `my_id`.
+
+            The call to the function would look like this:
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_obj = client.get_by_id(my_id)
+            ```
+            `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.
+
+            Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+            specifying the key its located under in the [`state`](#state) dictionary.
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_obj = client.get_by_id(my_id, search='lists')
+            ```
+
+            The search will now only look through `lists` in [`state`](#state).
+
+        Arguments:
+            obj_id: Id of the item.
+            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+
+        Returns:
+            The dictionary object of the item if found, or an empty dictionary if not found.
+
+        Raises:
+            KeyError: If the search key provided is not a key in [`state`](#state).
         """
+        if search is not None and search not in self.state:
+            raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
+
         # Search just in the desired list
         if search is not None:
             for index in self.state[search]:
-                if index['id'] == id:
+                if index['id'] == obj_id:
                     return index
 
         else:
@@ -457,14 +581,56 @@ class TickTickClient:
                 for our_object in self.state[prim_key]:
                     if 'id' not in our_object:
                         break
-                    if our_object['id'] == id:
+                    if our_object['id'] == obj_id:
                         return our_object
         # Return empty dictionary if not found
         return {}
 
     def get_by_etag(self, etag: str, search: str = None) -> dict:
-        if etag is None:
-            raise ValueError("Must Pass Etag")
+        """
+        Returns the dictionary object of the item with the matching etag.
+
+        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+
+        !!! example
+            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            comparing the etag fields.
+
+            For example: Lets get the object that corresponds to an etag referenced by `my_etag`.
+
+            The call to the function would look like this:
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_obj = client.get_by_etag(my_etag)
+            ```
+            `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.
+
+            Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+            specifying the key its located under in the [`state`](#state) dictionary.
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            found_obj = client.get_by_etag(my_etag, search='lists')
+            ```
+
+            The search will now only look through `lists` in [`state`](#state).
+
+        Arguments:
+            etag: The etag of the object that you are looking for.
+            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+
+        Returns:
+            The dictionary object of the item if found, or an empty dictionary if not found.
+
+        Raises:
+            KeyError: If the search key provided is not a key in [`state`](#state).
+
+        """
+        if search is not None and search not in self.state:
+            raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
 
         # Search just in the desired list
         if search is not None:
@@ -485,16 +651,49 @@ class TickTickClient:
 
     def delete_from_local_state(self, search: str = None, **kwargs) -> dict:
         """
-        Deletes the object that match the fields in the search list from the local state.
+        Deletes a single object from the local `state` dictionary. **Does not delete any items remotely.**
 
-        **Does not delete objects remotely, and only deletes a single object.**
+        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+
+        !!! example
+            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            comparing the fields.
+
+            For example: Lets say that we wanted to find and delete an existing task object from our local state
+            with the name 'Get Groceries'. To do this, we can specify the field(s) that we want to compare for in
+            the task objects -> in this case the `title` 'Get Groceries'.
+
+            The call to the function would look like this:
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            deleted_task = client.delete_from_local_state(title='Get Groceries')
+            ```
+            `deleted_task` would now hold the object that was deleted from the [`state`](#state) dictionary if it was found.
+
+            Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+            specifying the key its located under in the [`state`](#state) dictionary.
+
+            ```python
+            # Assumes that `client` is the name referencing the TickTickClient instance.
+
+            deleted_task = client.delete_from_local_state(title='Get Groceries', search='tasks')
+            ```
+
+            The search will now only look through `tasks` in `state`.
+
 
         Arguments:
-            search: A specific item to look through in the state dictionary. When not specified the entire state dictionary will be searched.
-            kwargs: Matching fields in the object to look for.
+            search: A specific item to look through in the [`state`](#state) dictionary. When not specified the entire [`state`](#state) dictionary will be searched.
+            **kwargs: Matching fields in the object to look for.
 
         Returns:
             The dictionary of the object that was deleted.
+
+        Raises:
+            ValueError: If no key word arguments are provided.
+            KeyError: If the search key provided is not a key in [`state`](#state).
 
         """
         # Check that kwargs is not empty

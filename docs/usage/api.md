@@ -1,6 +1,4 @@
-## `TickTickClient`
-
-::: api.TickTickClient
+::: api
     
     
 

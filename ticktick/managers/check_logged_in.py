@@ -8,7 +8,7 @@ def logged_in(func):
 
     @wraps(func)
     def call(self, *args, **kwargs):
-        if not self._access_token:
+        if not self.access_token:
             raise RuntimeError('ERROR -> Not Logged In')
         return func(self, *args, **kwargs)
 
