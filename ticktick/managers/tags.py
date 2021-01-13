@@ -181,7 +181,6 @@ class TagsManager:
         obj = self._client.get_by_fields(name=old, search='tags')
         if not obj:
             raise ValueError(f"Tag '{old}' Does Not Exist To Rename")
-        obj = obj[0]
 
         # Make sure the new tag does not exist
         temp_new = new.lower()
@@ -200,7 +199,7 @@ class TagsManager:
         # Response from TickTick does not return the new etag of the object, we must find it ourselves
         new_obj = self._client.get_by_fields(name=temp_new, search='tags')
         # Return the etag of the updated object
-        return self._client.get_by_etag(new_obj[0]['etag'], search='tags')
+        return self._client.get_by_etag(new_obj['etag'], search='tags')
 
     @logged_in
     def color(self, label: str, color: str) -> dict:
@@ -218,7 +217,6 @@ class TagsManager:
         obj = self._client.get_by_fields(name=label, search='tags')
         if not obj:
             raise ValueError(f"Tag '{label}' Does Not Exist To Update")
-        obj = obj[0]
 
         # Check the color
         if not check_hex_color(color):
@@ -250,7 +248,6 @@ class TagsManager:
         obj = self._client.get_by_fields(name=label, search='tags')
         if not obj:
             raise ValueError(f"Tag '{label}' Does Not Exist To Update")
-        obj = obj[0]
         sort = self._sort_string_value(sort)  # Get the sort string for the value
 
         obj['sortType'] = sort  # set the object field
@@ -285,7 +282,6 @@ class TagsManager:
         obj = self._client.get_by_fields(name=label, search='tags')
         if not obj:
             raise ValueError(f"Tag '{label}' Does Not Exist To Update")
-        obj = obj[0]
 
         # Four Cases
         # Case 1: No Parent -> Want a Parent
@@ -322,7 +318,6 @@ class TagsManager:
         pobj = self._client.get_by_fields(name=new_p, search='tags')
         if not pobj:
             raise ValueError(f"Tag '{parent}' Does Not Exist To Set As Parent")
-        pobj = pobj[0]  # Parent object found correctly
 
         url = self._client.BASE_URL + 'batch/tag'
         payload = {
@@ -396,7 +391,6 @@ class TagsManager:
         kept_obj = self._client.get_by_fields(name=merged, search='tags')
         if not kept_obj:
             raise ValueError(f"Kept Tag '{merged}' Does Not Exist To Merge")
-        kept_obj = kept_obj[0]
 
         # Verify all args are valid, and add them to a list
         merge_queue = []
@@ -408,7 +402,7 @@ class TagsManager:
                 retrieved = self._client.get_by_fields(name=string, search='tags')
                 if not retrieved:
                     raise ValueError(f"Tag '{obj}' Does Not Exist To Merge")
-                merge_queue.append(retrieved[0])
+                merge_queue.append(retrieved)
             elif isinstance(obj, list):
                 for item in obj:  # Loop through the items in the list and check items are a string and exist
                     # Make sure the item is a string
@@ -419,7 +413,7 @@ class TagsManager:
                     found = self._client.get_by_fields(name=string, search='tags')
                     if not found:
                         raise ValueError(f"Tag '{item}' Does Not Exist To Merge")
-                    merge_queue.append(found[0])
+                    merge_queue.append(found)
 
             else:
                 raise ValueError(f"Task Name Invalid: {obj} -> Must Be String or List Of Strings")

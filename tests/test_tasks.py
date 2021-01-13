@@ -608,7 +608,7 @@ def test_get_from_list_single(client):
     task1 = {'projectId': fake_list_id, 'title': task1_title}
     client.state['tasks'].append(task1)
     tasks = client.task.get_from_project(fake_list_id)
-    assert tasks == task1
+    assert tasks[0] == task1
     client.delete_from_local_state(id=fake_list_id, search='projects')
     client.delete_from_local_state(title=task1_title, search='tasks')
 

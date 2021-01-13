@@ -20,7 +20,7 @@ theme:
       purple
   features:
     - navigation.instant
-    - navigation.expand
+    - toc.integrate
 
 extra_css:
   - css/mkdocstrings.css

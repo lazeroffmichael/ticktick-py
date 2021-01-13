@@ -47,11 +47,11 @@ def test_get_by_fields_generic(client):
     """Tests getting an id by an object field"""
     list_name = str(uuid.uuid4())
     fake_obj = {'name': list_name}
-    client.state['lists'].append(fake_obj)  # Append the fake object
+    client.state['projects'].append(fake_obj)  # Append the fake object
     found = client.get_by_fields(name=list_name)
     assert found
     assert found['name'] == list_name
-    client.delete_from_local_state(search='lists', name=list_name)
+    client.delete_from_local_state(search='projects', name=list_name)
     assert not client.get_by_fields(name=list_name)
 
 
@@ -59,11 +59,11 @@ def test_get_by_fields_search_specified(client):
     """Tests getting an id"""
     list_name = str(uuid.uuid4())
     fake_obj = {'name': list_name}
-    client.state['lists'].append(fake_obj)  # Append the fake object
-    found = client.get_by_fields(name=list_name, search='lists')
+    client.state['projects'].append(fake_obj)  # Append the fake object
+    found = client.get_by_fields(name=list_name, search='projects')
     assert found
     assert found['name'] == list_name
-    client.delete_from_local_state(search='lists', name=list_name)  # Delete the fake object
+    client.delete_from_local_state(search='projects', name=list_name)  # Delete the fake object
     assert not client.get_by_fields(name=list_name)
 
 
@@ -89,11 +89,11 @@ def test_get_by_id_pass(client):
     """Tests getting an object by its id"""
     list_id = str(uuid.uuid4())
     fake_obj = {'id': list_id}
-    client.state['lists'].append(fake_obj)  # Append the fake object
+    client.state['projects'].append(fake_obj)  # Append the fake object
     found = client.get_by_id(list_id)
     assert found
     assert found['id'] == list_id
-    client.delete_from_local_state(search='lists', id=list_id)  # Delete the fake object
+    client.delete_from_local_state(search='projects', id=list_id)  # Delete the fake object
     assert not client.get_by_id(list_id)
 
 
@@ -101,10 +101,10 @@ def test_get_by_id_search_key_wrong(client):
     """Tests searching in the wrong list wont find the object"""
     list_id = str(uuid.uuid4())
     fake_obj = {'id': list_id}
-    client.state['lists'].append(fake_obj)  # Append the fake object
+    client.state['projects'].append(fake_obj)  # Append the fake object
     found = client.get_by_id(list_id, search='tasks')
     assert not found
-    client.delete_from_local_state(id=list_id, search='lists')
+    client.delete_from_local_state(id=list_id, search='projects')
     assert not client.get_by_id(list_id)
 
 
@@ -139,18 +139,18 @@ def test_delete_from_local_state_pass(client):
     """Tests successfully deleting an item from local state"""
     name = str(uuid.uuid4())
     item = {'name': name}
-    client.state['lists'].append(item)  # Append the item to the local state
-    obj = client.get_by_fields(name=name, search='lists')  # Make sure append worked
+    client.state['projects'].append(item)  # Append the item to the local state
+    obj = client.get_by_fields(name=name, search='projects')  # Make sure append worked
     assert obj
-    deleted = client.delete_from_local_state(name=name, search='lists')
-    obj = client.get_by_fields(name=name, search='lists')
+    deleted = client.delete_from_local_state(name=name, search='projects')
+    obj = client.get_by_fields(name=name, search='projects')
     assert not obj  # Assert that deletion worked
 
 
 def test_delete_from_local_state_no_key(client):
     name = str(uuid.uuid4())
     item = {'name': name}
-    client.state['lists'].append(item)  # Append the item to the local state
+    client.state['projects'].append(item)  # Append the item to the local state
     obj = client.get_by_fields(name=name)  # Make sure append worked
     assert obj
     deleted = client.delete_from_local_state(name=name)

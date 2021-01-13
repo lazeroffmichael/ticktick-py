@@ -115,7 +115,6 @@ def test_tag_create(client):
     assert tag_
 
 
-
 def test_tag_create_with_forbidden_characters(client):
     """Tests creating a tag with characters normally not allowed by TickTick"""
     name = "\ \ /  # : * ? < > | Space"
@@ -140,7 +139,7 @@ def test_tag_delete_fail(client):
         client.tag.delete(name)
 
 
-def test_tag_delete_fail(client):
+def test_tag_delete_fail_2(client):
     name = 84375903485
     names = [65767567, 3478935045]
     with pytest.raises(TypeError):
@@ -279,7 +278,6 @@ def test_tag_create_with_sort_fail(client):
 
 def test_tag_create_with_all_fields(client):
     """Tests creating a tag with all fields"""
-    # TODO: Batch create here
     parent_name = str(uuid.uuid4())
     parent_ = client.tag.create(parent_name)  # Parent tag
     child_name = str(uuid.uuid4())

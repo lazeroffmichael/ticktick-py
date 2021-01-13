@@ -21,7 +21,8 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
     - Create tags with parameters that are not usually allowed: `\\ / " # : * ? < > | Space`
  - [Projects](usage/projects.md)
     - Batch create, update, and delete 'lists' (projects)
-    - Move all tasks in a list easily to another list.
+    - Move all tasks in a project easily to another project
+    - Get all the tasks in a project
  
  
 ##Installation
@@ -68,6 +69,7 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
  
  - [Tasks](usage/tasks.md)
      - Notification and Repeats For Tasks
+     - Get and Restore From Trash
  
  - [Projects](usage/projects.md)
     - Smart List Support

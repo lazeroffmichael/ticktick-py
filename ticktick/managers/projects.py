@@ -52,6 +52,10 @@ class ProjectManager:
         'permission': None,                         # Not sure! (bool)
         'kind': 'TASK'}                             # 'TASK' list or 'NOTE' list (str)
         ```
+
+        | Property               |  Description                                 | Example Value                           |       Type       |  Useful Values           |
+        | -----------            | --------------------                         | -----------                             | -----------      | -----------              |
+        |    `id`                |                                              |                                         |                  |                          |
     """
 
     def __init__(self, client_class):

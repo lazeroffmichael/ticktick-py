@@ -29,6 +29,86 @@ class TaskManager:
 
         ** All usage examples assume that `client` is the name referencing the [`TickTickClient`](api.md) instance**
 
+    ## Example `TickTick` Task Dictionary
+
+    See "Task Object Properties and Explanations" for a description table for the properties.
+
+    !!! info
+
+        ```python
+        {'id': '5ffe93f3b04b35082bbce7b0',
+        'projectId': '5ffe96c88f08237f3d16fa57',
+        'sortOrder': -1099511627776,
+        'title': 'Deposit Funds',
+        'content': '',
+        'desc': '',
+        'startDate': '2021-01-12T08:00:00.000+0000',
+        'dueDate': '2021-01-12T08:00:00.000+0000',
+        'timeZone': 'America/Los_Angeles',
+        'isFloating': False,
+        'isAllDay': True,
+        'reminders': [],
+        'exDate': [],
+        'priority': 1,
+        'status': 0,
+        'items': [{'id': '5ffe972eb04b35082bbce831',
+                   'status': 0,
+                   'title': 'Hellooo',
+                   'sortOrder': 0,
+                   'startDate': None,
+                   'isAllDay': False,
+                   'timeZone': 'America/Los_Angeles',
+                   'snoozeReminderTime': None,
+                   'completedTime': None}],
+        'progress': 0,
+        'modifiedTime': '2021-01-13T06:49:17.508+0000',
+        'etag': 'ji35exmv',
+        'deleted': 0,
+        'createdTime': '2021-01-13T06:32:19.000+0000',
+        'creator': 447666584,
+        'tags': ['friends', 'party'],
+        'pomodoroSummaries': [],
+        'columnId': '11b745ecab9f0799bf53eb70',
+        'childIds': ['5ffe97edb04b35082bbce832'],
+        'kind': 'CHECKLIST'
+         }
+        ```
+
+        ??? tip "Task Object Properties and Explanations"
+            It is possible that not all possible fields are present in the table.
+
+            |       Property      |                                 Description                                |                                                           Example Value                                                           |  Type  |             Useful Values            |
+            |:-------------------:|:--------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------:|:------:|:------------------------------------:|
+            |         `id`        |                             The ID of the task                             |                                                     '5ffe93f3b04b35082bbce7b0'                                                    |  `str` |                  N/A                 |
+            |     `projectId`     |                         The project ID for the task                        |                                                     '5ffe96c88f08237f3d16fa57'                                                    |  `str` |                  N/A                 |
+            |     `sortOrder`     |              A sort ID relative to other tasks in the Project              |                                                           -1099511627776                                                          |  `int` |  Lower sortOrder == Higher Position  |
+            | `title`             | The name of the task                                                       | 'Deposit Funds'                                                                                                                   | `str`  | N/A                                  |
+            | `content`           | Text that will go underneath the title of the object.                      | 'This is a description"                                                                                                           | `str`  |                  N/A                 |
+            | `desc`              | N/A                                                                        | ''                                                                                                                                | `str`  | N/A                                  |
+            | `startDate`         | The start date or time for the object.                                     | '2021-01-12T08:00:00.000+0000'                                                                                                    | `str`  | N/A                                  |
+            | `dueDate`           | The end date for the object.                                               | '2021-01-12T08:00:00.000+0000'                                                                                                    | `str`  | N/A                                  |
+            | `timeZone`          | Time zone for the object                                                   | 'America/Los_Angeles'                                                                                                             | `str`  | N/A                                  |
+            | `isFloating`        | If the object should keep the same time regardless of change in time zone. | False                                                                                                                             | `bool` | N/A                                  |
+            | `isAllDay`          | Specifies if the task has a specific time/duration.                        | True                                                                                                                              | `bool` | N/A                                  |
+            | `reminders`         | Reminders for the task                                                     | [{'id': '5ffe9ebcb04b35082bbce88f',  'trigger': 'TRIGGER:P0DT9H0M0S'}]                                                            | `list` | N/A                                  |
+            | `repeatFirstDate`   | First repeat date                                                          | '2021-01-12T08:00:00.000+0000'                                                                                                    | `str`  | N/A                                  |
+            | `exDate`            | N/A                                                                        | []                                                                                                                                | `list` | N/A                                  |
+            | `priority`          | Priority value                                                             | 1                                                                                                                                 | `int`  | 0 = None, 1 = Low, 3 = Med, 5 = High |
+            | `status`            | Whether the task is complete or not                                        | 0                                                                                                                                 | `int`  | 0 = Not Complete, 2 = Complete       |
+            | `items`             | If the task is a CHECKLIST - item dictionaries are stored in this list.    | []                                                                                                                                | `list` | N/A                                  |
+            | `progress`          | Progress amount.                                                           | 70                                                                                                                                | `int`  | 0-100                                |
+            | `modifiedTime`      | Time last modified.                                                        | '2021-01-13T07:18:21.000+0000'                                                                                                    | `str`  | N/A                                  |
+            | `deleted`           | If the task is deleted.                                                    | 0                                                                                                                                 | `int`  | N/A                                  |
+            | `createdTime`       | Creation time.                                                             | 2021-01-13T06:32:19.000+0000                                                                                                      | `str`  | N/A                                  |
+            | `etag`              | Etag identifier.                                                           | 'ji35exmv'                                                                                                                        | `str`  | N/A                                  |
+            | `creator`           | Creator identifier.                                                        | 447666584                                                                                                                         | `int`  | N/A                                  |
+            | `tags`              | Name of the tags in a list.                                                | ['friends', 'party']                                                                                                              | `list` | The tags will be lowercase.          |
+            | `pomodoroSummaries` | Pomodoro summary for the task.                                             | [{'userId': 447666584, 'count': 1, 'estimatedPomo': 0, 'duration': 25}]                                                           | `list` | N/A                                  |
+            | `focusSummaries`    | Focus summary for the task.                                                | [{'userId': 447666584, 'pomoCount': 1, 'estimatedPomo': 0, 'estimatedDuration': 0, 'pomoDuration': 1500, 'stopwatchDuration': 0}] | `list` | N/A                                  |
+            | `columnId`          | If in a project with kanban view, this identifies which section it is in.  | '11b745ecab9f0799bf53eb70'                                                                                                        | `str`  | N/A                                  |
+            | `childIds`          | The ID's of any subtasks.                                                  | ['5ffe97edb04b35082bbce832']                                                                                                      | `list` | N/A                                  |
+            | `kind`              | Determines if the task has a normal description, or item list description. | 'TEXT'                                                                                                                            | `str`  | 'TEXT' or 'CHECKLIST'                |
+
     """
 
     PRIORITY_DICTIONARY = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
@@ -514,15 +594,15 @@ class TaskManager:
             task = self._client.get_by_fields(id=ids, search='tasks')
             if not task:
                 raise ValueError('The Task Does Not Exist To Mark As Complete')
-            task[0]['status'] = 2  # Complete
+            task['status'] = 2  # Complete
             tasks = task
         else:
             for id in ids:
                 task = self._client.get_by_fields(id=id, search='tasks')
                 if not task:
                     raise ValueError(f"'Task Id '{id}' Does Not Exist'")
-                task[0]['status'] = 2  # Complete
-                tasks.append(task[0])
+                task['status'] = 2  # Complete
+                tasks.append(task)
 
         url = self._client.BASE_URL + 'batch/task'
         payload = {
@@ -539,15 +619,96 @@ class TaskManager:
             return tasks
 
     @logged_in
-    def delete(self, ids) -> str:
+    def delete(self, ids):
         """
-        Deletes the task with the passed id remotely if it exists.
+        Deletes task(s). Supports single task deletion, and batch task deletion.
 
         !!! tip
             If a parent task is deleted - the children will remain (unlike normal parent task deletion in `TickTick`)
 
-        :param ids: Id of the task to be deleted
-        :return: Id of the task deleted
+        Arguments:
+            ids (str or list):
+                **Single Task (str)**: ID string of the task to be deleted.
+
+                **Multiple Tasks (list)**: List of ID strings for the tasks to be deleted.
+
+        Returns:
+            dict or list:
+            **Single Task (dict)**: Dictionary object of the deleted task.
+
+            **Multiple Tasks (list)**: List of dictionary objects for the deleted tasks.
+
+        Raises:
+            TypeError: If `ids` is not a string or list.
+            ValueError: If `ids` does not exist.
+            RuntimeError: If the deletion was unsuccessful.
+
+        !!! example "Task Deletion"
+            === "Single Task Deletion"
+                Pass the ID of the string to be deleted.
+
+                ```python
+                # Lets assume that our task is named "Dentist" and it's in our inbox.
+                task = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
+                deleted_task = client.task.delete(task['id'])
+                ```
+
+                ??? success "Result"
+                    The deleted task object is returned.
+
+                    ```python
+                    {'id': '5ffead3cb04b35082bbced71', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
+                    'title': 'Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
+                    'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T08:20:12.000+0000',
+                    'etag': 'tijkifu0', 'deleted': 0, 'createdTime': '2021-01-13T08:20:12.000+0000',
+                    'creator': 73561212, 'tags': [], 'kind': 'TEXT'}
+                    ```
+
+                    **Before**
+
+                    ![image](https://user-images.githubusercontent.com/56806733/104425305-615c5200-5535-11eb-93fa-3184b5d679b7.png)
+
+                    **After**
+
+                    ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
+
+            === "Multiple Task Deletion"
+                Pass a list of ID strings for the tasks to be deleted.
+
+                ```python
+                # Lets assume we have two tasks we want to delete from our inbox - "Dentist" and "Read"
+                dentist = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
+                read = client.get_by_fields(title="Read", projectId=client.inbox_id, search='tasks')
+                id_list = [dentist['id'], read['id']]
+                deleted_task = client.task.delete(id_list)
+                ```
+
+                ??? success "Result"
+                    A list of the deleted tasks is returned.
+
+                    ```python
+                    [{'id': '5ffeae528f081003f32cb661', 'projectId': 'inbox115781412', 'sortOrder': -1099511627776,
+                    'title': 'Dentist', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
+                    'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+                    'modifiedTime': '2021-01-13T08:24:50.334+0000', 'etag': 'fwsrqx4j', 'deleted': 0,
+                    'createdTime': '2021-01-13T08:24:50.340+0000', 'creator': 115781412, 'kind': 'TEXT'},
+
+                    {'id': '5ffeae528f081003f32cb664', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
+                    'title': 'Read', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
+                    'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+                    'modifiedTime': '2021-01-13T08:24:50.603+0000', 'etag': '1sje21ao', 'deleted': 0,
+                    'createdTime': '2021-01-13T08:24:50.609+0000', 'creator': 115781412, 'kind': 'TEXT'}]
+                    ```
+                    **Before**
+
+                    ![image](https://user-images.githubusercontent.com/56806733/104425633-c4e67f80-5535-11eb-9735-bea3db63e0ab.png)
+
+                    **After**
+
+                    ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
+
         """
         if not isinstance(ids, str) and not isinstance(ids, list):
             raise TypeError('Ids Must Be A String or List Of Strings')
@@ -584,7 +745,7 @@ class TaskManager:
         pass
 
     @logged_in
-    def move_projects(self, old: str, new: str) -> dict:  # TODO Finish Documentation
+    def move_projects(self, old: str, new: str) -> list:
         """
         Moves all the tasks from the old project to the new project.
 
@@ -597,12 +758,43 @@ class TaskManager:
 
         Raises:
             ValueError: If either the old or new projects do not exist.
+            RuntimeError: if the movement was unsuccessful.
 
         !!! example
             Lets assume that we have a project named "School", and another project named "Work". To move all the tasks from "School" to "Work":
 
             ```python
-            school_project = client.
+            # Get the projects
+            school_project = client.get_by_fields(name='School', search='projects')
+            work_project = client.get_by_fields(name='Work', search='projects')
+            # Call the method
+            moved_tasks = client.task.move_projects(school_project['id'], work_project['id'])
+            ```
+
+            ??? success "Result"
+                The tasks that were moved are returned.
+
+                ```python
+                [{'id': '5ffea9afe4b062d60dd62aef', 'projectId': '5ffea9afe4b062d60dd62aea', 'sortOrder': 0,
+                'title': 'Finish documentation for project', 'content': '', 'timeZone': 'America/Los_Angeles',
+                'isFloating': False, 'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+                'modifiedTime': '2021-01-13T08:06:31.407+0000', 'etag': 'ogclghmd', 'deleted': 0,
+                'createdTime': '2021-01-13T08:05:03.901+0000', 'creator': 447666584, 'kind': 'TEXT'},
+
+                {'id': '5ffea9b0e4b062d60dd62af4', 'projectId': '5ffea9afe4b062d60dd62aea', 'sortOrder': 0,
+                'title': 'Call the boss man', 'content': '', 'timeZone': 'America/Los_Angeles',
+                'isFloating': False, 'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+                'modifiedTime': '2021-01-13T08:06:31.409+0000', 'etag': '65c73q8i', 'deleted': 0,
+                'createdTime': '2021-01-13T08:05:04.117+0000', 'creator': 447666584, 'kind': 'TEXT'}]
+                ```
+
+                **Before**: Two tasks are contained in the "School" project
+
+                ![image](https://user-images.githubusercontent.com/56806733/104423574-1e997a80-5533-11eb-9417-34c31e603d21.png)
+
+                **After**: The two tasks are moved to the 'Work' project
+
+                ![image](https://user-images.githubusercontent.com/56806733/104423710-4a1c6500-5533-11eb-90f3-2c3d024280af.png)
         """
         # Make sure that old and new id's exist
         if old != self._client.inbox_id:
@@ -638,20 +830,53 @@ class TaskManager:
         return self._client.task.get_from_project(new)
 
     @logged_in
-    def get_from_project(self, project: str) -> list:
+    def get_from_project(self, project: str):
         """
         Obtains the tasks that are contained in the project.
 
         Arguments:
-            project: Id of the project to get the tasks from.
+            project: ID string of the project to get the tasks from.
 
         Returns:
-            A list of task objects from the project.
+            dict or list:
+            **Single Task In Project (dict)**: The single task object dictionary.
+
+            **Multiple Tasks In Project (list)**: A list of task object dictionaries.
+
+            **No Tasks Found (list)**: Empty list.
 
         Raises:
-            ValueError: If the project id does not exist.
+            ValueError: If the project ID does not exist.
+
+        !!! example "Getting Uncompleted Tasks From The Inbox"
+            ```python
+            tasks = client.task.get_from_project(client.inbox_id)
+            ```
+
+            ??? success "Result"
+                See `Returns` for the different return values based on the amount of tasks present
+                in the project.
+
+                ```python
+                [{'id': '5ffe93efb04b35082bbce7af', 'projectId': 'inbox115781412', 'sortOrder': 2199023255552, 'title': 'Go To Library',
+                'content': '', 'startDate': '2021-01-12T08:00:00.000+0000', 'dueDate': '2021-01-12T08:00:00.000+0000',
+                'timeZone': 'America/Los_Angeles', 'isFloating': False, 'isAllDay': True,
+                'reminders': [], 'exDate': [], 'priority': 0, 'status': 0, 'items': [], 'progress': 0,
+                'modifiedTime': '2021-01-13T06:32:15.000+0000', 'etag': 'kkh0w1jk', 'deleted': 0,
+                'createdTime': '2021-01-13T06:32:15.000+0000', 'creator': 447666584, 'tags': [],
+                'kind': 'TEXT'},
+
+                {'id': '5ffe93f3b04b35082bbce7b0', 'projectId': 'inbox115781412', 'sortOrder': 1099511627776, 'title': 'Deposit Funds',
+                'content': '', 'startDate': '2021-01-12T08:00:00.000+0000', 'dueDate': '2021-01-12T08:00:00.000+0000',
+                'timeZone': 'America/Los_Angeles', 'isFloating': False, 'isAllDay': True,
+                'reminders': [], 'exDate': [], 'priority': 0, 'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T06:32:19.000+0000',
+                'etag': 'w4hj21wf', 'deleted': 0, 'createdTime': '2021-01-13T06:32:19.000+0000', 'creator': 447666584, 'tags': [],
+                'kind': 'TEXT'}]
+                ```
+
+                ![image](https://user-images.githubusercontent.com/56806733/104415494-f86ddd80-5526-11eb-8b84-75bf3886ba46.png)
         """
-        # Make sure that old and new id's exist
+        # Make sure the project exists
         if project != self._client.inbox_id:
             obj = self._client.get_by_fields(id=project, search='projects')
             if not obj:

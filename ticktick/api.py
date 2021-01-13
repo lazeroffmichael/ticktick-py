@@ -83,10 +83,7 @@ class TickTickClient:
             | ----------- | -------------------|
             | `task`      |       Task Methods |
             | `tag`       |       Tag Methods |
-            | `project`      |       List Methods |
-            | `habit`     |      Habit Methods |
-            | `pomo`      |       Pomo Methods |
-            | `focus`     |      Focus Methods |
+            | `project`   |       List Methods |
 
         === "Example Usage"
 
@@ -105,8 +102,8 @@ class TickTickClient:
 
             | Member   |     Type   |Description                          |
             | ----------- | --------|---------------------------- |
-            | `profile_id`| `str`         | Id assigned to your profile |
-            | `inbox_id`  | `str`         | Id assigned to your profile|
+            | `profile_id`| `str`         | ID assigned to your profile |
+            | `inbox_id`  | `str`         | Inbox ID assigned to your profile|
             | `time_zone` | `str`         | Timezone string linked to your TickTick profile |
             | `state` |      `dict`       | Holds all the item objects in your profile (described above)|
 
@@ -137,7 +134,7 @@ class TickTickClient:
     That's all the required information for how to get started with the API! To see how to use individual features, check these out next:
 
     - [Tasks](tasks.md)
-    - [Projects][managers.lists.ListManager]
+    - [Projects][managers.projects.ProjectManager]
     - [Tags][managers.tags.TagsManager]
     ---
 
