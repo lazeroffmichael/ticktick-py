@@ -336,8 +336,34 @@ def test_update_list_folder(client):
     """Tests that updating list folder properties works"""
     parent = client.project.create_folder(str(uuid.uuid4()))
     parent['name'] = 'Changed Name'
-    updated = client.project.update_folder(parent['id'])
+    updated = client.project.update_folder(parent)
     updated_obj = client.get_by_id(updated['id'])
     assert updated_obj['name'] == 'Changed Name'
     client.project.delete_folder(updated['id'])
+
+
+def test_update_list_folder_multiple(client):
+    p1 = str(uuid.uuid4())
+    p2 = str(uuid.uuid4())
+    p3 = str(uuid.uuid4())
+    p = [p1, p2, p3]
+    folders = client.project.create_folder(p)
+    folders[0]['name'] = 'Folder 1'
+    folders[1]['name'] = 'Folder 2'
+    folders[2]['name'] = 'Folder 3'
+    updated = client.project.update_folder(folders)
+    ids = [x['id'] for x in updated]
+    assert updated[0]['name'] == 'Folder 1'
+    assert updated[1]['name'] == 'Folder 2'
+    assert updated[2]['name'] == 'Folder 3'
+    client.project.delete_folder(ids)
+
+
+def test_update_folders_fail(client):
+    with pytest.raises(TypeError):
+        client.project.update_folder('')
+    with pytest.raises(TypeError):
+        client.project.update_folder(34324)
+
+
 

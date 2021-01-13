@@ -16,17 +16,13 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
     - Batch create, update, and delete tasks.
     - Acquire all your uncompleted tasks.
     - Acquire all completed tasks in a certain date range
- - Tag Functionality
+ - [Tags](usage/tags.md)
     - Batch create, update, and delete tags.
     - Create tags with parameters that are not usually allowed: `\\ / " # : * ? < > | Space`
- - List Functionality
+ - [Projects](usage/projects.md)
     - Batch create, update, and delete 'lists' (projects)
     - Move all tasks in a list easily to another list.
- - Pomo and Focus Timer Functionality
-    - Get the Pomo and focus statistics for your account.
-    - Start the Pomo and focus timers.
- - Habits
-    - 
+ 
  
 ##Installation
 
@@ -66,7 +62,20 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
 ###Full Usage Guide [Here](usage/api.md)
 
 ##Future Plans
- - Smart List Support
- - Enhanced Team Support
- - Notification and Repeats For Tasks
- - Local cache with explicit commit feature for pushing changes to the TickTick servers
+ - General
+    - Enhanced Team Support
+    - Local cache with explicit commit feature for pushing changes to the TickTick servers
+ 
+ - [Tasks](usage/tasks.md)
+     - Notification and Repeats For Tasks
+ 
+ - [Projects](usage/projects.md)
+    - Smart List Support
+    - Column Creation For Kanban View
+    
+ - Pomo and Focus
+    - Getting the focus / pomo statistics for your profile
+    - Starting and stopping the focus / pomo timer
+    
+ - Habits
+    - Get, create, archive, delete, and complete habits

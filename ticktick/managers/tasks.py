@@ -13,7 +13,7 @@ from calendar import monthrange
 class TaskManager:
     """
     !!! info
-        Task methods are accessed through the `task` public member of your [`TickTickClient`](api.md) instance.
+        Task methods are accessed through the `task` [public member](/usage/api/#functionality) of your [`TickTickClient`](api.md) instance.
 
         ```python
         # Assumes that 'client' is the name that references the TickTickClient instance.
@@ -234,7 +234,7 @@ class TaskManager:
 
                 To create the task for a different time zone pass in a time zone string.
 
-                [Time Zone Help](timezones.md)
+                [Time Zone Help](/usage/helpers/#time-zones)
 
                 ```python
                 start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM

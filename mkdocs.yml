@@ -11,7 +11,7 @@ nav:
       - Tasks: usage/tasks.md
       - Projects: usage/projects.md
       - Tags: usage/tags.md
-      - Time Zones: usage/timezones.md
+      - Helpers: usage/helpers.md
 
 theme:
   name: "material"
