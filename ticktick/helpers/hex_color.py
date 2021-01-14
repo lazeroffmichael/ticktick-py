@@ -15,7 +15,7 @@ def generate_hex_color() -> str:
     Returns:
         '#' followed by 6 hexadecimal digits.
 
-    !!! info "Import Help"
+    ??? info "Import Help"
         ```python
         from ticktick.helpers.hex_color import generate_hex_color
         ```
@@ -35,7 +35,7 @@ def check_hex_color(color: str) -> bool:
     Returns:
         True if the string is a valid hex code, else False.
 
-    !!! info "Import Help"
+    ??? info "Import Help"
         ```python
         from ticktick.helpers.hex_color import check_hex_color
         ```

@@ -28,34 +28,86 @@ class ProjectManager:
     ## Example `TickTick` `Project` Dictionary
 
     !!! info "Members"
-        This is a showcase of the fields present in a project dictionary object from `TickTick`. Since all
-        the information is not explicitly given, some of the methods and what they do are unknown.
+        ??? summary "Descriptions"
+            It is possible that not all possible fields are present in the table.
+
+            |        Property       |                         Description                         |          Example Value         |  Type  |                     Useful Values                    |
+            |:---------------------:|:-----------------------------------------------------------:|:------------------------------:|:------:|:----------------------------------------------------:|
+            |          `id`         |                    The ID of the project                    |   '5ffe93f3b04b35082bbce7b0'   |  `str` |                          N/A                         |
+            |         `name`        |                   The name of the project                   |            'Hobbies'           |  `str` |                          N/A                         |
+            |       `isOwner`       |       Whether you are the owner of the project or not.      |              True              | `bool` |                          N/A                         |
+            |        `color`        |             The hex color code for the project.             |            '#6fcbdf'           |  `str` |                          N/A                         |
+            |        `inAll`        |                             N/A                             |              True              | `bool` |                          N/A                         |
+            |      `sortOrder`      |       A sort ID relative to other tasks in the project      |         -1099511627776         |  `int` |          Lower sortOrder == Higher Position          |
+            |       `sortType`      |                   Sort type of the project                  |            `dueDate`           |  `str` |  `dueDate`, `sortOrder`, `title`, `tag`, `priority`  |
+            |      `userCount`      |          How many users have access to the project.         |                1               |  `int` |                          N/A                         |
+            |         `etag`        |                       Etag identifier.                      |           'ji35exmv'           |  `str` |                          N/A                         |
+            |     `modifiedTime`    |                     Time last modified.                     | '2021-01-13T07:18:21.000+0000' |  `str` |                          N/A                         |
+            |        `closed`       |                       Archive status.                       |              False             | `bool` | `none` and `False` = Not Archived, `True` = Archived |
+            |        `muted`        |      Whether the project is 'hidden' (no notifications)     |              False             | `bool` |                          N/A                         |
+            |     `transferred`     |    Possibly if the ownership of the project has changed.    |              None              | `bool` |                          N/A                         |
+            |       `groupId`       |            ID of the project folder if it exists.           |   '5ffe11b7b04b356ce74d49da'   |  `str` |                          N/A                         |
+            |       `viewMode`      |                  View mode of the project.                  |            'kanban'            |  `str` |                  `kanban` or `list`                  |
+            | `notificationOptions` |                             N/A                             |              None              |   N/A  |                          N/A                         |
+            |        `teamId`       |                       ID of your team.                      |            342537403           |  `int` |                          N/A                         |
+            |      `permission`     |                             N/A                             |              None              |   N/A  |                          N/A                         |
+            |         `kind`        | If the project is a normal `TASK` project or `NOTE` project |             'TASK'             |  `str` |                   'TASK' or 'NOTE'                   |
 
         ```python
-        {'id': '5ffe24a18f081003f3294c44',          # ID of the project (str)
-        'name': 'Reading',                          # Name of the project (str)
-        'isOwner': True,                            # Whether you are the owner or not (bool)
-        'color': '#6fcbdf',                         # Color (str)
-        'inAll': True,                              # Not sure! (bool)
-        'sortOrder': 0,                             # Specifies the order in comparison to your other projects (int)
-        'sortType': None,                           # Sort type of the project (str)
-        'userCount': 1,                             # Count of the users who have access to the list (int)
-        'etag': 'qbj4z0gl',                         # Etag identifier (str)
-        'modifiedTime': '2021-01-12T22:37:21.823+0000', # Time Modified (str)
-        'closed': None,                             # Whether the project is archived (see archived method)
-        'muted': False,                             # Whether the project is 'hidden' (no notifications)
-        'transferred': None,                        # Not sure!
-        'groupId': '5ffe11b7b04b356ce74d49da',      # The folder id of the parent folder (str)
-        'viewMode': None,                           # 'kanban' or 'list' (str)
-        'notificationOptions': None,                # Not sure!
-        'teamId': None,                             # Team ID (int)
-        'permission': None,                         # Not sure! (bool)
-        'kind': 'TASK'}                             # 'TASK' list or 'NOTE' list (str)
+        {'id': '5ffe24a18f081003f3294c44',
+        'name': 'Reading',
+        'isOwner': True,
+        'color': '#6fcbdf',
+        'inAll': True,
+        'sortOrder': 0,
+        'sortType': None,
+        'userCount': 1,
+        'etag': 'qbj4z0gl',
+        'modifiedTime': '2021-01-12T22:37:21.823+0000',
+        'closed': None,
+        'muted': False,
+        'transferred': None,
+        'groupId': '5ffe11b7b04b356ce74d49da',
+        'viewMode': None,
+        'notificationOptions': None,
+        'teamId': None,
+        'permission': None,
+        'kind': 'TASK'}
         ```
 
-        | Property               |  Description                                 | Example Value                           |       Type       |  Useful Values           |
-        | -----------            | --------------------                         | -----------                             | -----------      | -----------              |
-        |    `id`                |                                              |                                         |                  |                          |
+    ## Example `TickTick` `Project` `Folder` `(group)` Dictionary
+
+    !!! info "Members"
+        ??? summary "Descriptions"
+            It is possible that not all possible fields are present in the table.
+
+            |   Property  |                    Description                   |        Example Value       |  Type  |                   Useful Values                   |
+            |:-----------:|:------------------------------------------------:|:--------------------------:|:------:|:-------------------------------------------------:|
+            |     `id`    |           The ID of the project folder           | '5ffe93f3b04b35082bbce7b0' |  `str` |                        N/A                        |
+            |    `etag`   |                 Etag identifier.                 |         'ji35exmv'         |  `str` |                        N/A                        |
+            |    `name`   |          The name of the project folder          |          'Hobbies'         |  `str` |                        N/A                        |
+            |  `showAll`  |                        N/A                       |            True            | `bool` |                        N/A                        |
+            | `sortOrder` | A sort ID relative to other tasks in the project |       -1099511627776       |  `int` |         Lower sortOrder == Higher Position        |
+            |  `deleted`  |   Whether the project folder is deleted or not.  |              0             |  `int` |                        N/A                        |
+            |   `userId`  |              User ID of the creator              |          586938759         |  `int` |                        N/A                        |
+            |  `sortType` |             Sort type of the project folder      |          `dueDate`         |  `str` | `dueDate`, `project`, `title`, `tag`, `priority`  |
+            |   `teamId`  |                 ID of your team.                 |          342537403         |  `int` |                        N/A                        |
+
+
+        ```python
+        {'id': '600008f2b04b355792c7a42d',
+        'etag': 'yeozz5v8',
+        'name': 'Test',
+        'showAll': True,
+        'sortOrder': -6786182545408,
+        'deleted': 0,
+        'userId': 586934829,
+        'sortType': 'project',
+        'teamId': None}
+        ```
+
+
+
     """
 
     def __init__(self, client_class):
@@ -454,7 +506,7 @@ class ProjectManager:
 
         !!! warning
             [Tasks](tasks.md) will be deleted from the project. If you want to preserve the
-            tasks before deletion, use [move_projects][managers.tasks.TaskManager.move_projects]
+            tasks before deletion, use [move_all][managers.tasks.TaskManager.move_all]
 
         Arguments:
             ids (str or list):
@@ -535,6 +587,8 @@ class ProjectManager:
     def archive(self, ids):
         """
         Moves the project(s) to a project folder created by `TickTick` called "Archived Lists"
+
+        To unarchive a project, change its `'closed'` field to `True`, then [update][managers.projects.ProjectManager.update]
 
         Arguments:
             ids (str or list):

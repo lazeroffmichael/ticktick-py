@@ -6,8 +6,10 @@
     
     Acceptable Time Zone names are found under the 'TZ database name' column.
 
+## `time_methods`
 
+::: helpers.time_methods
 
-## hex_color
+## `hex_color`
 
 ::: helpers.hex_color

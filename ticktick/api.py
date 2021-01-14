@@ -91,7 +91,7 @@ class TickTickClient:
             # Assumes that 'client' is the name that references the TickTickClient instance.
 
             created_task = client.task.create('My Created Task')
-            deleted_project = client.list.delete(list_id)
+            deleted_project = client.project.delete(project_id)
             ```
 
             Make sure to check the individual documentation for the different method managers.
@@ -432,7 +432,7 @@ class TickTickClient:
         If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
 
         !!! example
-            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
             comparing any fields contained in those objects.
 
             For example: Lets say we have 3 task objects that are titled 'Hello', and we want to obtain all of them.
@@ -528,7 +528,7 @@ class TickTickClient:
 
 
         !!! example
-            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
             comparing the id fields.
 
             For example: Lets get the object that corresponds to an id referenced by `my_id`.
@@ -548,10 +548,10 @@ class TickTickClient:
             ```python
             # Assumes that `client` is the name referencing the TickTickClient instance.
 
-            found_obj = client.get_by_id(my_id, search='lists')
+            found_obj = client.get_by_id(my_id, search='projects')
             ```
 
-            The search will now only look through `lists` in [`state`](#state).
+            The search will now only look through `projects` in [`state`](#state).
 
         Arguments:
             obj_id: Id of the item.
@@ -590,7 +590,7 @@ class TickTickClient:
         If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
 
         !!! example
-            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
             comparing the etag fields.
 
             For example: Lets get the object that corresponds to an etag referenced by `my_etag`.
@@ -610,10 +610,10 @@ class TickTickClient:
             ```python
             # Assumes that `client` is the name referencing the TickTickClient instance.
 
-            found_obj = client.get_by_etag(my_etag, search='lists')
+            found_obj = client.get_by_etag(my_etag, search='projects')
             ```
 
-            The search will now only look through `lists` in [`state`](#state).
+            The search will now only look through `projects` in [`state`](#state).
 
         Arguments:
             etag: The etag of the object that you are looking for.

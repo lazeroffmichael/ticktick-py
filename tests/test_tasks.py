@@ -4,7 +4,7 @@ Testing module for task functionality
 import pytest
 import uuid
 import datetime
-from ticktick.helpers.time_methods import convert_iso_to_tick_tick_format
+from ticktick.helpers.time_methods import convert_date_to_tick_tick_format
 
 
 def test_time_checks_start_after_end(client):
@@ -26,16 +26,16 @@ def test_time_checks_proper_parse_start(client):
     """Tests proper parsing of date with only start_date"""
     start = datetime.datetime(2022, 1, 5)
     dates = client.task._time_checks(start)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['isAllDay']
 
 
 def test_time_checks_proper_parse_end(client):
     end = datetime.datetime(2022, 1, 5)
     dates = client.task._time_checks(end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert dates['isAllDay']
 
 
@@ -43,16 +43,16 @@ def test_time_checks_proper_parse_start_not_all_day(client):
     """Tests proper date parse of not all day"""
     start = datetime.datetime(2022, 1, 5, 14, 56, 34)
     dates = client.task._time_checks(start)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert not dates['isAllDay']
 
 
 def test_time_checks_proper_parse_end_not_all_day(client):
     end = datetime.datetime(2022, 1, 5, 16, 56, 45)
     dates = client.task._time_checks(end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert not dates['isAllDay']
 
 
@@ -61,8 +61,8 @@ def test_time_all_day_range(client):
     end = datetime.datetime(2022, 1, 8)
     expected = datetime.datetime(2022, 1, 9)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']
 
 
@@ -71,8 +71,8 @@ def test_time_all_day_range_end_of_month(client):
     end = datetime.datetime(2022, 1, 31)
     expected = datetime.datetime(2022, 2, 1)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']
 
 
@@ -81,8 +81,8 @@ def test_time_all_day_range_end_of_year(client):
     end = datetime.datetime(2022, 12, 31)
     expected = datetime.datetime(2023, 1, 1)
     dates = client.task._time_checks(start, end)
-    assert dates['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']
 
 
@@ -151,8 +151,8 @@ def test_task_fields_proper_return(client):
     assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert items['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert items['isAllDay']
 
 
@@ -177,8 +177,8 @@ def test_builder(client):
     assert items['projectId'] == list_id
     assert items['tags'] == tags
     assert items['content'] == content
-    assert items['startDate'] == convert_iso_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_iso_to_tick_tick_format(expected, tz=client.time_zone)
+    assert items['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
+    assert items['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert items['isAllDay']
 
 
@@ -629,7 +629,7 @@ def test_move_list_pass(client):
     task1 = client.task.create(str(uuid.uuid4()), project=list2['id'])
     task2 = client.task.create(str(uuid.uuid4()), project=list2['id'])
     # Move the tasks: list2 -> list1
-    move = client.task.move_projects(list2['id'], list1['id'])
+    move = client.task.move_all(list2['id'], list1['id'])
     for ids in move:
         assert ids['id'] == task1['id'] or ids['id'] == task2['id']
     list2_tasks = client.task.get_from_project(list2['id'])
@@ -646,14 +646,14 @@ def test_move_from_inbox(client):
     """Tests moving the items from the inbox to another list and back"""
     task = client.task.create(str(uuid.uuid4()))
     list_ = client.project.create(str(uuid.uuid4()))
-    move = client.task.move_projects(client.inbox_id, list_['id'])
+    move = client.task.move_all(client.inbox_id, list_['id'])
     inbox_tasks = client.task.get_from_project(client.inbox_id)
     assert not inbox_tasks  # Assert that nothing in inbox
     list_tasks = client.task.get_from_project(list_['id'])
     for task in list_tasks:
         assert task['projectId'] == list_['id']
     # Move back
-    move_back = client.task.move_projects(list_['id'], client.inbox_id)
+    move_back = client.task.move_all(list_['id'], client.inbox_id)
     list_tasks = client.task.get_from_project(list_['id'])
     assert not list_tasks  # Make sure that nothing in new list
     inbox_tasks = client.task.get_from_project(client.inbox_id)
@@ -809,16 +809,19 @@ def test_delete_multiple_success(client):
 
 def test_create_subtask_single(client):
     # Create the parent task
-    parent = client.task.create('Parent Task')
-    task = client.task.builder('Child Task')
+    parent = client.task.builder('Parent Task')
+    child = client.task.builder('Child Task')
+    tasks = client.task.create([parent, child])
     try:
-        subtask = client.task.create_subtask(task, parent['id'])
+        subtask = client.task.make_subtask(tasks[1], tasks[0]['id'])
     except:
-        client.task.delete(parent['id'])
+        client.task.delete([tasks[0]['id'], tasks[1]['id']])
         assert False
     else:
-        client.task.delete([parent['id'], subtask['id']])
-        assert subtask['parentId'] == parent['id']
+        client.task.delete(tasks[0]['id'])
+        assert client.get_by_id(tasks[1]['id'])  # Make sure child task was not deleted.
+        client.task.delete(tasks[1]['id'])
+        assert subtask['parentId'] == tasks[0]['id']
 
 
 def test_create_subtask_multiple(client):
@@ -827,10 +830,12 @@ def test_create_subtask_multiple(client):
     task2 = client.task.builder('Child Task 2')
     task3 = client.task.builder('Child Task 3')
     tasks = [task1, task2, task3]
+    tasks = client.task.create(tasks)
     try:
-        subtask = client.task.create_subtask(tasks, parent=parent['id'])
+        subtask = client.task.make_subtask(tasks, parent=parent['id'])
     except:
-        client.task.delete(parent['id'])
+        client.task.delete(parent['id'])  # Delete parent
+        client.task.delete([x['id'] for x in tasks])  # Delete children
         assert False
     else:
         ids = [x['id'] for x in subtask]
@@ -844,11 +849,91 @@ def test_create_subtask_multiple(client):
 def test_create_subtask_type_errors(client):
     objs = ''
     with pytest.raises(TypeError):
-        client.task.create_subtask(objs, parent='')
+        client.task.make_subtask(objs, parent='')
     with pytest.raises(TypeError):
-        client.task.create_subtask({}, parent=3)
+        client.task.make_subtask({}, parent=3)
     with pytest.raises(ValueError):
-        client.task.create_subtask({}, parent='Yeah this not right')
+        client.task.make_subtask({}, parent='Yeah this not right')
+
+
+def test_create_child_subtask_different_project(client):
+    """Tests that an error is raised if the task doesn't exist in the same project as the parent"""
+    parent = client.task.create('Parent Task')  # In inbox
+    new_proj = client.project.create(str(uuid.uuid4()))  # New project
+    task = client.task.builder('Child Task', project=new_proj['id'])  # Create task in the new project
+    task = client.task.create([task])  # Create the task
+    with pytest.raises(ValueError):
+        subtask = client.task.make_subtask(task, parent['id'])  # Make the task a subtask of parent
+    client.task.delete([parent['id'], task['id']])
+    client.project.delete(new_proj['id'])
+
+
+def test_move_projects_single_type_errors(client):
+    """Tests type erorrs for move_projects"""
+    with pytest.raises(TypeError):
+        client.task.move('', '')
+    with pytest.raises(TypeError):
+        client.task.move(123, '')
+    with pytest.raises(TypeError):
+        client.task.move({}, 342)
+
+
+def test_move_projects_success(client):
+    """Tests moving a single task to a new project"""
+    p1 = client.project.builder(str(uuid.uuid4()))
+    p2 = client.project.builder(str(uuid.uuid4()))
+    p = client.project.create([p1, p2])  # Create the projects
+    # Create a tasks in the first project
+    task2 = client.task.builder('Task2', project=p[0]['id'])
+    task1 = client.task.builder('Task1', project=p[0]['id'])
+    tasks = client.task.create([task1, task2])  # Create the tasks
+    # Move task1 to p2
+    move1 = client.task.move(tasks[0], p[1]['id'])
+    # Check that project id for move1 is changed
+    assert move1['projectId'] == p[1]['id']
+    # Check that task2 still exists in p1
+    p1_tasks = client.task.get_from_project(p[0]['id'])
+    assert p1_tasks[0] == tasks[1]
+    # Check that task1 has moved
+    assert client.task.get_from_project(p[1]['id']) == [move1]
+    # Delete the objects
+    client.project.delete([p[0]['id'], p[1]['id']])  # Tasks are deleted as well.
+
+
+def test_move_projects_success_multiple(client):
+    p0 = client.project.builder(str(uuid.uuid4()))
+    p1 = client.project.builder(str(uuid.uuid4()))
+    p = client.project.create([p0, p1])  # Create the projects
+    task1 = client.task.builder('Task1', project=p[0]['id'])
+    task2 = client.task.builder('Task2', project=p[0]['id'])
+    task3 = client.task.builder('Task3', project=p[0]['id'])
+    tasks = client.task.create([task1, task2, task3])  # Create the tasks in the first project
+    # Move task1 and task2 to p1
+    move = [tasks[0], tasks[1]]
+    moved = client.task.move(move, p[1]['id'])  # Move to p1
+    # Make sure task3 still is in p0
+    assert client.task.get_from_project(p[0]['id']) == [tasks[2]]
+    # Make sure task1 and task2 are in p1
+    assert moved[0]['projectId'] == p[1]['id'] and moved[1]['projectId'] == p[1]['id']
+    p1_tasks = client.task.get_from_project(p[1]['id'])
+    assert moved[0] in p1_tasks and moved[1] in p1_tasks
+    client.project.delete([p[0]['id'], p[1]['id']])
+
+
+def test_move_projects_fail_when_task_projects_differ(client):
+    p0 = client.project.builder(str(uuid.uuid4()))
+    p1 = client.project.builder(str(uuid.uuid4()))
+    p = client.project.create([p0, p1])  # Create the projects
+    task1 = client.task.builder('Task1', project=p[0]['id'])
+    task2 = client.task.builder('Task2', project=p[1]['id'])
+    tasks = client.task.create([task1, task2])
+    with pytest.raises(ValueError):
+        client.task.move([tasks[0], tasks[1]], client.inbox_id)
+    client.project.delete([p[0]['id'], p[1]['id']])
+
+
+
+
 
 
 

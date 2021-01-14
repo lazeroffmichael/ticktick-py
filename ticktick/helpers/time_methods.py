@@ -1,18 +1,41 @@
+"""
+Useful time conversion methods.
+"""
+
 import pytz
 
 from ticktick.helpers.constants import DATE_FORMAT
 import datetime
 
 
-def convert_local_time_to_utc(original_time: datetime, time_zone: str):
+def convert_local_time_to_utc(original_time, time_zone: str):
     """
-    Converts the passed datetime from the time_zone specified into UTC time.
+    Converts the datetime object to UTC time. Utilizes the time_zone string for proper conversion.
 
-    Timezones can be found in timezones.txt
+    Arguments:
+        original_time (datetime): Datetime object
+        time_zone: Time zone of `original_time`
 
-    :param original_time: datetime string in the time zone passed
-    :param time_zone: string of the timezone from the pytz list of timezones
-    :return: datetime object containing the converted UTC time with no timezone information attached
+    Returns:
+        datetime: Datetime object with the converted UTC time - with no timezone information attached.
+
+    ??? info "Import Help"
+        ```python
+        from ticktick.helpers.time_methods import convert_local_time_to_utc
+        ```
+
+    ??? Example
+        ```python
+        pst = datetime(2020, 12, 11, 23, 59)
+        converted = convert_local_time_to_utc(pst, 'US/Pacific')
+        ```
+
+        ??? success "Result"
+            A datetime object that is the UTC equivalent of the original date.
+
+            ```python
+            datetime(2020, 12, 12, 7, 59)
+            ```
     """
 
     utc = pytz.utc
@@ -23,14 +46,42 @@ def convert_local_time_to_utc(original_time: datetime, time_zone: str):
     return time_zone_dt.astimezone(utc).replace(tzinfo=None)
 
 
-def convert_iso_to_tick_tick_format(date: datetime, tz: str):
+def convert_date_to_tick_tick_format(date, tz: str):
     """
-    Parses ISO 8601 Format to Tick Tick Format
-    ISO 8601 Format Example: 2020-12-23T01:56:07+00:00
-    TickTick Required Format: 2020-12-23T01:56:07+0000 -> Where the last colon is removed for timezone
-    :param date: Datetime object to be parsed
-    :param tz: Timezone
-    :return: Parsed time string
+    Parses ISO 8601 Format to Tick Tick Date Format
+
+    It first converts the datetime object to UTC time based off the passed time zone, and then
+    returns a string with the TickTick required date format.
+
+    !!! info Required Format
+        ISO 8601 Format Example: 2020-12-23T01:56:07+00:00
+
+        TickTick Required Format: 2020-12-23T01:56:07+0000 -> Where the last colon is removed for timezone
+
+    Arguments:
+        date (datetime): Datetime object to be parsed.
+        tz: Time zone string.
+
+    Returns:
+        str: The TickTick accepted date string.
+
+    ??? info "Import Help"
+        ```python
+        from ticktick.helpers.time_methods import convert_iso_to_tick_tick_format
+        ```
+
+    ??? example
+        ```python
+        date = datetime(2022, 12, 31, 14, 30, 45)
+        converted_date = convert_iso_to_tick_tick_format(date, 'US/Pacific')
+        ```
+
+        ??? success "Result"
+            The proper format for a date string to be used with TickTick dates.
+
+            ```python
+            '2022-12-31T22:30:45+0000'
+            ```
     """
     date = convert_local_time_to_utc(date, tz)
     date = date.replace(tzinfo=datetime.timezone.utc).isoformat()

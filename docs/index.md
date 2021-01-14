@@ -6,7 +6,7 @@
 TickTick-py is an unofficial API library for interacting with the popular
 'to do list' app [TickTick](<https://www.ticktick.com/>). It allows
 users a way to interact with their [TickTick](<https://www.ticktick.com/>) account using python. Currently,
-as of **1/2/2021**, there is no official API for [TickTick](<https://www.ticktick.com/>).
+as of **1/14/2021**, there is no official API for [TickTick](<https://www.ticktick.com/>).
 
 
 ##Features
@@ -15,14 +15,15 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
  - [Tasks](usage/tasks.md)
     - Batch create, update, and delete tasks.
     - Acquire all your uncompleted tasks.
+    - Move tasks easily between projects.
     - Acquire all completed tasks in a certain date range
  - [Tags](usage/tags.md)
     - Batch create, update, and delete tags.
     - Create tags with parameters that are not usually allowed: `\\ / " # : * ? < > | Space`
  - [Projects](usage/projects.md)
     - Batch create, update, and delete 'lists' (projects)
-    - Move all tasks in a project easily to another project
-    - Get all the tasks in a project
+    - Batch archive projects.
+    - 
  
  
 ##Installation
@@ -51,12 +52,23 @@ The API automatically fetches all the tasks, tags, lists, and more linked to you
     groceries = client.task.create(name, start=date)  # Create the task with the parameters.
     ```
 
-    Result:
-
-    ```python
-    print(groceries)
-    {'id': '5ff24e4b8f08904035b304d9', 'projectId': 'inbox416323287', 'sortOrder': -1099511627776, 'title': 'Get Groceries', 'content': '', 'startDate': '2021-05-06T21:30:00.000+0000', 'dueDate': '2021-05-06T21:30:00.000+0000', 'timeZone': 'America/Los_Angeles', 'isFloating': False, 'isAllDay': False, 'reminders': [], 'priority': 0, 'status': 0, 'items': [], 'modifiedTime': '2021-01-03T23:07:55.004+0000', 'etag': 'ol2zesef', 'deleted': 0, 'createdTime': '2021-01-03T23:07:55.011+0000', 'creator': 359368200, 'kind': 'TEXT'}
-    ```
+    ??? success "Result"
+        
+        A dictionary for the newly created task is returned.
+        
+        ```python
+        print(groceries)
+        {'id': '5ff24e4b8f08904035b304d9', 'projectId': 'inbox416323287', 'sortOrder': -1099511627776, 
+        'title': 'Get Groceries', 'content': '', 'startDate': '2021-05-06T21:30:00.000+0000', 
+        'dueDate': '2021-05-06T21:30:00.000+0000', 'timeZone': 'America/Los_Angeles', 
+        'isFloating': False, 'isAllDay': False, 'reminders': [], 'priority': 0, 'status': 0, 
+        'items': [], 'modifiedTime': '2021-01-03T23:07:55.004+0000', 'etag': 'ol2zesef', 'deleted': 0, 
+        'createdTime': '2021-01-03T23:07:55.011+0000', 'creator': 359368200, 'kind': 'TEXT'}
+        ```
+        
+        **Created Task In `TickTick`**
+        
+        ![image](https://user-images.githubusercontent.com/56806733/104566369-5f13f980-5602-11eb-904e-c6ac3e4984fb.png)
         
     Most methods will return the object that was changed. Consult the individual documentation for more information on specific methods.
 
