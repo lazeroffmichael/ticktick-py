@@ -801,6 +801,7 @@ def test_delete_multiple_success(client):
     assert not client.get_by_id(delete[0])
     assert not client.get_by_id(delete[1])
     assert not client.get_by_id(delete[2])
+    assert deleted == tasks
     count = 0
     for d in deleted:
         assert delete[count] == d['id']

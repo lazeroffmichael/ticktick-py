@@ -168,6 +168,18 @@ def test_tag_delete_multiple(client):
     assert tags[2]['label'] == deleted[2]['label']
 
 
+def test_tag_delete_task_preserved(client):
+    tag1_name = str(uuid.uuid4()).upper()
+    tag = client.tag.create(tag1_name)
+    task_name = str(uuid.uuid4()).upper()
+    task = client.task.create(task_name, tags=tag1_name)
+    # Delete the tag
+    deleted = client.tag.delete(tag1_name)
+    found = client.get_by_id(task['id'])
+    assert not client.get_by_fields(label=tag1_name, search='tags')
+    client.task.delete(task['id'])
+
+
 def test_tag_batch_create(client):
     """Tests batch tag creation success"""
     label1 = str(uuid.uuid4()).upper()
@@ -179,9 +191,7 @@ def test_tag_batch_create(client):
     tags = [tag1, tag2, tag3]
     obj = client.tag.create(tags)
     # Assert that the objects are returned in the same order as passed
-    client.tag.delete(obj[0]['name'])
-    client.tag.delete(obj[1]['name'])
-    client.tag.delete(obj[2]['name'])
+    client.tag.delete([obj[0]['name'], obj[1]['name'], obj[2]['name']])
     assert len(obj) == 3
     assert label1 == obj[0]['label']
     assert label2 == obj[1]['label']
@@ -418,15 +428,14 @@ def test_sorting_works(client):
 
 def test_parent_type_error(client):
     with pytest.raises(TypeError):
-        client.tag.parent('hello', 56)
+        client.tag.nesting('hello', 56)
     with pytest.raises(TypeError):
-        client.tag.parent(56, 'hello')
+        client.tag.nesting(56, 'hello')
 
 
 def test_parent_object_error(client):
     with pytest.raises(ValueError):
-        client.tag.parent(str(uuid.uuid4()).upper(), str(uuid.uuid4()))
-
+        client.tag.nesting(str(uuid.uuid4()).upper(), str(uuid.uuid4()))
 
 
 def test_parent_doesnt_exist(client):
@@ -435,7 +444,7 @@ def test_parent_doesnt_exist(client):
     client.state['tags'].append(fake)
     parent = str(uuid.uuid4()).upper()
     with pytest.raises(ValueError):
-        client.tag.parent(label, parent)
+        client.tag.nesting(label, parent)
     client.delete_from_local_state(name=label.lower(), search='tags')
 
 
@@ -447,7 +456,7 @@ def test_parent_works(client):
     pfake = client.tag.builder(parent)
     objs = client.tag.create([fake, pfake])  # Create tags
     try:
-        change = client.tag.parent(old, parent)
+        change = client.tag.nesting(old, parent)
     except:
         client.tag.delete(old)
         client.tag.delete(parent)
@@ -466,7 +475,7 @@ def test_parent_works_reset(client):
     p = client.tag.builder(parent)
     objs = client.tag.create([c, p])
     try:
-        change = client.tag.parent(old, parent)
+        change = client.tag.nesting(old, parent)
     except:
         client.tag.delete(old)
         client.tag.delete(parent)
@@ -474,7 +483,7 @@ def test_parent_works_reset(client):
     else:
         # Set c to be none
         try:
-            change_again = client.tag.parent(old, None)
+            change_again = client.tag.nesting(old, None)
         except:
             client.tag.delete(old)
             client.tag.delete(parent)
@@ -498,14 +507,14 @@ def test_already_parent(client):
     p = client.tag.builder(parent)
     objs = client.tag.create([c, p])
     try:
-        change = client.tag.parent(old, parent)
+        change = client.tag.nesting(old, parent)
     except:
         client.tag.delete(old)
         client.tag.delete(parent)
         assert False
     else:
         try:
-            changed = client.tag.parent(old, parent)
+            changed = client.tag.nesting(old, parent)
         except:
             client.tag.delete(old)
             client.tag.delete(parent)
@@ -520,7 +529,7 @@ def test_no_parent_wanted(client):
     old = str(uuid.uuid4()).upper()
     c = client.tag.create(old)
     try:
-        change = client.tag.parent(old, None)
+        change = client.tag.nesting(old, None)
     except:
         client.tag.delete(old)
         assert False
@@ -544,7 +553,7 @@ def test_parent_has_parent_wants_new_parent(client):
     tag3 = client.tag.builder(name3)
     tags = client.tag.create([tag1, tag2, tag3])
     try:
-        change = client.tag.parent(name1, name2)
+        change = client.tag.nesting(name1, name2)
     except:
         client.tag.delete(name1)
         client.tag.delete(name2)
@@ -552,7 +561,7 @@ def test_parent_has_parent_wants_new_parent(client):
         assert False
     else:
         try:
-            changed = client.tag.parent(name1, name3)
+            changed = client.tag.nesting(name1, name3)
         except:
             client.tag.delete(name1)
             client.tag.delete(name2)
@@ -574,7 +583,7 @@ def test_merge_fail(client):
 def test_merge_fail_no_args(client):
     name = str(uuid.uuid4()).upper()
     tag = client.tag.create(name)
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         client.tag.merge(name)  # Test no args
     arg = 458927358934
     with pytest.raises(ValueError):
@@ -599,7 +608,7 @@ def test_merge_success_two_tags(client):
     tag2 = client.tag.builder(name2)
     objs = client.tag.create([tag1, tag2])
     # Merge tag1 <-- tag2
-    merge = client.tag.merge(name1, name2)
+    merge = client.tag.merge(name2, name1)
     # Make sure that name2 doesn't exist anymore
     tag2 = client.get_by_fields(name=name2)
     assert not tag2
@@ -614,15 +623,21 @@ def test_merge_success_three_tags_in_list(client):
     tag2 = client.tag.builder(name2)
     tag3 = client.tag.builder(name3)
     objs = client.tag.create([tag1, tag2, tag3])
+    # Create tasks in name2 and name3
+    task1 = client.task.builder('Task1', tags=[name2])
+    task2 = client.task.builder('Task2', tags=[name3])
+    tasks = client.task.create([task1, task2])
     merge = [name2, name3]
     try:
-        merged = client.tag.merge(name1, merge)
+        merged = client.tag.merge(merge, name1)
     finally:
         # Assert name2 and name3 don't exist
         tag2 = client.get_by_fields(label=name2)
         assert not tag2
         tag3 = client.get_by_fields(label=name3)
         assert not tag3
+        tasks = client.task.delete([tasks[0]['id'], tasks[1]['id']])
+        assert tasks[0]['tags'] == [name1.lower()]
         client.tag.delete(name1)
 
 

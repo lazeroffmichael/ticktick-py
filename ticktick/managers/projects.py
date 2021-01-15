@@ -240,7 +240,8 @@ class ProjectManager:
 
             === "Specify a Color"
                 A random color can be generated using [generate_hex_color][helpers.hex_color.generate_hex_color].
-                However, just not specifying a color will automatically generate a random color (as seen in the previous tab)
+                However, just not specifying a color will automatically generate a random color (as seen in the previous tab).
+                You can always specify the color that you want.
 
                 ```python
                 project = client.project.create('Work', color='#86bb6d')
@@ -1034,7 +1035,8 @@ class ProjectManager:
         # Delete the list
         deleted_list = []
         for current_id in ids:
-            deleted_list.append(self._client.delete_from_local_state(id=current_id, search='project_folders'))
+            deleted_list.append(self._client.get_by_id(current_id, search='project_folders'))
+        self._client.sync()
 
         if len(deleted_list) == 1:
             return deleted_list[0]

@@ -1016,14 +1016,17 @@ class TaskManager:
         url = self._client.BASE_URL + 'batch/task'
         payload = {'delete': tasks}
         response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        return_list = []
         if len(tasks) == 1:
-            return self._client.delete_from_local_state(id=ids, search='tasks')
+            return_list.append(self._client.get_by_id(ids, search='tasks'))
         else:
-            return_list = []
             for item in tasks:
-                o = self._client.delete_from_local_state(id=item['taskId'], search='tasks')
+                o = self._client.get_by_id(item['taskId'], search='tasks')
                 return_list.append(o)
-            return return_list
+        self._client.sync()
+        if len(return_list) == 1:
+            return return_list[0]
+        return return_list
 
     @logged_in
     def get_trash(self):
