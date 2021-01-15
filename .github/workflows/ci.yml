@@ -15,4 +15,5 @@ jobs:
       - run: pip install mkdocs-material
       - run: pip install mkdocstrings
       - run: pip install httpx
+      - run: pip install pytz
       - run: mkdocs gh-deploy --force
