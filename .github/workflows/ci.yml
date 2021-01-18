@@ -34,14 +34,9 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
 
-    - name: Set environment variables
+    - name: Run test suite
       env:
         TICKTICK_USER: ${{ secrets.TICKTICK_USER }}
         TICKTICK_PASS: ${{ secrets.TICKTICK_PASS }}
-
-    - name: Run test suite with pytest
       run: |
-        pytest
-      
-      
-    
+        pytest 
