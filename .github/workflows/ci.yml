@@ -11,7 +11,7 @@ jobs:
   
   # We have to declare the jobs separately since sync issues can occur failing the test suite if multiple
   # suites are running at the same time.
-  test-ubuntu-3.6:
+  test-ubuntu-3_6:
     
     runs-on: ubuntu_latest
     
@@ -36,7 +36,7 @@ jobs:
       run: |
         pytest 
         
-  test-ubuntu-3.7:
+  test-ubuntu-3_7:
     
     runs-on: ubuntu_latest
     
@@ -61,7 +61,7 @@ jobs:
       run: |
         pytest 
         
-  test-ubuntu-3.8:
+  test-ubuntu-3_8:
 
     runs-on: ubuntu_latest
 
@@ -86,7 +86,7 @@ jobs:
       run: |
         pytest
         
-  test-ubuntu-3.9:
+  test-ubuntu-3_9:
 
     runs-on: ubuntu_latest
 
@@ -111,7 +111,7 @@ jobs:
       run: |
         pytest
         
-  test-ubuntu-3.x:
+  test-ubuntu-3_x:
 
     runs-on: ubuntu_latest
 
