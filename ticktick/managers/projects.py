@@ -269,7 +269,7 @@ class ProjectManager:
         Make local changes to the project objects that you want to change first, then pass the actual objects to the method.
 
         !!! info
-            Every potential update to a project's attributes have not been tested. See [here](projects.md#example-ticktick-project-dictionary) for
+            Every potential update to a project's attributes have not been tested. See [Example `TickTick` Project Dictionary](projects.md#example-ticktick-project-dictionary) for
             a listing of the fields present in a project.
 
         Arguments:
