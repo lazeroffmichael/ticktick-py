@@ -1,0 +1,6 @@
+mkdocs-material
+mkdocstrings
+httpx
+pytz
+pytest
+regex
