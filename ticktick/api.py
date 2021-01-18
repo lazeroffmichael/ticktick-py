@@ -147,7 +147,6 @@ class TickTickClient:
     #   ---------------------------------------------------------------------------------------------------------------
     #   Client Initialization
 
-    # TODO : Change lists to projects and list_folders to project_folders
     def __init__(self, username: str, password: str) -> None:
         """
         Initializes a client session. In order to interact with the API

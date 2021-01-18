@@ -192,7 +192,6 @@ def test_create_batch_raise_not_list(client):
 
 
 def test_create_batch_success(client):
-    #TODO Fix
     name = 'Test Create Batch'
     start_date = datetime.datetime(2022, 1, 28)
     end_date = datetime.datetime(2022, 1, 31)
@@ -240,7 +239,6 @@ def test_create_task_just_title(client):
 
 
 def test_create_task_title_not_string(client):
-    #TODO Fix
     """Tests a value error is raised if the title is not a string"""
     with pytest.raises(TypeError):
         client.task.create(1234)
@@ -396,7 +394,6 @@ def test_create_task_both_dates_not_all_day_different_tz(client):
 
 
 def test_create_task_not_datetime_dates(client):
-    # TODO Fix
     with pytest.raises(TypeError):
         task1 = client.task.create('hello', start='yeah this not a datetime')
     with pytest.raises(TypeError):
@@ -414,7 +411,6 @@ def test_create_task_title_and_priority_fail(client):
 
 
 def test_create_task_title_and_priority_string_fail(client):
-    #TODO Fix
     """Tests task creation fail with a string input"""
     title = str(uuid.uuid4())
     priority = 'nope'
@@ -491,7 +487,6 @@ def test_create_task_tags_fail_dictionary(client):
 
 
 def test_create_task_with_tag_single_string(client):
-    #TODO Fix
     """Tests creating a task with a single tag as a string"""
     tag = str(uuid.uuid4())
     name = str(uuid.uuid4())
@@ -512,7 +507,7 @@ def test_create_task_with_tag_spaces(client):
     client.tag.delete(tag.lower())
 
 
-def test_create_task_with_tags(client):#TODO Fix
+def test_create_task_with_tags(client):
     """Tests creating a list with tags"""
     tag1 = str(uuid.uuid4())
     tag2 = str(uuid.uuid4())

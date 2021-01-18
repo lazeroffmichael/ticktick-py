@@ -480,7 +480,7 @@ class TaskManager:
         return self._client.task.update(update_list)
 
     @logged_in
-    def make_subtask(self, obj, parent: str): # TODO Finish Docs
+    def make_subtask(self, obj, parent: str):
         """
         Makes the passed task(s) sub-tasks to the parent task.
 
