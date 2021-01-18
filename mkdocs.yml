@@ -1,8 +1,8 @@
-site_name: "TickTick-py"
+site_name: "ticktick-py"
 site_description: "Unofficial TickTick API For Python 3"
-site_url: "https://lazeroffmichael.github.io/TickTick-py"
-repo_url: "https://github.com/lazeroffmichael/TickTick-py"
-repo_name: "lazeroffmichael/TickTick-py"
+site_url: "https://lazeroffmichael.github.io/ticktick-py"
+repo_url: "https://github.com/lazeroffmichael/ticktick-py"
+repo_name: "lazeroffmichael/ticktick-py"
 
 nav:
   - Overview: index.md
