@@ -66,7 +66,8 @@ print(groceries)
 
 Most methods will return the object that was changed. Consult the [usage](usage/api.md) documentation for more information on specific methods.
 
-##Installation
+## Installation
+
 Note: `ticktick-py` requires [Python 3.6](https://www.python.org/downloads/) or above.
 
 ```md

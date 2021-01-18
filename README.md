@@ -2,7 +2,6 @@
 ## Unofficial TickTick API Client for Python 3
 > Designed for [TickTick.com](<https://www.ticktick.com/>) API v2
 
----
 
 ## Full Documentation 
 
@@ -15,6 +14,8 @@
 - [Quick Guide](#quick-guide)
 - [Installation](#installation)
 - [Future Plans](#future-plans)
+
+---
 
 ## Description
 `ticktick-py` is an unofficial API library for interacting with [TickTick.com](<https://www.ticktick.com/>). It allows
@@ -86,7 +87,8 @@ Most methods will return the object that was changed. Consult the usage document
 
 ---
 
-##Installation
+## Installation
+
 Note: `ticktick-py` requires [Python 3.6](https://www.python.org/downloads/) or above.
 
 ```md
