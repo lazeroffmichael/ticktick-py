@@ -335,10 +335,11 @@ def test_non_deletion_of_grouped_tasks(client):
 def test_update_list_folder(client):
     """Tests that updating list folder properties works"""
     parent = client.project.create_folder(str(uuid.uuid4()))
-    parent['name'] = 'Changed Name'
+    changed_name = str(uuid.uuid4())
+    parent['name'] = changed_name
     updated = client.project.update_folder(parent)
     updated_obj = client.get_by_id(updated['id'])
-    assert updated_obj['name'] == 'Changed Name'
+    assert updated_obj['name'] == changed_name
     client.project.delete_folder(updated['id'])
 
 
@@ -348,14 +349,17 @@ def test_update_list_folder_multiple(client):
     p3 = str(uuid.uuid4())
     p = [p1, p2, p3]
     folders = client.project.create_folder(p)
-    folders[0]['name'] = 'Folder 1'
-    folders[1]['name'] = 'Folder 2'
-    folders[2]['name'] = 'Folder 3'
+    n1 = str(uuid.uuid4()).upper()
+    n2 = str(uuid.uuid4())
+    n3 = str(uuid.uuid4()).upper()
+    folders[0]['name'] = n1
+    folders[1]['name'] = n2
+    folders[2]['name'] = n3
     updated = client.project.update_folder(folders)
     ids = [x['id'] for x in updated]
-    assert updated[0]['name'] == 'Folder 1'
-    assert updated[1]['name'] == 'Folder 2'
-    assert updated[2]['name'] == 'Folder 3'
+    assert updated[0]['name'] == n1
+    assert updated[1]['name'] == n2
+    assert updated[2]['name'] == n3
     client.project.delete_folder(ids)
 
 

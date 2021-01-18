@@ -11,8 +11,9 @@ from ticktick.helpers.hex_color import generate_hex_color
 def test_check_fields_labels(client):
     """Tests exception raised for all bad inputs in _check_fields"""
     # Test label already exists
-    fake_tag = {'name': 'howdy', 'label': 'HOWDY'}
-    label = 'HOWDY'
+    name = str(uuid.uuid4())
+    label = name.upper()
+    fake_tag = {'name': name, 'label': label}
     client.state['tags'].append(fake_tag)
     with pytest.raises(ValueError):
         client.tag._check_fields(label)
@@ -77,9 +78,11 @@ def test_builder_success_name_and_color(client):
 
 def test_builder_success_name_parent_color(client):
     """Tests builder object with name, color, and parent"""
-    fake_tag = {'name': 'howdy', 'label': 'HOWDY'}
-    parent_label = 'HOWDY'
-    new_label = 'Yessirski'
+    name = str(uuid.uuid4())
+    label = name.upper()
+    fake_tag = {'name': name, 'label': label}
+    parent_label = label
+    new_label = str(uuid.uuid4())
     color = generate_hex_color()
     client.state['tags'].append(fake_tag)
     obj = client.tag.builder(new_label, color=color, parent=parent_label)
@@ -92,9 +95,11 @@ def test_builder_success_name_parent_color(client):
 
 def test_builder_success_all(client):
     """Tests builder object success with all fields"""
-    fake_tag = {'name': 'howdy', 'label': 'HOWDY'}
-    parent_label = 'HOWDY'
-    new_label = 'Yessirski'
+    name = str(uuid.uuid4())
+    label = name.upper()
+    fake_tag = {'name': name, 'label': label}
+    parent_label = label
+    new_label = str(uuid.uuid4())
     color = generate_hex_color()
     client.state['tags'].append(fake_tag)
     sort = 2
@@ -117,7 +122,7 @@ def test_tag_create(client):
 
 def test_tag_create_with_forbidden_characters(client):
     """Tests creating a tag with characters normally not allowed by TickTick"""
-    name = "\ \ /  # : * ? < > | Space"
+    name = str(uuid.uuid4()) + "\ \ /  # : * ? < > | Space"
     tag = client.tag.create(name)
     client.tag.delete(name)
     assert tag
