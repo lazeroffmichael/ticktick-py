@@ -1,30 +1,49 @@
-# TickTick-py
-##Unofficial TickTick API Client for Python 3
+# ticktick-py
+## Unofficial TickTick API Client for Python 3
 > Designed for [TickTick.com](<https://www.ticktick.com/>) API v2
 
-##Description
-TickTick-py is an unofficial API library for interacting with the popular
-'to do list' app [TickTick](<https://www.ticktick.com/>). It allows
-users a way to interact with their [TickTick](<https://www.ticktick.com/>) account using python. Currently,
+---
+
+## Full Documentation 
+
+[https://lazeroffmichael.github.io/TickTick-py/]()
+
+---
+
+- [Description](#description)
+- [Features](#features)
+- [Quick Guide](#quick-guide)
+- [Installation](#installation)
+- [Future Plans](#future-plans)
+
+## Description
+`ticktick-py` is an unofficial API library for interacting with [TickTick.com](<https://www.ticktick.com/>). It allows
+users a way to interact with their [TickTick](<https://www.ticktick.com/>) account using [Python](https://www.python.org/). Currently,
 as of **1/14/2021**, there is no official API for [TickTick](<https://www.ticktick.com/>).
 
+---
 
-##Features
-The API automatically fetches all the tasks, tags, lists, and more linked to your profile and stores them in a dictionary named [`state`](usage/api/#state).
+## Features
 
- - [Tasks](usage/tasks.md)
+The API automatically fetches all the tasks, tags, lists, and more linked to your profile and stores them in a dictionary named `state`.
+
+ - **Tasks**
     - Batch create, update, and delete tasks
     - Acquire all your uncompleted tasks
     - Move tasks easily between projects
     - Acquire all completed tasks in a certain date range
- - [Tags](usage/tags.md)
+ - **Tags**
     - Batch create, update, and delete tags
     - Create tags with parameters that are not usually allowed: `\\ / " # : * ? < > | Space`
- - [Projects](usage/projects.md)
+ - **Projects**
     - Batch create, update, and delete 'lists' (projects)
     - Batch archive projects
-    
-#### Initializing Your Session
+
+---
+
+## Quick Guide 
+
+### Initializing Your Session
 
 ``` python
 from ticktick import api
@@ -33,7 +52,7 @@ client = api.TickTickClient('username', 'password')  # Enter correct username an
 
 Once you have initialized your session, all interactions will occur through the reference, in this case: ```client```
 
-#### Example: Creating A Task
+### Example: Creating A Task
 
 Lets create a task in our ```inbox``` titled "Get Groceries", with the date as 5/6/2021 at 2:30PM:
 
@@ -45,7 +64,8 @@ date = datetime(2021, 5, 6, 14, 30)
 groceries = client.task.create(name, start=date)  # Create the task with the parameters.
 ```
 
-#### Result
+### Result
+
 A dictionary for the newly created task is returned.
 
 ```python
@@ -62,32 +82,31 @@ print(groceries)
 
 ![image](https://user-images.githubusercontent.com/56806733/104566369-5f13f980-5602-11eb-904e-c6ac3e4984fb.png)
 
-Most methods will return the object that was changed. Consult the individual documentation for more information on specific methods.
+Most methods will return the object that was changed. Consult the usage documentation for more information on specific methods.
 
-##Requirements
-`TickTick-py` Requires [Python 3.6](https://www.python.org/downloads/) Or Above.
+---
 
 ##Installation
+Note: `ticktick-py` requires [Python 3.6](https://www.python.org/downloads/) or above.
 
+```md
+pip install ticktick-py
+```
 
-###Full Usage Guide [Here](usage/api.md)
+---
 
-##Future Plans
- - General
+## Future Plans
+
+- **General**
     - Enhanced Team Support
-    - Local cache with explicit commit feature for pushing changes to the TickTick servers
- 
- - [Tasks](usage/tasks.md)
-     - Notification and Repeats For Tasks
-     - Get and Restore From Trash
- 
- - [Projects](usage/projects.md)
+- **Tasks**
+    - Notification and Repeats For Tasks
+    - Get and Restore From Trash  
+- **Projects**
     - Smart List Support
     - Column Creation For Kanban View
-    
- - Pomo and Focus
-    - Getting the focus / pomo statistics for your profile
-    - Starting and stopping the focus / pomo timer
-    
- - Habits
+- **Pomo and Focus**  
+    - Getting the focus / pomo statistics for your profile  
+    - Starting and stopping the focus / pomo timer    
+- **Habits**  
     - Get, create, archive, delete, and complete habits
