@@ -13,7 +13,7 @@ jobs:
   # suites are running at the same time.
   test-ubuntu-3_6:
     
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout
@@ -38,7 +38,7 @@ jobs:
         
   test-ubuntu-3_7:
     
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     
     steps:
     - name: Checkout
@@ -63,7 +63,7 @@ jobs:
         
   test-ubuntu-3_8:
 
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -88,7 +88,7 @@ jobs:
         
   test-ubuntu-3_9:
 
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -113,7 +113,7 @@ jobs:
         
   test-ubuntu-3_x:
 
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
