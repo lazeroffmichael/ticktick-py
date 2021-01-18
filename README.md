@@ -1,5 +1,5 @@
 ![ci](https://github.com/lazeroffmichael/ticktick-py/workflows/ci/badge.svg)
-[![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://lazeroffmichael.github.io/TickTick-py/)
+[![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://lazeroffmichael.github.io/ticktick-py/)
 
 # ticktick-py
 ## Unofficial TickTick API Client for Python 3
