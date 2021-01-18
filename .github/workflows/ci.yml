@@ -1,7 +1,6 @@
 name: ci
 on:
   push:
-  pull_request:
     branches:
       - master
       - main
@@ -9,8 +8,6 @@ on:
     - cron: "0 2 * * 0-6"
 jobs:
   
-  # We have to declare the jobs separately since sync issues can occur failing the test suite if multiple
-  # suites are running at the same time.
   tests:
     
     strategy:
@@ -41,4 +38,24 @@ jobs:
       run: |
         pytest 
         
-    
+  documentation:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python runtime
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        
+      - name: Deploy documentation
+        run: |
+          mkdocs gh-deploy --force
