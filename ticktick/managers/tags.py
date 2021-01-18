@@ -110,7 +110,7 @@ class TagsManager:
             label: Desired label of the tag - tag labels cannot be repeated.
             color: Hex color string. A random color will be generated if no color is specified.
             parent: The label of the parent tag if desired (include capitals in the label if it exists).
-            sort: The desired sort type of the tag. Valid integer values are present in the [sort dictionary](#sort-dictionary). The default
+            sort: The desired sort type of the tag. Valid integer values are present in the [sort dictionary](tags.md#sort-dictionary). The default
                 sort value will be by 'project'
 
         Returns:
@@ -460,7 +460,7 @@ class TagsManager:
 
         Arguments:
             label: The label of the tag to be changed.
-            sort: The new sort type specified by an integer 0-3. See [sort dictionary](tags.med#sort-dictionary).
+            sort: The new sort type specified by an integer 0-3. See [sort dictionary](tags.md#sort-dictionary).
 
         Returns:
             The updated tag dictionary object.
