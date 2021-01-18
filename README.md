@@ -8,7 +8,7 @@
 
 ## Full Documentation 
 
-[https://lazeroffmichael.github.io/TickTick-py/]()
+[https://lazeroffmichael.github.io/ticktick-py/](https://lazeroffmichael.github.io/ticktick-py/)
 
 ---
 
