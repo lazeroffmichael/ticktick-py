@@ -1,3 +1,6 @@
+![ci](https://github.com/lazeroffmichael/ticktick-py/workflows/ci/badge.svg)
+[![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://lazeroffmichael.github.io/TickTick-py/)
+
 # ticktick-py
 ## Unofficial TickTick API Client for Python 3
 > Designed for [TickTick.com](<https://www.ticktick.com/>) API v2

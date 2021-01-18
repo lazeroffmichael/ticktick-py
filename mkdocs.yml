@@ -12,6 +12,7 @@ nav:
       - Projects: usage/projects.md
       - Tags: usage/tags.md
       - Helpers: usage/helpers.md
+  - License: license.md
 
 theme:
   name: "material"
