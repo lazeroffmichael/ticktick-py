@@ -1,5 +1,5 @@
 !!! info
-    Task methods are accessed through the `task` [public member](/usage/api/#functionality) of your [`TickTickClient`](api.md) instance.
+    Task methods are accessed through the `task` [public member](api.md#functionality) of your [`TickTickClient`](api.md) instance.
 
     ```python
     # Assumes that 'client' is the name that references the TickTickClient instance.
@@ -30,7 +30,7 @@
             date = datetime(2021, 1, 1)
             ```
 
-## Example `TickTick` `Task` Dictionary
+## Example TickTick Task Dictionary
 
 !!! info "Members"
     ??? summary "Descriptions"

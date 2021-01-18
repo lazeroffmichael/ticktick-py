@@ -533,7 +533,7 @@ class TaskManager:
         To update a task, change any field in it's dictionary directly then pass to the method.
 
         !!! tip "For Help On What Fields Are Present In The Task Dictionaries"
-            [Example `TickTick` Task Dictionary](#example-ticktick-task-dictionary)
+            [Example `TickTick` Task Dictionary](tasks.md#example-ticktick-task-dictionary)
 
 
         Arguments:

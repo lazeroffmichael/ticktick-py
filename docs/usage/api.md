@@ -118,8 +118,8 @@ Different functionality can be accessed through different public members of the 
 That's all the required information for how to get started with the API! To see how to use individual features, check these out next:
 
 - [Tasks](tasks.md)
-- [Projects][managers.projects.ProjectManager]
-- [Tags][managers.tags.TagsManager]
+- [Projects](projects.md)
+- [Tags](tags.md)
 ---
 
     ## `TickTickClient Documentation`

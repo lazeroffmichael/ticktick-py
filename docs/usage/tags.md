@@ -1,6 +1,6 @@
 
 !!! info
-    Tag methods are accessed through the `tag` [public member](/usage/api/#functionality) of your [`TickTickClient`](api.md) instance.
+    Tag methods are accessed through the `tag` [public member](api.md#functionality) of your [`TickTickClient`](api.md) instance.
 
     ```python
     # Assumes that 'client' is the name that references the TickTickClient instance.
@@ -16,7 +16,7 @@
 
     ** All usage examples assume that `client` is the name referencing the [`TickTickClient`](api.md) instance**
 
-## Example `TickTick` `Tag` Dictionary
+## Example TickTick Tag Dictionary
 
 !!! info "Members"
     ??? summary "Descriptions"

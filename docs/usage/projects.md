@@ -3,7 +3,7 @@
     confusion with the `list` built in type.
 
 !!! info
-    Project methods are accessed through the `project` [public member](/usage/api/#functionality) of your [`TickTickClient`](api.md) instance.
+    Project methods are accessed through the `project` [public member](api.md#functionality) of your [`TickTickClient`](api.md) instance.
 
     ```python
     # Assumes that 'client' is the name that references the TickTickClient instance.
@@ -19,7 +19,7 @@
 
     ** All usage examples assume that `client` is the name referencing the [`TickTickClient`](api.md) instance**
 
-## Example `TickTick` `Project` Dictionary
+## Example TickTick Project Dictionary
 
 !!! info "Members"
     ??? summary "Descriptions"
@@ -69,7 +69,7 @@
     'kind': 'TASK'}
     ```
 
-## Example `TickTick` `Project` `Folder` `(group)` Dictionary
+## Example TickTick Project Folder (group) Dictionary
 
 !!! info "Members"
     ??? summary "Descriptions"

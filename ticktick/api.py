@@ -20,7 +20,7 @@ class TickTickClient:
     def __init__(self, username: str, password: str) -> None:
         """
         Initializes a client session. In order to interact with the API
-        a successful login must occur. See [Logging In](#logging-in) for help.
+        a successful login must occur. See [Logging In](api.md#logging-in) for help.
 
         Arguments:
             username: TickTick Username
@@ -55,7 +55,7 @@ class TickTickClient:
 
     def reset_local_state(self):
         """
-        Resets the contents of the items in the [`state`](#state) dictionary.
+        Resets the contents of the items in the [`state`](api.md#state) dictionary.
 
         """
         self.state = {
@@ -129,7 +129,7 @@ class TickTickClient:
     @logged_in
     def sync(self):
         """
-        Populates the `TickTickClient` [`state`](#state) dictionary with the contents of your account.
+        Populates the `TickTickClient` [`state`](api.md#state) dictionary with the contents of your account.
 
         **This method is called when necessary by other methods and does not need to be explicitly called.**
 
@@ -298,7 +298,7 @@ class TickTickClient:
         """
         Finds and returns the objects in `state` that match the inputted fields.
 
-        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
             Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
@@ -324,11 +324,11 @@ class TickTickClient:
             found_obj = client.get_by_fields(title='Hello', search='tasks')
             ```
 
-            The search will now only look through `tasks` in [`state`](#state).
+            The search will now only look through `tasks` in [`state`](api.md#state).
 
 
         Arguments:
-            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+            search: Key in [`state`](api.md#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
             **kwargs: Matching fields in the object to look for.
 
         Returns:
@@ -398,7 +398,7 @@ class TickTickClient:
         """
         Returns the dictionary of the object corresponding to the passed id.
 
-        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
 
 
         !!! example
@@ -417,7 +417,7 @@ class TickTickClient:
             `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.
 
             Furthermore if we know the type of object we are looking for, we can make the search more efficient by
-            specifying the key its located under in the [`state`](#state) dictionary.
+            specifying the key its located under in the [`state`](api.md#state) dictionary.
 
             ```python
             # Assumes that `client` is the name referencing the TickTickClient instance.
@@ -425,17 +425,17 @@ class TickTickClient:
             found_obj = client.get_by_id(my_id, search='projects')
             ```
 
-            The search will now only look through `projects` in [`state`](#state).
+            The search will now only look through `projects` in [`state`](api.md#state).
 
         Arguments:
             obj_id: Id of the item.
-            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+            search: Key in [`state`](api.md#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
 
         Returns:
             The dictionary object of the item if found, or an empty dictionary if not found.
 
         Raises:
-            KeyError: If the search key provided is not a key in [`state`](#state).
+            KeyError: If the search key provided is not a key in [`state`](api.md#state).
         """
         if search is not None and search not in self.state:
             raise KeyError(f"'{search}' Is Not Present In self.state Dictionary")
@@ -461,7 +461,7 @@ class TickTickClient:
         """
         Returns the dictionary object of the item with the matching etag.
 
-        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
             Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
@@ -479,7 +479,7 @@ class TickTickClient:
             `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.
 
             Furthermore if we know the type of object we are looking for, we can make the search more efficient by
-            specifying the key its located under in the [`state`](#state) dictionary.
+            specifying the key its located under in the [`state`](api.md#state) dictionary.
 
             ```python
             # Assumes that `client` is the name referencing the TickTickClient instance.
@@ -487,17 +487,17 @@ class TickTickClient:
             found_obj = client.get_by_etag(my_etag, search='projects')
             ```
 
-            The search will now only look through `projects` in [`state`](#state).
+            The search will now only look through `projects` in [`state`](api.md#state).
 
         Arguments:
             etag: The etag of the object that you are looking for.
-            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](#state) dictionary will be searched.
+            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
 
         Returns:
             The dictionary object of the item if found, or an empty dictionary if not found.
 
         Raises:
-            KeyError: If the search key provided is not a key in [`state`](#state).
+            KeyError: If the search key provided is not a key in [`state`](api.md#state).
 
         """
         if search is not None and search not in self.state:
@@ -524,7 +524,7 @@ class TickTickClient:
         """
         Deletes a single object from the local `state` dictionary. **Does not delete any items remotely.**
 
-        If search is specified, it will only search the specific [`state`](#state) list, else the entire [`state`](#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
             Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
@@ -541,10 +541,10 @@ class TickTickClient:
 
             deleted_task = client.delete_from_local_state(title='Get Groceries')
             ```
-            `deleted_task` would now hold the object that was deleted from the [`state`](#state) dictionary if it was found.
+            `deleted_task` would now hold the object that was deleted from the [`state`](api.md#state) dictionary if it was found.
 
             Furthermore if we know the type of object we are looking for, we can make the search more efficient by
-            specifying the key its located under in the [`state`](#state) dictionary.
+            specifying the key its located under in the [`state`](api.md#state) dictionary.
 
             ```python
             # Assumes that `client` is the name referencing the TickTickClient instance.
@@ -556,7 +556,7 @@ class TickTickClient:
 
 
         Arguments:
-            search: A specific item to look through in the [`state`](#state) dictionary. When not specified the entire [`state`](#state) dictionary will be searched.
+            search: A specific item to look through in the [`state`](api.md#state) dictionary. When not specified the entire [`state`](api.md#state) dictionary will be searched.
             **kwargs: Matching fields in the object to look for.
 
         Returns:
@@ -564,7 +564,7 @@ class TickTickClient:
 
         Raises:
             ValueError: If no key word arguments are provided.
-            KeyError: If the search key provided is not a key in [`state`](#state).
+            KeyError: If the search key provided is not a key in [`state`](api.md#state).
 
         """
         # Check that kwargs is not empty
