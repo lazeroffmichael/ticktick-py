@@ -30,13 +30,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest-xdist
 
     - name: Run test suite
       env:
         TICKTICK_USER: ${{ secrets.TICKTICK_USER }}
         TICKTICK_PASS: ${{ secrets.TICKTICK_PASS }}
       run: |
-        pytest 
+        pytest -n auto
         
   documentation:
     name: Build documentation
