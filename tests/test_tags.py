@@ -620,32 +620,6 @@ def test_merge_success_two_tags(client):
     client.tag.delete(name1)  # Delete the remaining tag
 
 
-def test_merge_success_three_tags_in_list(client):
-    name1 = str(uuid.uuid4()).upper()
-    name2 = str(uuid.uuid4())
-    name3 = str(uuid.uuid4()).upper()
-    tag1 = client.tag.builder(name1)
-    tag2 = client.tag.builder(name2)
-    tag3 = client.tag.builder(name3)
-    objs = client.tag.create([tag1, tag2, tag3])
-    # Create tasks in name2 and name3
-    task1 = client.task.builder('Task1', tags=[name2])
-    task2 = client.task.builder('Task2', tags=[name3])
-    tasks = client.task.create([task1, task2])
-    merge = [name2, name3]
-    try:
-        merged = client.tag.merge(merge, name1)
-    finally:
-        # Assert name2 and name3 don't exist
-        tag2 = client.get_by_fields(label=name2)
-        assert not tag2
-        tag3 = client.get_by_fields(label=name3)
-        assert not tag3
-        tasks = client.task.delete([tasks[0]['id'], tasks[1]['id']])
-        assert tasks[0]['tags'] == [name1.lower()]
-        client.tag.delete(name1)
-
-
 def test_update_success(client):
     name = str(uuid.uuid4()).upper()
     tag = client.tag.create(name)
