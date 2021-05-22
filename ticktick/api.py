@@ -1,6 +1,5 @@
-
-
 import httpx
+import webbrowser
 
 from ticktick.managers.check_logged_in import logged_in
 from ticktick.managers.projects import ProjectManager
@@ -13,7 +12,6 @@ from ticktick.managers.tags import TagsManager
 
 
 class TickTickClient:
-
     BASE_URL = 'https://api.ticktick.com/api/v2/'
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
