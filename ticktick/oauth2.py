@@ -48,17 +48,11 @@ class OAuth2:
         # Initialize code parameter
         self._code = None
 
+        # Set the cache handler
+        self._cache = CacheHandler()
+
         # Set the access token
-        self._access_token_info = None
-
-        # Get the authorization
-        self.authorize()
-
-    def authorize(self):
-        self._open_auth_url_in_browser()
-        self._get_redirected_url()
-        self._access_token_info = self.request_authorization_token()
-        self._set_expire_time()
+        self._access_token_info = self.get_access_token()
 
     def get_auth_url(self):
         """
@@ -70,7 +64,6 @@ class OAuth2:
             "response_type": "code",
             "redirect_uri": self._redirect_uri,
             "state": self._state,
-            "show_dialog": True
         }
 
         parameters = urlencode(payload)
@@ -118,13 +111,18 @@ class OAuth2:
         # return the parameters
         return isolated["code"], isolated["state"]
 
-    def request_authorization_token(self):
+    def request_access_token(self):
         """
         Makes the POST request to get the token and returns the token info dictionary
 
         Docs link: https://developer.ticktick.com/api#/openapi?id=third-step
         :return:
         """
+
+        # Get the manual authentication from the user, and prompt for the redirected url
+        self._open_auth_url_in_browser()
+        self._get_redirected_url()
+
         # create the payload
         payload = {
             "client_id": self._client_id,
@@ -134,15 +132,35 @@ class OAuth2:
             "scope": self._scope,
             "redirect_uri": self._redirect_uri
         }
+
         # make the request
         response = self._session.post(self.OBTAIN_TOKEN_URL, params=payload)
 
         if response.status_code != 200:
             raise RuntimeError("The request for the token could not be completed")
 
-        return response.json()
+        token_info = response.json()
+        token_info = self._set_expire_time(token_info)
+        self._cache.write_token_to_cache(token_info)
+        self._access_token_info = token_info
 
-    def _set_expire_time(self):
+        return token_info
+
+    def get_access_token(self, check_cache=True):
+        """
+        Retrieves the authorization token from cache or makes a new request for it.
+        """
+        if check_cache:
+            token_info = self.validate_token(self._cache.get_cached_token())
+            if token_info is not None:
+                if self.is_token_expired(token_info):
+                    token_info = self.request_access_token()
+                return token_info["access_token"]
+
+        token_info = self.request_access_token()
+        return token_info["access_token"]
+
+    def _set_expire_time(self, token_dict):
         """
         Adds two members to the access_token_info dictionary containing the expire time of the token
 
@@ -150,10 +168,10 @@ class OAuth2:
         self._access_token_info["readable_expire_time"]: The readable date in the form like 'Wed Nov 17 15:48:57 2021'
         :return:
         """
-        self._access_token_info["expire_time"] = int(time.time()) + self._access_token_info["expires_in"]
-        self._access_token_info["readable_expire_time"] = time.asctime(time.localtime(time.time() +
-                                                                                      self._access_token_info[
-                                                                                          "expires_in"]))
+        token_dict["expire_time"] = int(time.time()) + token_dict["expires_in"]
+        token_dict["readable_expire_time"] = time.asctime(time.localtime(time.time() +
+                                                                            token_dict[ "expires_in"]))
+        return token_dict
 
     @staticmethod
     def is_token_expired(token_dict):
@@ -163,11 +181,22 @@ class OAuth2:
         :return:
         """
         current_time = int(time.time())
-        return token_dict["expires_at"] - current_time < 60
+        return token_dict["expire_time"] - current_time < 60
 
-    # TODO: Implement these methods
-    def get_token_from_cache(self):
-        pass
+    def validate_token(self, token_dict):
+        """
+        Validates whether the access token is valid
+        """
+        # if the token info dictionary does not exist then bounce
+        if token_dict is None:
+            return None
 
-    def _save_token_info_to_cache(self):
-        pass
+        # check if the token is expired
+        if self.is_token_expired(token_dict):
+            # make a new request for a valid token since there is currently no refresh token
+            self._access_token_info = self.get_access_token()
+            return self._access_token_info
+
+        return token_dict   # original token_dict is valid
+
+
