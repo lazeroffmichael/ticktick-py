@@ -10,5 +10,6 @@ if __name__ == '__main__':
     client_secret = os.getenv('CLIENT_SECRET')
     redirect_uri = os.getenv('URI')
     auth_client = OAuth2(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri)
+    auth_client.get_access_token()
     pass
 

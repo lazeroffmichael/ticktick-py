@@ -52,7 +52,7 @@ class OAuth2:
         self._cache = CacheHandler()
 
         # Set the access token
-        self._access_token_info = self.get_access_token()
+        self._access_token_info = None
 
     def get_auth_url(self):
         """
@@ -70,7 +70,7 @@ class OAuth2:
 
         return "%s?%s" % (self.OAUTH_AUTHORIZE_URL, parameters)
 
-    def _open_auth_url_in_browser(self):
+    def _open_auth_url_in_browser(self, test=False):
         """
         Opens the authorization url in the browser
 
@@ -81,17 +81,24 @@ class OAuth2:
                  "provided in the url. Paste the url that you "
                  "were redirected to into the console")
         url = self.get_auth_url()
-        webbrowser.open(url)
+        response = webbrowser.open(url)
 
     def _get_redirected_url(self):
         """
         Prompts the user for the redirected url to parse the token and state
         """
         prompt = "Enter the URL you were redirected to: "
-        response = input(prompt)
+        url = self._get_user_input(prompt)
 
         # get the parsed parameters from the url
-        self._code, self._state = self.get_auth_response_parameters(response)
+        self._code, self._state = self.get_auth_response_parameters(url)
+
+    @staticmethod
+    def _get_user_input(prompt: str = ''):
+        """
+        Prompts the user for input from the console based on the prompt
+        """
+        return input(prompt)
 
     @staticmethod
     def get_auth_response_parameters(url):
@@ -111,7 +118,7 @@ class OAuth2:
         # return the parameters
         return isolated["code"], isolated["state"]
 
-    def request_access_token(self):
+    def _request_access_token(self):
         """
         Makes the POST request to get the token and returns the token info dictionary
 
@@ -142,7 +149,6 @@ class OAuth2:
         token_info = response.json()
         token_info = self._set_expire_time(token_info)
         self._cache.write_token_to_cache(token_info)
-        self._access_token_info = token_info
 
         return token_info
 
@@ -154,10 +160,12 @@ class OAuth2:
             token_info = self.validate_token(self._cache.get_cached_token())
             if token_info is not None:
                 if self.is_token_expired(token_info):
-                    token_info = self.request_access_token()
+                    token_info = self._request_access_token()
+                self._access_token_info = token_info
                 return token_info["access_token"]
 
-        token_info = self.request_access_token()
+        token_info = self._request_access_token()
+        self._access_token_info = token_info
         return token_info["access_token"]
 
     def _set_expire_time(self, token_dict):
