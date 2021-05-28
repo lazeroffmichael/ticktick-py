@@ -70,7 +70,7 @@ class OAuth2:
 
         return "%s?%s" % (self.OAUTH_AUTHORIZE_URL, parameters)
 
-    def _open_auth_url_in_browser(self, test=False):
+    def _open_auth_url_in_browser(self):
         """
         Opens the authorization url in the browser
 
@@ -141,16 +141,36 @@ class OAuth2:
         }
 
         # make the request
-        response = self._session.post(self.OBTAIN_TOKEN_URL, params=payload)
+        token_info = self._post(self.OBTAIN_TOKEN_URL, params=payload)
 
-        if response.status_code != 200:
-            raise RuntimeError("The request for the token could not be completed")
-
-        token_info = response.json()
         token_info = self._set_expire_time(token_info)
         self._cache.write_token_to_cache(token_info)
 
         return token_info
+
+    def _post(self, url, **kwargs):
+        """
+        Sends an http post request with the specified url and keyword arguments.
+
+        Arguments:
+            url (str): Url to send the request.
+            **kwargs: Arguments to send with the request.
+
+        Returns:
+            dict: The json parsed response if possible or just a string of the response text if not.
+
+        Raises:
+            RunTimeError: If the request could not be completed.
+        """
+
+        response = self._session.post(url, **kwargs)
+        if response.status_code != 200:
+            raise RuntimeError("POST request could not be completed")
+
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
 
     def get_access_token(self, check_cache=True):
         """
@@ -158,9 +178,8 @@ class OAuth2:
         """
         if check_cache:
             token_info = self.validate_token(self._cache.get_cached_token())
+            # validate token will always return a valid token
             if token_info is not None:
-                if self.is_token_expired(token_info):
-                    token_info = self._request_access_token()
                 self._access_token_info = token_info
                 return token_info["access_token"]
 
@@ -168,7 +187,8 @@ class OAuth2:
         self._access_token_info = token_info
         return token_info["access_token"]
 
-    def _set_expire_time(self, token_dict):
+    @staticmethod
+    def _set_expire_time(token_dict):
         """
         Adds two members to the access_token_info dictionary containing the expire time of the token
 
@@ -185,7 +205,7 @@ class OAuth2:
     def is_token_expired(token_dict):
         """
         Returns a boolean for if the access token is expired
-        :param token_dict:
+        :param token_dict:  p;;
         :return:
         """
         current_time = int(time.time())
@@ -202,9 +222,7 @@ class OAuth2:
         # check if the token is expired
         if self.is_token_expired(token_dict):
             # make a new request for a valid token since there is currently no refresh token
-            self._access_token_info = self.get_access_token()
-            return self._access_token_info
+            new_token_dict = self._request_access_token()
+            return new_token_dict
 
         return token_dict   # original token_dict is valid
-
-
