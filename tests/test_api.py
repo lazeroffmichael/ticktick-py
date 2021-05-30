@@ -2,8 +2,23 @@
 import pytest
 import httpx
 import uuid
+import os
 
 from ticktick.api import TickTickClient
+
+
+# TODO: refactor api tests
+
+@pytest.yield_fixture(scope='module')
+def client():
+    user = os.getenv('TICKTICK_USER')
+    passw = os.getenv('TICKTICK_PASS')
+    return_client = TickTickClient(user, passw)
+    yield return_client
+
+
+class TestInitMethod:
+    pass
 
 
 def test_good_login(client):

@@ -156,11 +156,43 @@ class TestRequestAccessToken:
         oauth_client_fake._code = None
         oauth_client_fake._state = None
 
-
         os.remove(oauth_client_fake._cache.path)
 
 
 class TestGetAccessToken:
+
+    def test_get_access_token_from_state(self, oauth_client_fake):
+        """
+        Tests returning an access token that is in the current running state
+        """
+        token_info = {"access_token": 48573490857892, "expire_time": int(time.time()) + 1000}
+        oauth_client_fake._access_token_info = token_info
+        returned_token = oauth_client_fake.get_access_token()
+        assert token_info["access_token"] == returned_token
+        oauth_client_fake._access_token_info = None
+
+    def test_get_access_token_from_environment_error(self, oauth_client_fake):
+        """
+        Tests an exception is raised when the access token cannot be properly converted from an environment variable
+        """
+        with pytest.raises(ValueError):
+            oauth_client_fake.get_access_token(check_env="ACCESS_TOKEN")
+
+    def test_get_access_token_from_environment(self, oauth_client_fake):
+        """
+        Tests getting a successful
+        """
+        # TODO: implement getting access token from environment
+        token_info = {"access_token": 48573490857892, "expire_time": int(time.time()) + 1000}
+        # write token to environment
+        os.environ["ACCESS_TOKEN"] = str(token_info)
+        # method call -> this should return the string for the access token
+        returned_token = oauth_client_fake.get_access_token(check_env="ACCESS_TOKEN")
+        assert returned_token == token_info["access_token"]
+
+        # delete token from environment
+        os.environ.pop("ACCESS_TOKEN")
+        oauth_client_fake._access_token_info = None
 
     def test_get_access_token_from_cache(self, oauth_client_fake):
         """

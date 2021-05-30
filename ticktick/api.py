@@ -1,5 +1,4 @@
 import httpx
-import webbrowser
 
 from ticktick.managers.check_logged_in import logged_in
 from ticktick.managers.projects import ProjectManager
@@ -9,13 +8,14 @@ from ticktick.managers.habits import HabitManager
 from ticktick.managers.pomo import PomoManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
+from ticktick.oauth2 import OAuth2
 
 
 class TickTickClient:
     BASE_URL = 'https://api.ticktick.com/api/v2/'
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
-    def __init__(self, username: str, password: str) -> None:
+    def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
         """
         Initializes a client session. In order to interact with the API
         a successful login must occur. See [Logging In](api.md#logging-in) for help.
@@ -23,6 +23,7 @@ class TickTickClient:
         Arguments:
             username: TickTick Username
             password: TickTick Password
+            oauth: Oauth2 manager
 
         Raises:
             RunTimeError: If the login was not successful.
@@ -37,8 +38,10 @@ class TickTickClient:
         self.inbox_id = ''
         self.state = {}
         self.reset_local_state()
+        self.oauth_manager = oauth
 
         self._login(username, password)
+
         self._settings()
         self.sync()
 

@@ -2,6 +2,8 @@ import httpx
 import webbrowser
 import time
 import logging
+import ast
+import os
 
 from urllib.parse import urlparse, urlencode, parse_qsl
 from ticktick.cache import CacheHandler
@@ -81,7 +83,7 @@ class OAuth2:
                  "provided in the url. Paste the url that you "
                  "were redirected to into the console")
         url = self.get_auth_url()
-        response = webbrowser.open(url)
+        webbrowser.open(url)
 
     def _get_redirected_url(self):
         """
@@ -172,10 +174,39 @@ class OAuth2:
         except ValueError:
             return response.text
 
-    def get_access_token(self, check_cache=True):
+    def get_access_token(self, check_cache: bool = True, check_env: str = None):
         """
         Retrieves the authorization token from cache or makes a new request for it.
+        Priority order for getting the access token:
+        1) From an already set class member in the current running instance
+        2) From an environment variable where the token dictionary is in a string literal form,
+        and the name of the environment variable is the value of the "check_env" parameter
+        3) From a cache file that contains the access token dictionary
+        4) From a new token request (which will create a new cache file that contains the access
+        token dictionary)
         """
+        # check the local state for if the access token exists
+        if self._access_token_info is not None:
+            token_info = self.validate_token(self._access_token_info)
+            if token_info is not None:
+                self._access_token_info = token_info
+                return token_info["access_token"]
+
+        # check if in the environment the access token is set
+        if check_env is not None:
+            # get the access token string
+            token_dict_string = os.getenv(check_env)
+            try:
+                converted_token_dict = ast.literal_eval(token_dict_string)
+            except:
+                raise ValueError("Access token in the environment must be a python dictionary contained"
+                                 " in a string literal")
+            token_info = self.validate_token(converted_token_dict)
+            if token_info is not None:
+                self._access_token_info = token_info
+                return token_info["access_token"]
+
+        # check if the cache file exists with the token
         if check_cache:
             token_info = self.validate_token(self._cache.get_cached_token())
             # validate token will always return a valid token
@@ -183,6 +214,7 @@ class OAuth2:
                 self._access_token_info = token_info
                 return token_info["access_token"]
 
+        # access token is not stored anywhere, request a new token
         token_info = self._request_access_token()
         self._access_token_info = token_info
         return token_info["access_token"]
@@ -198,7 +230,7 @@ class OAuth2:
         """
         token_dict["expire_time"] = int(time.time()) + token_dict["expires_in"]
         token_dict["readable_expire_time"] = time.asctime(time.localtime(time.time() +
-                                                                            token_dict[ "expires_in"]))
+                                                                         token_dict["expires_in"]))
         return token_dict
 
     @staticmethod
@@ -225,4 +257,4 @@ class OAuth2:
             new_token_dict = self._request_access_token()
             return new_token_dict
 
-        return token_dict   # original token_dict is valid
+        return token_dict  # original token_dict is valid
