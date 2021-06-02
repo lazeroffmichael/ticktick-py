@@ -187,5 +187,181 @@ class TestSync:
         ticktick_client.reset_local_state()
 
 
+class TestParseMethods:
+
+    def test_parse_id(self, ticktick_client):
+        """
+        Tests proper parsing of the ID from a dictionary
+        """
+        d = {'id2etag': {'5ff2bcf68f08093e5b745a30': '3okkc2xm'}, 'id2error': {}}
+        expected_id = '5ff2bcf68f08093e5b745a30'
+        assert ticktick_client.parse_id(d) == expected_id
+
+    def test_parse_etag(self, ticktick_client):
+        """
+        Tests proper parsing of the ID from an Etag response
+        """
+        d = {"id2etag":{"MyTag":"vxzpwo38"},"id2error":{}}
+        expected_etag = "vxzpwo38"
+        assert ticktick_client.parse_etag(d) == expected_etag
+
+    def test_parse_multiple_etags(self, ticktick_client):
+        """
+        Tests proper parsing of multiple ID's from an Etag response
+        """
+        d = {'id2etag':{"MyTag":"vxzpwo38", "MyTag2":"vxzpwo38"},
+             "id2error":{}}
+        expected_etags = ["vxzpwo38","vxzpwo38"]
+        returned = ticktick_client.parse_etag(d, multiple=True)
+        assert len(returned) == 2
+        assert expected_etags[0] in returned
+        assert expected_etags[1] in returned
+
+
+class TestGetByFields:
+
+    def test_get_by_fields_generic(self, ticktick_client):
+        """
+        Tests getting an id by an object field
+        """
+        list_name = str(uuid.uuid4())
+        fake_obj = {'name': list_name}
+        ticktick_client.state['projects'].append(fake_obj)  # Append the fake object
+        found = ticktick_client.get_by_fields(name=list_name)
+        assert found
+        assert found['name'] == list_name
+        ticktick_client.delete_from_local_state(search='projects', name=list_name)
+        assert not ticktick_client.get_by_fields(name=list_name)
+
+    def test_get_by_fields_search_specified(self, ticktick_client):
+        """
+        Tests getting an id
+        """
+        list_name = str(uuid.uuid4())
+        fake_obj = {'name': list_name}
+        ticktick_client.state['projects'].append(fake_obj)  # Append the fake object
+        found = ticktick_client.get_by_fields(name=list_name, search='projects')
+        assert found
+        assert found['name'] == list_name
+        ticktick_client.delete_from_local_state(search='projects', name=list_name)  # Delete the fake object
+        assert not ticktick_client.get_by_fields(name=list_name)
+
+    def test_get_by_fields_no_results(self, ticktick_client):
+        """
+        Tests getting an empty list if no objects match the fields
+        """
+        name = str(uuid.uuid4())
+        assert not ticktick_client.get_by_fields(name=name)
+
+    def test_get_by_fields_search_key_wrong(self, ticktick_client):
+        """
+        Tests raises an exception when search key doesn't exist
+        """
+        with pytest.raises(KeyError):
+            ticktick_client.get_by_fields(search=str(uuid.uuid4()), name='')
+
+
+class TestGetByID:
+
+    def test_get_by_id_fail(self, ticktick_client):
+        """
+        Tests returning an empty object if the id doesn't exist
+        """
+        id_str = str(uuid.uuid4())
+        assert not ticktick_client.get_by_id(id_str)
+
+    def test_get_by_id_pass(self, ticktick_client):
+        """
+        Tests getting an object by its id
+        """
+        list_id = str(uuid.uuid4())
+        fake_obj = {'id': list_id}
+        ticktick_client.state['projects'].append(fake_obj)  # Append the fake object
+        found = ticktick_client.get_by_id(list_id)
+        assert found
+        assert found['id'] == list_id
+        ticktick_client.delete_from_local_state(search='projects', id=list_id)  # Delete the fake object
+        assert not ticktick_client.get_by_id(list_id)
+
+    def test_get_by_id_search_key_wrong(self, ticktick_client):
+        """
+        Tests searching in the wrong list wont find the object
+        """
+        list_id = str(uuid.uuid4())
+        fake_obj = {'id': list_id}
+        ticktick_client.state['projects'].append(fake_obj)  # Append the fake object
+        found = ticktick_client.get_by_id(list_id, search='tasks')
+        assert not found
+        ticktick_client.delete_from_local_state(id=list_id, search='projects')
+        assert not ticktick_client.get_by_id(list_id)
+
+    def test_no_args_entered(self, ticktick_client):
+        """
+        Tests exceptions raised when no arguments passed
+        """
+        with pytest.raises(ValueError):
+            ticktick_client.get_by_fields()
+        with pytest.raises(Exception):
+            ticktick_client.get_by_id()
+        with pytest.raises(Exception):
+            ticktick_client.get_by_etag()
+        with pytest.raises(Exception):
+            ticktick_client.delete_from_local_state()
+
+
+class TestGetByEtag:
+
+    def test_get_by_etag_pass(self, ticktick_client):
+        """
+        Tests getting an object by etag works
+        """
+        etag = str(uuid.uuid4())
+        obj = {'etag': etag}
+        ticktick_client.state['tags'].append(obj)  # Append the fake object
+        assert ticktick_client.get_by_etag(etag)
+        ticktick_client.delete_from_local_state(etag=etag, search='tags')
+        assert not ticktick_client.get_by_etag(etag)
+
+    def test_get_by_etag_fail(self, ticktick_client):
+        """
+        Asserts that object is empty if the etag doesn't exist
+        """
+        etag = str(uuid.uuid4())
+        assert not ticktick_client.get_by_etag(etag)
+
+
 class TestDeleteFromLocalState:
-    pass
+
+    def test_delete_from_local_state_pass(self, ticktick_client):
+        """
+        Tests successfully deleting an item from local state
+        """
+        name = str(uuid.uuid4())
+        item = {'name': name}
+        ticktick_client.state['projects'].append(item)  # Append the item to the local state
+        obj = ticktick_client.get_by_fields(name=name, search='projects')  # Make sure append worked
+        assert obj
+        deleted = ticktick_client.delete_from_local_state(name=name, search='projects')
+        obj = ticktick_client.get_by_fields(name=name, search='projects')
+        assert not obj  # Assert that deletion worked
+
+    def test_delete_from_local_state_no_key(self, ticktick_client):
+        """
+        Tests finding the object without a key entered
+        """
+        name = str(uuid.uuid4())
+        item = {'name': name}
+        ticktick_client.state['projects'].append(item)  # Append the item to the local state
+        obj = ticktick_client.get_by_fields(name=name)  # Make sure append worked
+        assert obj
+        deleted = ticktick_client.delete_from_local_state(name=name)
+        obj = ticktick_client.get_by_fields(name=name)  # Search for the object
+        assert not obj  # Assert the object doesn't exist anymore
+
+    def test_delete_from_local_state_null(self, ticktick_client):
+        """
+        Tests nothing is deleted if an item doesn't exist
+        """
+        name = str(uuid.uuid4())
+        deleted = ticktick_client.delete_from_local_state(name=name)
+        assert not deleted  # Assert that nothing was deleted
