@@ -3,9 +3,7 @@ Module for testing api.py
 """
 
 import pytest
-import httpx
 import uuid
-import os
 
 from ticktick.api import TickTickClient
 from ticktick.managers.projects import ProjectManager
@@ -16,7 +14,7 @@ from ticktick.managers.pomo import PomoManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.oauth2 import OAuth2
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 
 @pytest.yield_fixture(scope='module')
@@ -201,7 +199,7 @@ class TestParseMethods:
         """
         Tests proper parsing of the ID from an Etag response
         """
-        d = {"id2etag":{"MyTag":"vxzpwo38"},"id2error":{}}
+        d = {"id2etag": {"MyTag": "vxzpwo38"}, "id2error": {}}
         expected_etag = "vxzpwo38"
         assert ticktick_client.parse_etag(d) == expected_etag
 
@@ -209,9 +207,9 @@ class TestParseMethods:
         """
         Tests proper parsing of multiple ID's from an Etag response
         """
-        d = {'id2etag':{"MyTag":"vxzpwo38", "MyTag2":"vxzpwo38"},
-             "id2error":{}}
-        expected_etags = ["vxzpwo38","vxzpwo38"]
+        d = {'id2etag': {"MyTag": "vxzpwo38", "MyTag2": "vxzpwo38"},
+             "id2error": {}}
+        expected_etags = ["vxzpwo38", "vxzpwo38"]
         returned = ticktick_client.parse_etag(d, multiple=True)
         assert len(returned) == 2
         assert expected_etags[0] in returned
