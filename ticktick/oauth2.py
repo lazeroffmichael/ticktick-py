@@ -24,13 +24,16 @@ class OAuth2:
                  redirect_uri: str,
                  scope: str = "tasks:write tasks:read",  # only available options right now
                  state=None,
-                 session=None):
+                 session=None,
+                 env_key=None,
+                 check_cache=True
+                 ):
         # If a proper session is passed then we will just use the existing session
         if isinstance(session, httpx.Client):
-            self._session = session
+            self.session = session
         else:
             # build a new session
-            self._session = httpx.Client()
+            self.session = httpx.Client()
 
         # Set the client_id
         self._client_id = client_id
@@ -55,6 +58,9 @@ class OAuth2:
 
         # Set the access token
         self._access_token_info = None
+
+        # get access token
+        self.get_access_token(check_cache=check_cache, check_env=env_key)
 
     def get_auth_url(self):
         """
@@ -165,7 +171,7 @@ class OAuth2:
             RunTimeError: If the request could not be completed.
         """
 
-        response = self._session.post(url, **kwargs)
+        response = self.session.post(url, **kwargs)
         if response.status_code != 200:
             raise RuntimeError("POST request could not be completed")
 

@@ -17,9 +17,10 @@ def oauth_client_fake():
     client_id = "aPzhUPvXPaDgAXwznM"
     client_secret = "hyE^TaeRiM^EirOicoC~oNNusWu5fLlA"
     redirect_uri = "http://127.0.0.1:8080"
-    auth_client = OAuth2(client_id=client_id,
-                         client_secret=client_secret,
-                         redirect_uri=redirect_uri)
+    with patch('ticktick.oauth2.OAuth2.get_access_token'):
+        auth_client = OAuth2(client_id=client_id,
+                             client_secret=client_secret,
+                             redirect_uri=redirect_uri)
     yield auth_client
 
 
@@ -32,12 +33,13 @@ class TestInitMethod:
         client_id = str(uuid.uuid4())
         client_secret = str(uuid.uuid4())
         redirect_uri = str(uuid.uuid4())
-        auth = OAuth2(client_id=client_id,
-                      client_secret=client_secret,
-                      redirect_uri=redirect_uri)
+        with patch('ticktick.oauth2.OAuth2.get_access_token'):
+            auth = OAuth2(client_id=client_id,
+                          client_secret=client_secret,
+                          redirect_uri=redirect_uri)
 
         # assert the members match
-        assert isinstance(auth._session, httpx.Client)
+        assert isinstance(auth.session, httpx.Client)
         assert auth._client_id == client_id
         assert auth._client_secret == client_secret
         assert auth._redirect_uri == redirect_uri
@@ -55,11 +57,12 @@ class TestInitMethod:
         client_id = str(uuid.uuid4())
         client_secret = str(uuid.uuid4())
         redirect_uri = str(uuid.uuid4())
-        auth = OAuth2(client_id=client_id,
-                      client_secret=client_secret,
-                      redirect_uri=redirect_uri,
-                      session=session)
-        assert auth._session == session
+        with patch('ticktick.oauth2.OAuth2.get_access_token'):
+            auth = OAuth2(client_id=client_id,
+                          client_secret=client_secret,
+                          redirect_uri=redirect_uri,
+                          session=session)
+        assert auth.session == session
 
     def test_session_passing_fail(self):
         """
@@ -69,12 +72,13 @@ class TestInitMethod:
         client_id = str(uuid.uuid4())
         client_secret = str(uuid.uuid4())
         redirect_uri = str(uuid.uuid4())
-        auth = OAuth2(client_id=client_id,
-                      client_secret=client_secret,
-                      redirect_uri=redirect_uri,
-                      session=session)
-        assert auth._session != session
-        assert isinstance(auth._session, httpx.Client)
+        with patch('ticktick.oauth2.OAuth2.get_access_token'):
+            auth = OAuth2(client_id=client_id,
+                          client_secret=client_secret,
+                          redirect_uri=redirect_uri,
+                          session=session)
+        assert auth.session != session
+        assert isinstance(auth.session, httpx.Client)
 
 
 class TestURLMethods:

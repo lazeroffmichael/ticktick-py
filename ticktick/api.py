@@ -23,7 +23,7 @@ class TickTickClient:
         Arguments:
             username: TickTick Username
             password: TickTick Password
-            oauth: Oauth2 manager
+            oauth: OAuth2 manager
 
         Raises:
             RunTimeError: If the login was not successful.
@@ -32,18 +32,15 @@ class TickTickClient:
 
         self.access_token = ''
         self.cookies = {}
-        self.session = httpx.Client()
         self.time_zone = ''
         self.profile_id = ''
         self.inbox_id = ''
         self.state = {}
         self.reset_local_state()
         self.oauth_manager = oauth
+        self._session = self.oauth_manager.session
 
-        self._login(username, password)
-
-        self._settings()
-        self.sync()
+        self._prepare_session(username, password)
 
         # Mangers for the different operations
         self.focus = FocusTimeManager(self)
@@ -53,6 +50,14 @@ class TickTickClient:
         self.settings = SettingsManager(self)
         self.tag = TagsManager(self)
         self.task = TaskManager(self)
+
+    def _prepare_session(self, username, password):
+        """
+        Creates all the necessary calls to prepare the session
+        """
+        self._login(username, password)
+        self._settings()
+        self.sync()
 
     def reset_local_state(self):
         """
@@ -107,7 +112,6 @@ class TickTickClient:
         if response.status_code != 200:
             raise RuntimeError(error_message)
 
-    @logged_in
     def _settings(self) -> httpx:
         """
         Sets the time_zone and profile_id.
@@ -127,7 +131,6 @@ class TickTickClient:
 
         return response
 
-    @logged_in
     def sync(self):
         """
         Populates the `TickTickClient` [`state`](api.md#state) dictionary with the contents of your account.
