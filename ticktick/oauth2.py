@@ -57,7 +57,7 @@ class OAuth2:
         self._cache = CacheHandler()
 
         # Set the access token
-        self._access_token_info = None
+        self.access_token_info = None
 
         # get access token
         self.get_access_token(check_cache=check_cache, check_env=env_key)
@@ -192,10 +192,10 @@ class OAuth2:
         token dictionary)
         """
         # check the local state for if the access token exists
-        if self._access_token_info is not None:
-            token_info = self.validate_token(self._access_token_info)
+        if self.access_token_info is not None:
+            token_info = self.validate_token(self.access_token_info)
             if token_info is not None:
-                self._access_token_info = token_info
+                self.access_token_info = token_info
                 return token_info["access_token"]
 
         # check if in the environment the access token is set
@@ -209,7 +209,7 @@ class OAuth2:
                                  " in a string literal")
             token_info = self.validate_token(converted_token_dict)
             if token_info is not None:
-                self._access_token_info = token_info
+                self.access_token_info = token_info
                 return token_info["access_token"]
 
         # check if the cache file exists with the token
@@ -217,12 +217,12 @@ class OAuth2:
             token_info = self.validate_token(self._cache.get_cached_token())
             # validate token will always return a valid token
             if token_info is not None:
-                self._access_token_info = token_info
+                self.access_token_info = token_info
                 return token_info["access_token"]
 
         # access token is not stored anywhere, request a new token
         token_info = self._request_access_token()
-        self._access_token_info = token_info
+        self.access_token_info = token_info
         return token_info["access_token"]
 
     @staticmethod

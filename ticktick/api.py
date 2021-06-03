@@ -1,18 +1,21 @@
 import httpx
 
-from ticktick.managers.check_logged_in import logged_in
-from ticktick.managers.projects import ProjectManager
-from ticktick.managers.tasks import TaskManager
 from ticktick.managers.focus import FocusTimeManager
 from ticktick.managers.habits import HabitManager
 from ticktick.managers.pomo import PomoManager
+from ticktick.managers.projects import ProjectManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
+from ticktick.managers.tasks import TaskManager
 from ticktick.oauth2 import OAuth2
 
 
 class TickTickClient:
+
     BASE_URL = 'https://api.ticktick.com/api/v2/'
+
+    OPEN_API_BASE_URL = 'https://api.ticktick.com'
+
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
     def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
@@ -172,7 +175,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.session.post(url, **kwargs)
+        response = self._session.post(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -194,7 +197,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.session.get(url, **kwargs)
+        response = self._session.get(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -216,7 +219,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.session.delete(url, **kwargs)
+        response = self._session.delete(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:
@@ -238,7 +241,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.session.put(url, **kwargs)
+        response = self._session.put(url, **kwargs)
         self.check_status_code(response, 'Could Not Complete Request')
 
         try:

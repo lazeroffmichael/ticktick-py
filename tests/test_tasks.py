@@ -12,20 +12,20 @@ def test_time_checks_start_after_end(client):
     start = datetime.datetime(2022, 1, 5)
     end = datetime.datetime(2022, 1, 2)
     with pytest.raises(ValueError):
-        client.task._time_checks(start_date=start, end_date=end)
+        client.task.time_conversions(start_date=start, end_date=end)
 
 
 def test_invalid_time_zone(client):
     """Tests exception raised if time zone not valid"""
     tz = 'Yeah this not right'
     with pytest.raises(ValueError):
-        client.task._time_checks(time_zone=tz)
+        client.task.time_conversions(time_zone=tz)
 
 
 def test_time_checks_proper_parse_start(client):
     """Tests proper parsing of date with only start_date"""
     start = datetime.datetime(2022, 1, 5)
-    dates = client.task._time_checks(start)
+    dates = client.task.time_conversions(start)
     assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['isAllDay']
@@ -33,7 +33,7 @@ def test_time_checks_proper_parse_start(client):
 
 def test_time_checks_proper_parse_end(client):
     end = datetime.datetime(2022, 1, 5)
-    dates = client.task._time_checks(end)
+    dates = client.task.time_conversions(end)
     assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert dates['isAllDay']
@@ -42,7 +42,7 @@ def test_time_checks_proper_parse_end(client):
 def test_time_checks_proper_parse_start_not_all_day(client):
     """Tests proper date parse of not all day"""
     start = datetime.datetime(2022, 1, 5, 14, 56, 34)
-    dates = client.task._time_checks(start)
+    dates = client.task.time_conversions(start)
     assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert not dates['isAllDay']
@@ -50,7 +50,7 @@ def test_time_checks_proper_parse_start_not_all_day(client):
 
 def test_time_checks_proper_parse_end_not_all_day(client):
     end = datetime.datetime(2022, 1, 5, 16, 56, 45)
-    dates = client.task._time_checks(end)
+    dates = client.task.time_conversions(end)
     assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
     assert not dates['isAllDay']
@@ -60,7 +60,7 @@ def test_time_all_day_range(client):
     start = datetime.datetime(2022, 1, 5)
     end = datetime.datetime(2022, 1, 8)
     expected = datetime.datetime(2022, 1, 9)
-    dates = client.task._time_checks(start, end)
+    dates = client.task.time_conversions(start, end)
     assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']
@@ -70,7 +70,7 @@ def test_time_all_day_range_end_of_month(client):
     start = datetime.datetime(2022, 1, 28)
     end = datetime.datetime(2022, 1, 31)
     expected = datetime.datetime(2022, 2, 1)
-    dates = client.task._time_checks(start, end)
+    dates = client.task.time_conversions(start, end)
     assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']
@@ -80,7 +80,7 @@ def test_time_all_day_range_end_of_year(client):
     start = datetime.datetime(2022, 12, 28)
     end = datetime.datetime(2022, 12, 31)
     expected = datetime.datetime(2023, 1, 1)
-    dates = client.task._time_checks(start, end)
+    dates = client.task.time_conversions(start, end)
     assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
     assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
     assert dates['isAllDay']

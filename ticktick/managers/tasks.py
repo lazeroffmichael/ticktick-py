@@ -10,368 +10,482 @@ from ticktick.managers.check_logged_in import logged_in
 from calendar import monthrange
 
 
+# TODO Implement support for dates
+
 class TaskManager:
     """
     Handles all interactions for tasks.
     """
     PRIORITY_DICTIONARY = {'none': 0, 'low': 1, 'medium': 3, 'high': 5}
 
+    TASK_CREATE_ENDPOINT = "/open/v1/task"
+
     def __init__(self, client_class):
+        # ._client is a reference to the original client_class
         self._client = client_class
-        self.access_token = self._client.access_token
 
-    @logged_in
-    def create(self,
-               name: str,
-               start=None,
-               end=None,
-               priority: str = 'none',
-               project: str = None,
-               tags: list = None,
-               content: str = '',
-               tz: str = None,
-               ) -> dict:
+        # declare access token
+        self.oauth_access_token = ''
+
+        # set access token to valid oauth access token if available
+        if self._client.oauth_manager.access_token_info is not None:
+            self.oauth_access_token = self._client.oauth_manager.access_token_info['access_token']
+
+        # create header dictionary
+        self.headers = {'Content-Type': 'application/json',
+                        'Authorization': 'Bearer {}'.format(self.oauth_access_token)}
+
+    def _generate_create_url(self):
         """
-        Create a task. This method supports single and batch task creation.
-
-        Arguments:
-            name: Any string is valid.
-            start (datetime): Desired start time.
-            end (datetime): Desired end time.
-            priority: For a priority other than 'none': 'low', 'medium', 'high'.
-            project: The id of the list (project) you want the task to be created in. The default will be your inbox.
-            tags: Single string for the label of the tag, or a list of strings of labels for many tags.
-            content: Desired text to go into the 'Description' field in the task.
-            tz: Timezone string if you want to make your task for a timezone other than the timezone linked to your TickTick account.
-
-        Returns:
-            Dictionary of created task object.
-
-        Raises:
-            TypeError: If any of the parameter types do not match as specified in the parameters table.
-            RunTimeError: If the task could not be created successfully.
-
-        !!! example "Create A Single Task"
-            Creating a single task is simple - specify whatever parameters you want directly.
-
-            Creating a single task will return the dictionary object of the created task.
-
-            === "Just a Name"
-
-                ```python
-                title = "Molly's Birthday"
-                task = client.task.create(title)
-                ```
-
-                ??? success "Result"
-                    [![task-just-name.png](https://i.postimg.cc/TPDkqYwC/task-just-name.png)](https://postimg.cc/069d9v7w)
-
-            === "Priority"
-
-                Priorities can be changed using the following strings:
-
-                - 'none' : <span style="color:grey"> *Grey* </span>
-                - 'low' : <span style="color:Blue"> *Blue* </span>
-                - 'medium' : <span style="color:#f5c71a"> *Yellow* </span>
-                - 'high' : <span style="color:Red"> *Red* </span>
-
-                ```python
-                title = "Molly's Birthday"
-                task = client.task.create(title, priority = 'medium')
-                ```
-
-                ??? success "Result"
-                    [![task-priority.png](https://i.postimg.cc/QdrvMyqF/task-priority.png)](https://postimg.cc/ZCVw7j2m)
-
-            === "All Day Date"
-
-                An all day task is specified by using a `datetime` object without any hours, minutes, or seconds.
-                You can pass your datetime object using either `start` or `end` for all day tasks.
-
-                ```python
-                date = datetime(2022, 7, 5)  # 7/5/2022
-                title = "Molly's Birthday"
-                task = client.task.create(title, start=date, priority='medium')
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![start-date.png](https://i.postimg.cc/PfQwcLF0/start-date.png)](https://postimg.cc/Lhh5gsSV)
-
-
-
-
-            === "Specific Duration"
-
-                A specific duration can be set by using `datetime` objects and specifying both the
-                start and end times.
-
-                ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                task = client.task.create(title, start=start_time, end=end_time, priority='medium')
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![duration2.png](https://i.postimg.cc/5tzHmjC7/duration2.png)](https://postimg.cc/xk0TffgM)
-
-            === "Content"
-
-                Content can be any string you want. Use escape sequences for newlines, tabs, etc.
-
-                ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                task = client.task.create(title,
-                                          start=start_time,
-                                          end=end_time,
-                                          priority='medium',
-                                          content=remember)
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![content2.png](https://i.postimg.cc/285VK0WB/content2.png)](https://postimg.cc/SjwSX7Dy)
-
-            === "Tags"
-
-                **_Single Tag_:**
-
-                A single tag can be passed as a simple string for the name. The tag will
-                be created if it doesn't already exist.
-
-                ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                tag = 'Party'
-                task = client.task.create(title,
-                                          start=start_time,
-                                          end=end_time,
-                                          priority='medium',
-                                          content=remember,
-                                          tags=tag)
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![tags1.png](https://i.postimg.cc/Y9ppmSfm/tags1.png)](https://postimg.cc/t1M0KpcX)
-
-                **_Multiple Tags_:**
-
-                Multiple tags can be added to a task by including all the desired tag names
-                in a list.
-
-                ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                tag = ['Party', 'Friends', 'Food']
-                task = client.task.create(title,
-                                          start=start_time,
-                                          end=end_time,
-                                          priority='medium',
-                                          content=remember,
-                                          tags=tag)
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![tags2.png](https://i.postimg.cc/7PtxfwCf/tags2.png)](https://postimg.cc/3WpMqMFT)
-
-            === "Different Time Zone"
-
-                To create the task for a different time zone pass in a time zone string.
-
-                [Time Zone Help](/usage/helpers/#time-zones)
-
-                ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                tag = ['Party', 'Friends', 'Food']
-                timezone = 'America/Costa_Rica'  # Notice the time zone in the result image
-                task = client.task.create(title,
-                                          start=start_time,
-                                          end=end_time,
-                                          priority='medium',
-                                          content=remember,
-                                          tags=tag,
-                                          tz=timezone)
-                ```
-
-                ??? success "Result"
-                    [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
-
-                    ---
-
-                    [![tz1.png](https://i.postimg.cc/dtrvVdGV/tz1.png)](https://postimg.cc/BXSRhjhr)
-
-            === "Different Project"
-
-                !!! info
-                    To create your task inside of a different [project](projects.md) other than your inbox,
-                    pass in the ID corresponding to the [project](projects.md) that you want.
-
-                !!! note
-                    Your [project](projects.md) must exist before the creation of the task.
-
-                ```python
-                # Lets assume that we have a project that is already created and named 'Birthday's'
-
-                project_obj = client.get_by_fields(name="Birthday's", search='projects')  # Get the list (project) object
-                birthdays_id = project_obj['id']  # Obtain the id of the object
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                tag = ['Party', 'Friends', 'Food']
-                task = client.task.create(title,
-                              start=start_time,
-                              end=end_time,
-                              priority='medium',
-                              content=remember,
-                              tags=tag,
-                              project=birthdays_id)
-                ```
-
-                ??? success "Result"
-
-                    [![different-list1.png](https://i.postimg.cc/ncN4vXR5/different-list1.png)](https://postimg.cc/1fcVS3Zc)
-
-                    ---
-
-                    [![different-list2.png](https://i.postimg.cc/Mpz8WmVb/different-list2.png)](https://postimg.cc/0bX4nmtb)
-
-        !!! example "Creating Multiple Tasks At Once (Batch)"
-
-            Creating multiple tasks is also simple, however we have to create the individual
-            task objects before passing them to the `create` method. This is efficient on resources if you need
-            to create multiple tasks at a single time since the same amount of requests will be required no
-            matter how many tasks are being created at once.
-
-            This is accomplished using the [`builder`][managers.tasks.TaskManager.builder] method. Create the task objects with
-            [`builder`][managers.tasks.TaskManager.builder] and pass the objects you want to create in a list to the create method.
-
-            If the creation was successful, the created tasks will be returned in the same order as the input in a list. All parameters
-            supported with creating a single task are supported here as well.
-
-            ```python
-            # Create three tasks in the inbox
-            task1 = client.task.builder('Hello I Am Task 1')
-            task2 = client.task.builder('Hello I Am Task 2')
-            task3 = client.task.builder('Hello I Am Task 3')
-            task_objs = [task1, task2, task3]
-            created_tasks = client.task.create(task_objs)
-            ```
-
-            ??? success "Result"
-
-                [![batch-task.png](https://i.postimg.cc/J0tq8nQW/batch-task.png)](https://postimg.cc/GTwYJbNM)
-
+        Returns the endpoint url for task creation
         """
-        if isinstance(name, list):
-            # If task name is a list, we will batch create objects
-            obj = name
-            batch = True
-        # Get task object
-        elif isinstance(name, str):
-            batch = False
-            obj = self.builder(name=name,
-                               start=start,
-                               end=end,
-                               priority=priority,
-                               project=project,
-                               tags=tags,
-                               content=content,
-                               tz=tz)
-            obj = [obj]
 
-        else:
-            raise TypeError(f"Required Positional Argument Must Be A String or List of Task Objects")
+        CREATE_ENDPOINT = "/open/v1/task"
+        return self._client.OPEN_API_BASE_URL + CREATE_ENDPOINT
 
-        tag_list = []
-        for o in obj:
-            for tag in o['tags']:
-                if self._client.get_by_fields(label=tag, search='tags'):
-                    continue  # Dont create the tag if it already exists
-                tag_obj = self._client.tag.builder(tag)
-                same = False
-                for objs in tag_list:
-                    if objs['label'] == tag_obj['label']:
-                        same = True
-                if not same:
-                    tag_list.append(tag_obj)
+    def create(self, task):
+        """
+        Create a task.
+        """
 
-        # Batch create the tags
-        if tag_list:
-            tags = self._client.tag.create(tag_list)
+        # generate url
+        url = self._generate_create_url()
 
-        if not batch:  # For a single task we will just send it to the update
-            return self._client.task.update(obj)
+        # make request
+        response = self._client.http_post(url=url, json=task, headers=self.headers)
 
-        else:
-            # We are going to create a unique identifier and append it to content.
-            # We will be able to distinguish which task is which by this identifier
-            # Once we find the tasks, we will make one more call to update to remove the
-            # Identifier from the content string.
-            ids = []
-            for task in obj:
-                identifier = str(uuid.uuid4())  # Identifier
-                ids.append(identifier)
-                task['content'] += identifier  # Append the identifier onto the end of it
-
-        url = self._client.BASE_URL + 'batch/task'
-        payload = {
-            'add': obj
-        }
-        response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
-        if response.status_code != 200 and response.status_code != 500:
-            raise RuntimeError('Could Not Complete Request')
-
+        # sync local state
         self._client.sync()
-        # We will find the tasks by their identifiers
-        update_list = [''] * len(obj)
-        if batch:
-            for tsk in self._client.state['tasks'][::-1]:  # Task List
-                if len(ids) == 0:
-                    break
-                id = 0
-                for id in range(len(ids)):
-                    try:
-                        if ids[id] in tsk['content']:
-                            tsk['content'] = tsk['content'].replace(ids[id], '')
-                            update_list[id] = tsk
-                            del ids[id]
-                            break
-                    except:
-                        break
 
-        return self._client.task.update(update_list)
+        # TODO: Figure out tags
+        # since the openapi does not explicitly support tag creation - lets create a new tag for the new task
+        # try:
+        #     tags = task['tag']
+        #     if isinstance(tags, str):
+        #         # single tag -> check to see if it exists before creating another one
+        #         search = self._client.get_by_fields(name=tags, search='tags')
+        #     elif:
+        #         isinstance(tags, list)
+        #         # multiple tags
+        #         pass
+        # except KeyError:
+        #     pass
 
-    @logged_in
+        # return response
+        return response
+
+    def _generate_update_url(self, taskID: str):
+        """
+        Generates the url for updating a task based off the taskID
+        """
+
+        UPDATE_ENDPOINT = f"/open/v1/task/{taskID}"
+        return self._client.OPEN_API_BASE_URL + UPDATE_ENDPOINT
+
+    def update(self, task):
+        """
+        Update a task. The task should already be created.
+        """
+
+        # TODO: Make tags work
+
+        # generate url
+        url = self._generate_update_url(task['id'])
+
+        # make request
+        response = self._client.http_post(url=url, json=task, headers=self.headers)
+
+        # sync local state
+        self._client.sync()
+
+        # return response
+        return response
+
+    def _generate_mark_complete_url(self, projectID, taskID):
+        """
+        Generates the url for marking a task as complete based off the projectID and taskID
+        """
+
+        COMPLETE_ENDPOINT = f"/open/v1/project/{projectID}/task/{taskID}/complete"
+        return self._client.OPEN_API_BASE_URL + COMPLETE_ENDPOINT
+
+    def complete(self, task):
+        """
+        Marks a task as complete
+        """
+
+        # generate url
+        url = self._generate_mark_complete_url(task['projectId'], task['id'])
+
+        # make request
+        response = self._client.http_post(url=url, json=task, headers=self.headers)
+
+        # sync local state
+        self._client.sync()
+
+        if response == '':
+            return task
+
+        # return response
+        return response
+
+
+
+
+
+
+    # @logged_in
+    # def create(self,
+    #            name: str,
+    #            start=None,
+    #            end=None,
+    #            priority: str = 'none',
+    #            project: str = None,
+    #            tags: list = None,
+    #            content: str = '',
+    #            tz: str = None,
+    #            ) -> dict:
+    #     """
+    #     Create a task. This method supports single and batch task creation.
+    #
+    #     Arguments:
+    #         name: Any string is valid.
+    #         start (datetime): Desired start time.
+    #         end (datetime): Desired end time.
+    #         priority: For a priority other than 'none': 'low', 'medium', 'high'.
+    #         project: The id of the list (project) you want the task to be created in. The default will be your inbox.
+    #         tags: Single string for the label of the tag, or a list of strings of labels for many tags.
+    #         content: Desired text to go into the 'Description' field in the task.
+    #         tz: Timezone string if you want to make your task for a timezone other than the timezone linked to your TickTick account.
+    #
+    #     Returns:
+    #         Dictionary of created task object.
+    #
+    #     Raises:
+    #         TypeError: If any of the parameter types do not match as specified in the parameters table.
+    #         RunTimeError: If the task could not be created successfully.
+    #
+    #     !!! example "Create A Single Task"
+    #         Creating a single task is simple - specify whatever parameters you want directly.
+    #
+    #         Creating a single task will return the dictionary object of the created task.
+    #
+    #         === "Just a Name"
+    #
+    #             ```python
+    #             title = "Molly's Birthday"
+    #             task = client.task.create(title)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![task-just-name.png](https://i.postimg.cc/TPDkqYwC/task-just-name.png)](https://postimg.cc/069d9v7w)
+    #
+    #         === "Priority"
+    #
+    #             Priorities can be changed using the following strings:
+    #
+    #             - 'none' : <span style="color:grey"> *Grey* </span>
+    #             - 'low' : <span style="color:Blue"> *Blue* </span>
+    #             - 'medium' : <span style="color:#f5c71a"> *Yellow* </span>
+    #             - 'high' : <span style="color:Red"> *Red* </span>
+    #
+    #             ```python
+    #             title = "Molly's Birthday"
+    #             task = client.task.create(title, priority = 'medium')
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![task-priority.png](https://i.postimg.cc/QdrvMyqF/task-priority.png)](https://postimg.cc/ZCVw7j2m)
+    #
+    #         === "All Day Date"
+    #
+    #             An all day task is specified by using a `datetime` object without any hours, minutes, or seconds.
+    #             You can pass your datetime object using either `start` or `end` for all day tasks.
+    #
+    #             ```python
+    #             date = datetime(2022, 7, 5)  # 7/5/2022
+    #             title = "Molly's Birthday"
+    #             task = client.task.create(title, start=date, priority='medium')
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![start-date.png](https://i.postimg.cc/PfQwcLF0/start-date.png)](https://postimg.cc/Lhh5gsSV)
+    #
+    #
+    #
+    #
+    #         === "Specific Duration"
+    #
+    #             A specific duration can be set by using `datetime` objects and specifying both the
+    #             start and end times.
+    #
+    #             ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             task = client.task.create(title, start=start_time, end=end_time, priority='medium')
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![duration2.png](https://i.postimg.cc/5tzHmjC7/duration2.png)](https://postimg.cc/xk0TffgM)
+    #
+    #         === "Content"
+    #
+    #             Content can be any string you want. Use escape sequences for newlines, tabs, etc.
+    #
+    #             ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             task = client.task.create(title,
+    #                                       start=start_time,
+    #                                       end=end_time,
+    #                                       priority='medium',
+    #                                       content=remember)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![content2.png](https://i.postimg.cc/285VK0WB/content2.png)](https://postimg.cc/SjwSX7Dy)
+    #
+    #         === "Tags"
+    #
+    #             **_Single Tag_:**
+    #
+    #             A single tag can be passed as a simple string for the name. The tag will
+    #             be created if it doesn't already exist.
+    #
+    #             ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             tag = 'Party'
+    #             task = client.task.create(title,
+    #                                       start=start_time,
+    #                                       end=end_time,
+    #                                       priority='medium',
+    #                                       content=remember,
+    #                                       tags=tag)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![tags1.png](https://i.postimg.cc/Y9ppmSfm/tags1.png)](https://postimg.cc/t1M0KpcX)
+    #
+    #             **_Multiple Tags_:**
+    #
+    #             Multiple tags can be added to a task by including all the desired tag names
+    #             in a list.
+    #
+    #             ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             tag = ['Party', 'Friends', 'Food']
+    #             task = client.task.create(title,
+    #                                       start=start_time,
+    #                                       end=end_time,
+    #                                       priority='medium',
+    #                                       content=remember,
+    #                                       tags=tag)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![tags2.png](https://i.postimg.cc/7PtxfwCf/tags2.png)](https://postimg.cc/3WpMqMFT)
+    #
+    #         === "Different Time Zone"
+    #
+    #             To create the task for a different time zone pass in a time zone string.
+    #
+    #             [Time Zone Help](/usage/helpers/#time-zones)
+    #
+    #             ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             tag = ['Party', 'Friends', 'Food']
+    #             timezone = 'America/Costa_Rica'  # Notice the time zone in the result image
+    #             task = client.task.create(title,
+    #                                       start=start_time,
+    #                                       end=end_time,
+    #                                       priority='medium',
+    #                                       content=remember,
+    #                                       tags=tag,
+    #                                       tz=timezone)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 [![start-date-2.png](https://i.postimg.cc/SNctHGpk/start-date-2.png)](https://postimg.cc/2V8wZh6K)
+    #
+    #                 ---
+    #
+    #                 [![tz1.png](https://i.postimg.cc/dtrvVdGV/tz1.png)](https://postimg.cc/BXSRhjhr)
+    #
+    #         === "Different Project"
+    #
+    #             !!! info
+    #                 To create your task inside of a different [project](projects.md) other than your inbox,
+    #                 pass in the ID corresponding to the [project](projects.md) that you want.
+    #
+    #             !!! note
+    #                 Your [project](projects.md) must exist before the creation of the task.
+    #
+    #             ```python
+    #             # Lets assume that we have a project that is already created and named 'Birthday's'
+    #
+    #             project_obj = client.get_by_fields(name="Birthday's", search='projects')  # Get the list (project) object
+    #             birthdays_id = project_obj['id']  # Obtain the id of the object
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             tag = ['Party', 'Friends', 'Food']
+    #             task = client.task.create(title,
+    #                           start=start_time,
+    #                           end=end_time,
+    #                           priority='medium',
+    #                           content=remember,
+    #                           tags=tag,
+    #                           project=birthdays_id)
+    #             ```
+    #
+    #             ??? success "Result"
+    #
+    #                 [![different-list1.png](https://i.postimg.cc/ncN4vXR5/different-list1.png)](https://postimg.cc/1fcVS3Zc)
+    #
+    #                 ---
+    #
+    #                 [![different-list2.png](https://i.postimg.cc/Mpz8WmVb/different-list2.png)](https://postimg.cc/0bX4nmtb)
+    #
+    #     !!! example "Creating Multiple Tasks At Once (Batch)"
+    #
+    #         Creating multiple tasks is also simple, however we have to create the individual
+    #         task objects before passing them to the `create` method. This is efficient on resources if you need
+    #         to create multiple tasks at a single time since the same amount of requests will be required no
+    #         matter how many tasks are being created at once.
+    #
+    #         This is accomplished using the [`builder`][managers.tasks.TaskManager.builder] method. Create the task objects with
+    #         [`builder`][managers.tasks.TaskManager.builder] and pass the objects you want to create in a list to the create method.
+    #
+    #         If the creation was successful, the created tasks will be returned in the same order as the input in a list. All parameters
+    #         supported with creating a single task are supported here as well.
+    #
+    #         ```python
+    #         # Create three tasks in the inbox
+    #         task1 = client.task.builder('Hello I Am Task 1')
+    #         task2 = client.task.builder('Hello I Am Task 2')
+    #         task3 = client.task.builder('Hello I Am Task 3')
+    #         task_objs = [task1, task2, task3]
+    #         created_tasks = client.task.create(task_objs)
+    #         ```
+    #
+    #         ??? success "Result"
+    #
+    #             [![batch-task.png](https://i.postimg.cc/J0tq8nQW/batch-task.png)](https://postimg.cc/GTwYJbNM)
+    #
+    #     """
+    #     if isinstance(name, list):
+    #         # If task name is a list, we will batch create objects
+    #         obj = name
+    #         batch = True
+    #     # Get task object
+    #     elif isinstance(name, str):
+    #         batch = False
+    #         obj = self.builder(name=name,
+    #                            start=start,
+    #                            end=end,
+    #                            priority=priority,
+    #                            project=project,
+    #                            tags=tags,
+    #                            content=content,
+    #                            tz=tz)
+    #         obj = [obj]
+    #
+    #     else:
+    #         raise TypeError(f"Required Positional Argument Must Be A String or List of Task Objects")
+    #
+    #     tag_list = []
+    #     for o in obj:
+    #         for tag in o['tags']:
+    #             if self._client.get_by_fields(label=tag, search='tags'):
+    #                 continue  # Dont create the tag if it already exists
+    #             tag_obj = self._client.tag.builder(tag)
+    #             same = False
+    #             for objs in tag_list:
+    #                 if objs['label'] == tag_obj['label']:
+    #                     same = True
+    #             if not same:
+    #                 tag_list.append(tag_obj)
+    #
+    #     # Batch create the tags
+    #     if tag_list:
+    #         tags = self._client.tag.create(tag_list)
+    #
+    #     if not batch:  # For a single task we will just send it to the update
+    #         return self._client.task.update(obj)
+    #
+    #     else:
+    #         # We are going to create a unique identifier and append it to content.
+    #         # We will be able to distinguish which task is which by this identifier
+    #         # Once we find the tasks, we will make one more call to update to remove the
+    #         # Identifier from the content string.
+    #         ids = []
+    #         for task in obj:
+    #             identifier = str(uuid.uuid4())  # Identifier
+    #             ids.append(identifier)
+    #             task['content'] += identifier  # Append the identifier onto the end of it
+    #
+    #     url = self._client.BASE_URL + 'batch/task'
+    #     payload = {
+    #         'add': obj
+    #     }
+    #     response = self._client.session.post(url, json=payload, cookies=self._client.cookies)
+    #     if response.status_code != 200 and response.status_code != 500:
+    #         raise RuntimeError('Could Not Complete Request')
+    #
+    #     self._client.sync()
+    #     # We will find the tasks by their identifiers
+    #     update_list = [''] * len(obj)
+    #     if batch:
+    #         for tsk in self._client.state['tasks'][::-1]:  # Task List
+    #             if len(ids) == 0:
+    #                 break
+    #             id = 0
+    #             for id in range(len(ids)):
+    #                 try:
+    #                     if ids[id] in tsk['content']:
+    #                         tsk['content'] = tsk['content'].replace(ids[id], '')
+    #                         update_list[id] = tsk
+    #                         del ids[id]
+    #                         break
+    #                 except:
+    #                     break
+    #
+    #     return self._client.task.update(update_list)
+
+
     def make_subtask(self, obj, parent: str):
         """
         Makes the passed task(s) sub-tasks to the parent task.
@@ -521,279 +635,276 @@ class TaskManager:
         else:
             return subtasks
 
-    @logged_in
-    def set_repeat(self, task_id: str):
-        pass
 
-    @logged_in
-    def update(self, obj):
-        """
-        Updates task(s) remotely. Supports single task update and batch task update.
+    # @logged_in
+    # def update(self, obj):
+    #     """
+    #     Updates task(s) remotely. Supports single task update and batch task update.
+    #
+    #     To update a task, change any field in it's dictionary directly then pass to the method.
+    #
+    #     !!! tip "For Help On What Fields Are Present In The Task Dictionaries"
+    #         [Example `TickTick` Task Dictionary](tasks.md#example-ticktick-task-dictionary)
+    #
+    #
+    #     Arguments:
+    #         obj (dict or list):
+    #             **Single Task (dict)**: The changed task dictionary object.
+    #
+    #             **Multiple Tasks (list)**: The changed task dictionary objects in a list.
+    #
+    #     Returns:
+    #         dict or list:
+    #         **Single Task (dict)**: The updated task dictionary object.
+    #
+    #         **Multiple Tasks (list)**: The updated task dictionary objects in a list.
+    #
+    #     Raises:
+    #         TypeError: If `obj` is not a dictionary or list.
+    #         RuntimeError: If the updating was unsuccessful.
+    #
+    #     !!! tip "Formatting Dates Help"
+    #         TickTick uses a certain syntax for their dates. To convert a datetime object to a compatible
+    #         string to be used for updating dates, see [convert_date_to_tick_tick_format][helpers.time_methods.convert_date_to_tick_tick_format]
+    #
+    #     !!! example "Updating Tasks"
+    #         === "Single Task Update"
+    #             Updating a single task requires changing the task dictionary directly, and then
+    #             passing the entire object to `update`.
+    #
+    #             ```python
+    #             # Lets say we have a task named "Hang out with Jon" that we want to rename to "Call Jon"
+    #             jon_task = client.get_by_fields(title='Hang out with Jon', search='tasks')
+    #             # Change the field directly
+    #             jon_task['title'] = 'Call Jon'
+    #             # Pass the entire object to update.
+    #             updated_jon_task = client.task.update(jon_task)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 The updated task dictionary is returned.
+    #
+    #                 ```python
+    #                 {'id': '5fff566fb04b355792c79417', 'projectId': 'inbox115781412', 'sortOrder': -101429947662336,
+    #                 'title': 'Call Jon', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
+    #                 'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T20:22:07.000+0000',
+    #                 'etag': '5qiug0q2', 'deleted': 0, 'createdTime': '2021-01-13T20:22:07.000+0000',
+    #                 'creator': 759365027, 'kind': 'TEXT'}
+    #                 ```
+    #
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104506247-f8f38c00-5599-11eb-9f8e-c4bbb256cf03.png)
+    #
+    #                 **After**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104506300-0e68b600-559a-11eb-952d-ac5d189535b4.png)
+    #
+    #         === "Multiple Task Update"
+    #             Updating multiple tasks requires changing the task dictionaries directly, and then
+    #             passing the dictionaries in a list to `update`.
+    #
+    #             ```python
+    #             # Lets say we have a task named "Hang out with Jon" that we want to rename to "Call Jon"
+    #             jon_task = client.get_by_fields(title='Hang out with Jon', search='tasks')
+    #             # Change the field directly
+    #             jon_task['title'] = 'Call Jon'
+    #
+    #             # Lets say we have another task named "Read Book" that we want to change the progress to 70%.
+    #             book_task = client.get_by_fields(title='Read Book', search='tasks')
+    #             # Change the field directly
+    #             book_task['progress'] = 70
+    #
+    #             # Create a list of the objects and pass to update
+    #             update_tasks = [jon_task, book_task]
+    #             updated = client.task.update(update_tasks)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 The updated task dictionaries are returned in a list.
+    #
+    #                 ```python
+    #                 [{'id': '5fff566fb04b355792c79417', 'projectId': 'inbox115781412', 'sortOrder': -101429947662336,
+    #                 'title': 'Call Jon', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
+    #                 'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T20:29:56.000+0000',
+    #                 'etag': 'nxahco6u', 'deleted': 0, 'createdTime': '2021-01-13T20:22:07.000+0000',
+    #                 'creator': 557493756, 'kind': 'TEXT'},
+    #
+    #                 {'id': '5fff584db04b355792c79430', 'projectId': 'inbox115781412', 'sortOrder': -102529459290112,
+    #                 'title': 'Read Book', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
+    #                 'status': 0, 'items': [], 'progress': 70, 'modifiedTime': '2021-01-13T20:30:05.000+0000',
+    #                 'etag': 'hdz5rbcj', 'deleted': 0, 'createdTime': '2021-01-13T20:30:05.000+0000',
+    #                 'creator': 557493756, 'kind': 'TEXT'}]
+    #                 ```
+    #
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104507072-15dc8f00-559b-11eb-9253-3629e1abc668.png)
+    #
+    #                 **After**
+    #
+    #                 Notice the progress icon located near the date now for "Read Book"
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104507219-4ae8e180-559b-11eb-99bf-f0a018c4ae5c.png)
+    #     """
+    #     if not isinstance(obj, dict) and not isinstance(obj, list):
+    #         raise TypeError("Task Objects Must Be A Dictionary or List of Dictionaries.")
+    #
+    #     if isinstance(obj, dict):
+    #         tasks = [obj]
+    #     else:
+    #         tasks = obj
+    #
+    #     url = self._client.BASE_URL + 'batch/task'
+    #     payload = {
+    #         'update': tasks
+    #     }
+    #     response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+    #     self._client.sync()
+    #
+    #     if len(tasks) == 1:
+    #         return self._client.get_by_id(self._client.parse_id(response), search='tasks')
+    #     else:
+    #         etag = response['id2etag']
+    #         etag2 = list(etag.keys())  # Tag names are out of order
+    #         labels = [x['id'] for x in tasks]  # Tag names are in order
+    #         items = [''] * len(tasks)  # Create enough spots for the objects
+    #         for tag in etag2:
+    #             index = labels.index(tag)  # Object of the index is here
+    #             found = self._client.get_by_id(labels[index], search='tasks')
+    #             items[index] = found  # Place at the correct index
+    #         return items
 
-        To update a task, change any field in it's dictionary directly then pass to the method.
-
-        !!! tip "For Help On What Fields Are Present In The Task Dictionaries"
-            [Example `TickTick` Task Dictionary](tasks.md#example-ticktick-task-dictionary)
-
-
-        Arguments:
-            obj (dict or list):
-                **Single Task (dict)**: The changed task dictionary object.
-
-                **Multiple Tasks (list)**: The changed task dictionary objects in a list.
-
-        Returns:
-            dict or list:
-            **Single Task (dict)**: The updated task dictionary object.
-
-            **Multiple Tasks (list)**: The updated task dictionary objects in a list.
-
-        Raises:
-            TypeError: If `obj` is not a dictionary or list.
-            RuntimeError: If the updating was unsuccessful.
-
-        !!! tip "Formatting Dates Help"
-            TickTick uses a certain syntax for their dates. To convert a datetime object to a compatible
-            string to be used for updating dates, see [convert_date_to_tick_tick_format][helpers.time_methods.convert_date_to_tick_tick_format]
-
-        !!! example "Updating Tasks"
-            === "Single Task Update"
-                Updating a single task requires changing the task dictionary directly, and then
-                passing the entire object to `update`.
-
-                ```python
-                # Lets say we have a task named "Hang out with Jon" that we want to rename to "Call Jon"
-                jon_task = client.get_by_fields(title='Hang out with Jon', search='tasks')
-                # Change the field directly
-                jon_task['title'] = 'Call Jon'
-                # Pass the entire object to update.
-                updated_jon_task = client.task.update(jon_task)
-                ```
-
-                ??? success "Result"
-                    The updated task dictionary is returned.
-
-                    ```python
-                    {'id': '5fff566fb04b355792c79417', 'projectId': 'inbox115781412', 'sortOrder': -101429947662336,
-                    'title': 'Call Jon', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
-                    'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T20:22:07.000+0000',
-                    'etag': '5qiug0q2', 'deleted': 0, 'createdTime': '2021-01-13T20:22:07.000+0000',
-                    'creator': 759365027, 'kind': 'TEXT'}
-                    ```
-
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104506247-f8f38c00-5599-11eb-9f8e-c4bbb256cf03.png)
-
-                    **After**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104506300-0e68b600-559a-11eb-952d-ac5d189535b4.png)
-
-            === "Multiple Task Update"
-                Updating multiple tasks requires changing the task dictionaries directly, and then
-                passing the dictionaries in a list to `update`.
-
-                ```python
-                # Lets say we have a task named "Hang out with Jon" that we want to rename to "Call Jon"
-                jon_task = client.get_by_fields(title='Hang out with Jon', search='tasks')
-                # Change the field directly
-                jon_task['title'] = 'Call Jon'
-
-                # Lets say we have another task named "Read Book" that we want to change the progress to 70%.
-                book_task = client.get_by_fields(title='Read Book', search='tasks')
-                # Change the field directly
-                book_task['progress'] = 70
-
-                # Create a list of the objects and pass to update
-                update_tasks = [jon_task, book_task]
-                updated = client.task.update(update_tasks)
-                ```
-
-                ??? success "Result"
-                    The updated task dictionaries are returned in a list.
-
-                    ```python
-                    [{'id': '5fff566fb04b355792c79417', 'projectId': 'inbox115781412', 'sortOrder': -101429947662336,
-                    'title': 'Call Jon', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
-                    'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T20:29:56.000+0000',
-                    'etag': 'nxahco6u', 'deleted': 0, 'createdTime': '2021-01-13T20:22:07.000+0000',
-                    'creator': 557493756, 'kind': 'TEXT'},
-
-                    {'id': '5fff584db04b355792c79430', 'projectId': 'inbox115781412', 'sortOrder': -102529459290112,
-                    'title': 'Read Book', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
-                    'status': 0, 'items': [], 'progress': 70, 'modifiedTime': '2021-01-13T20:30:05.000+0000',
-                    'etag': 'hdz5rbcj', 'deleted': 0, 'createdTime': '2021-01-13T20:30:05.000+0000',
-                    'creator': 557493756, 'kind': 'TEXT'}]
-                    ```
-
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104507072-15dc8f00-559b-11eb-9253-3629e1abc668.png)
-
-                    **After**
-
-                    Notice the progress icon located near the date now for "Read Book"
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104507219-4ae8e180-559b-11eb-99bf-f0a018c4ae5c.png)
-        """
-        if not isinstance(obj, dict) and not isinstance(obj, list):
-            raise TypeError("Task Objects Must Be A Dictionary or List of Dictionaries.")
-
-        if isinstance(obj, dict):
-            tasks = [obj]
-        else:
-            tasks = obj
-
-        url = self._client.BASE_URL + 'batch/task'
-        payload = {
-            'update': tasks
-        }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        self._client.sync()
-
-        if len(tasks) == 1:
-            return self._client.get_by_id(self._client.parse_id(response), search='tasks')
-        else:
-            etag = response['id2etag']
-            etag2 = list(etag.keys())  # Tag names are out of order
-            labels = [x['id'] for x in tasks]  # Tag names are in order
-            items = [''] * len(tasks)  # Create enough spots for the objects
-            for tag in etag2:
-                index = labels.index(tag)  # Object of the index is here
-                found = self._client.get_by_id(labels[index], search='tasks')
-                items[index] = found  # Place at the correct index
-            return items
-
-    @logged_in
-    def complete(self, ids):
-        """
-        Marks the task(s) as complete. Supports single task completion and batch task completion.
-
-        Arguments:
-            ids (str or list):
-                **Single Task (str)**: The ID string of the task.
-
-                **Multiple Tasks (list)**: A list of ID strings for the tasks.
-
-        Returns:
-            dict or list:
-            **Single Task (dict)**: The dictionary of the completed task.
-
-            **Multiple Tasks (list)**: A list of dictionaries for the completed tasks.
-
-        Raises:
-            TypeError: If `ids` is not a string or list.
-            ValueError: If `ids` is not a task that exists.
-            RuntimeError: If completing was unsuccessful.
-
-        !!! example "Task Completing"
-            === "Single Task Completion"
-                Pass the ID string of the task to complete.
-
-                ```python
-                # Lets assume that we have a task named "Go To Dentist" that we want to mark as complete.
-                dentist_task = client.get_by_fields(title='Go To Dentist', search='tasks')
-                complete_task = client.task.complete(dentist_task['id'])  # Pass the ID of the object
-                ```
-
-                ??? success "Result"
-                    The task is completed and the dictionary object returned.
-
-                    ```python
-                    {'id': '5fff5009b04b355792c79397', 'projectId': 'inbox115781412', 'sortOrder': -99230924406784,
-                    'title': 'Go To Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
-                    'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0, 'status': 2, 'items': [],
-                    'progress': 0, 'modifiedTime': '2021-01-13T19:56:11.000+0000', 'etag': 'djiiqso6', 'deleted': 0,
-                    'createdTime': '2021-01-13T19:54:49.000+0000', 'creator': 6147345572, 'kind': 'TEXT'}
-                    ```
-
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104503673-39510b00-5596-11eb-88df-88eeee9ab4b0.png)
-
-                    **After**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104504069-c4ca9c00-5596-11eb-96c9-5698e19989ea.png)
-
-            === "Multiple Tasks Completion"
-                Pass a list of ID strings to complete the tasks.
-
-                ```python
-                # Lets assume that we have a task named "Go To Dentist" and a task named "Go To Store"
-                dentist_task = client.get_by_fields(title='Go To Dentist', search='tasks')
-                store_task = client.get_by_fields(title='Go To Store', search='tasks')
-                ids = [dentist_task['id'], store_task['id']]
-                completed_tasks = client.task.complete(ids)
-                ```
-
-                ??? success "Result"
-                    The tasks are completed and the dictionary objects returned in a list.
-
-                    ```python
-                    [{'id': '5fff5009b04b355792c79397', 'projectId': 'inbox115781412', 'sortOrder': -99230924406784,
-                    'title': 'Go To Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [],
-                    'completedTime': '2021-01-13T19:57:00.285+0000', 'completedUserId': 115781412,
-                    'priority': 0, 'status': 2, 'items': [], 'progress': 0,
-                    'modifiedTime': '2021-01-13T19:56:11.000+0000', 'etag': 'qq9drp8d', 'deleted': 0,
-                    'createdTime': '2021-01-13T19:54:49.000+0000', 'creator': 215414317, 'kind': 'TEXT'},
-
-                    {'id': '5fff51f3b04b355792c793e6', 'projectId': 'inbox115781412', 'sortOrder': -100330436034560,
-                    'title': 'Go To Store', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [],
-                    'priority': 0, 'status': 2, 'items': [], 'progress': 0,
-                    'modifiedTime': '2021-01-13T20:02:59.000+0000', 'etag': 'be8m3g3x',
-                    'deleted': 0, 'createdTime': '2021-01-13T20:02:59.000+0000', 'creator': 215414317,
-                    'tags': [], 'kind': 'TEXT'}]
-                    ```
-
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104504451-4f130000-5597-11eb-9f92-386a6be10ca6.png)
-
-                    **After**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104504511-6a7e0b00-5597-11eb-9855-c4edce01713b.png)
-
-        """
-        if not isinstance(ids, str) and not isinstance(ids, list):
-            raise TypeError("Ids Must Be A String Or List Of Ids")
-
-        tasks = []
-        if isinstance(ids, str):
-            task = self._client.get_by_fields(id=ids, search='tasks')
-            if not task:
-                raise ValueError('The Task Does Not Exist To Mark As Complete')
-            task['status'] = 2  # Complete
-            tasks.append(task)
-        else:
-            for id in ids:
-                task = self._client.get_by_fields(id=id, search='tasks')
-                if not task:
-                    raise ValueError(f"'Task Id '{id}' Does Not Exist'")
-                task['status'] = 2  # Complete
-                tasks.append(task)
-
-        url = self._client.BASE_URL + 'batch/task'
-        payload = {
-            'update': tasks
-        }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-
-        self._client.sync()
-        if len(tasks) == 1:
-            return tasks[0]
-        else:
-            return tasks
+    # @logged_in
+    # def complete(self, ids):
+    #     """
+    #     Marks the task(s) as complete. Supports single task completion and batch task completion.
+    #
+    #     Arguments:
+    #         ids (str or list):
+    #             **Single Task (str)**: The ID string of the task.
+    #
+    #             **Multiple Tasks (list)**: A list of ID strings for the tasks.
+    #
+    #     Returns:
+    #         dict or list:
+    #         **Single Task (dict)**: The dictionary of the completed task.
+    #
+    #         **Multiple Tasks (list)**: A list of dictionaries for the completed tasks.
+    #
+    #     Raises:
+    #         TypeError: If `ids` is not a string or list.
+    #         ValueError: If `ids` is not a task that exists.
+    #         RuntimeError: If completing was unsuccessful.
+    #
+    #     !!! example "Task Completing"
+    #         === "Single Task Completion"
+    #             Pass the ID string of the task to complete.
+    #
+    #             ```python
+    #             # Lets assume that we have a task named "Go To Dentist" that we want to mark as complete.
+    #             dentist_task = client.get_by_fields(title='Go To Dentist', search='tasks')
+    #             complete_task = client.task.complete(dentist_task['id'])  # Pass the ID of the object
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 The task is completed and the dictionary object returned.
+    #
+    #                 ```python
+    #                 {'id': '5fff5009b04b355792c79397', 'projectId': 'inbox115781412', 'sortOrder': -99230924406784,
+    #                 'title': 'Go To Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
+    #                 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0, 'status': 2, 'items': [],
+    #                 'progress': 0, 'modifiedTime': '2021-01-13T19:56:11.000+0000', 'etag': 'djiiqso6', 'deleted': 0,
+    #                 'createdTime': '2021-01-13T19:54:49.000+0000', 'creator': 6147345572, 'kind': 'TEXT'}
+    #                 ```
+    #
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104503673-39510b00-5596-11eb-88df-88eeee9ab4b0.png)
+    #
+    #                 **After**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104504069-c4ca9c00-5596-11eb-96c9-5698e19989ea.png)
+    #
+    #         === "Multiple Tasks Completion"
+    #             Pass a list of ID strings to complete the tasks.
+    #
+    #             ```python
+    #             # Lets assume that we have a task named "Go To Dentist" and a task named "Go To Store"
+    #             dentist_task = client.get_by_fields(title='Go To Dentist', search='tasks')
+    #             store_task = client.get_by_fields(title='Go To Store', search='tasks')
+    #             ids = [dentist_task['id'], store_task['id']]
+    #             completed_tasks = client.task.complete(ids)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 The tasks are completed and the dictionary objects returned in a list.
+    #
+    #                 ```python
+    #                 [{'id': '5fff5009b04b355792c79397', 'projectId': 'inbox115781412', 'sortOrder': -99230924406784,
+    #                 'title': 'Go To Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [],
+    #                 'completedTime': '2021-01-13T19:57:00.285+0000', 'completedUserId': 115781412,
+    #                 'priority': 0, 'status': 2, 'items': [], 'progress': 0,
+    #                 'modifiedTime': '2021-01-13T19:56:11.000+0000', 'etag': 'qq9drp8d', 'deleted': 0,
+    #                 'createdTime': '2021-01-13T19:54:49.000+0000', 'creator': 215414317, 'kind': 'TEXT'},
+    #
+    #                 {'id': '5fff51f3b04b355792c793e6', 'projectId': 'inbox115781412', 'sortOrder': -100330436034560,
+    #                 'title': 'Go To Store', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [],
+    #                 'priority': 0, 'status': 2, 'items': [], 'progress': 0,
+    #                 'modifiedTime': '2021-01-13T20:02:59.000+0000', 'etag': 'be8m3g3x',
+    #                 'deleted': 0, 'createdTime': '2021-01-13T20:02:59.000+0000', 'creator': 215414317,
+    #                 'tags': [], 'kind': 'TEXT'}]
+    #                 ```
+    #
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104504451-4f130000-5597-11eb-9f92-386a6be10ca6.png)
+    #
+    #                 **After**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104504511-6a7e0b00-5597-11eb-9855-c4edce01713b.png)
+    #
+    #     """
+    #     if not isinstance(ids, str) and not isinstance(ids, list):
+    #         raise TypeError("Ids Must Be A String Or List Of Ids")
+    #
+    #     tasks = []
+    #     if isinstance(ids, str):
+    #         task = self._client.get_by_fields(id=ids, search='tasks')
+    #         if not task:
+    #             raise ValueError('The Task Does Not Exist To Mark As Complete')
+    #         task['status'] = 2  # Complete
+    #         tasks.append(task)
+    #     else:
+    #         for id in ids:
+    #             task = self._client.get_by_fields(id=id, search='tasks')
+    #             if not task:
+    #                 raise ValueError(f"'Task Id '{id}' Does Not Exist'")
+    #             task['status'] = 2  # Complete
+    #             tasks.append(task)
+    #
+    #     url = self._client.BASE_URL + 'batch/task'
+    #     payload = {
+    #         'update': tasks
+    #     }
+    #     response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+    #
+    #     self._client.sync()
+    #     if len(tasks) == 1:
+    #         return tasks[0]
+    #     else:
+    #         return tasks
 
     @logged_in
     def delete(self, ids):
@@ -920,9 +1031,6 @@ class TaskManager:
             return return_list[0]
         return return_list
 
-    @logged_in
-    def get_trash(self):
-        pass
 
     @logged_in
     def move(self, obj, new: str):
@@ -1354,7 +1462,7 @@ class TaskManager:
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
         return response
 
-    def _time_checks(self, start_date: datetime = None, end_date: datetime = None, time_zone: str = None):
+    def time_conversions(self, start_date: datetime = None, end_date: datetime = None, time_zone: str = None):
         """
         Performs the proper checks and conversions for converting datetime object to TickTick time string
         :return: (start_date, end_date)
@@ -1457,7 +1565,7 @@ class TaskManager:
         :param content:
         :return:
         """
-        dates = self._time_checks(start_date=start_date, end_date=end_date, time_zone=time_zone)
+        dates = self.time_conversions(start_date=start_date, end_date=end_date, time_zone=time_zone)
         # task_name: -> Make sure task_name is a string
         if not isinstance(task_name, str):
             raise TypeError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")

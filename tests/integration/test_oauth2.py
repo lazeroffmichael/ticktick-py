@@ -19,4 +19,4 @@ def test_oauth2_from_environment():
                          redirect_uri=redirect_uri,
                          env_key="ACCESS_TOKEN_DICT")
 
-    assert auth_client._access_token_info["access_token"] == os.getenv('ACCESS_TOKEN')
+    assert auth_client.access_token_info["access_token"] == os.getenv('ACCESS_TOKEN')

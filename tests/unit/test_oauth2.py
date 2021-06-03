@@ -47,7 +47,7 @@ class TestInitMethod:
         assert auth._state is None
         assert auth._code is None
         assert isinstance(auth._cache, CacheHandler)
-        assert auth._access_token_info is None
+        assert auth.access_token_info is None
 
     def test_session_passing(self):
         """
@@ -156,7 +156,7 @@ class TestRequestAccessToken:
         assert new_token_info["access_token"] == cached["access_token"]
 
         # reset code
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
         oauth_client_fake._code = None
         oauth_client_fake._state = None
 
@@ -170,10 +170,10 @@ class TestGetAccessToken:
         Tests returning an access token that is in the current running state
         """
         token_info = {"access_token": 48573490857892, "expire_time": int(time.time()) + 1000}
-        oauth_client_fake._access_token_info = token_info
+        oauth_client_fake.access_token_info = token_info
         returned_token = oauth_client_fake.get_access_token()
         assert token_info["access_token"] == returned_token
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
     def test_get_access_token_from_environment_error(self, oauth_client_fake):
         """
@@ -196,7 +196,7 @@ class TestGetAccessToken:
 
         # delete token from environment
         os.environ.pop("ACCESS_TOKEN")
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
     def test_get_access_token_from_cache(self, oauth_client_fake):
         """
@@ -216,7 +216,7 @@ class TestGetAccessToken:
         # remove cache file
         os.remove(path)
 
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
     def test_get_access_token_from_cache_expired(self, oauth_client_fake):
         """
@@ -248,9 +248,9 @@ class TestGetAccessToken:
         os.remove(path)
 
         assert returned_token == new_token_info["access_token"]
-        assert oauth_client_fake._access_token_info == new_token_info
+        assert oauth_client_fake.access_token_info == new_token_info
 
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
     def test_get_access_token_from_cache_doesnt_exist(self, oauth_client_fake):
         """
@@ -267,9 +267,9 @@ class TestGetAccessToken:
             returned_token = oauth_client_fake.get_access_token()
 
         assert returned_token == new_token_info["access_token"]
-        assert oauth_client_fake._access_token_info == new_token_info
+        assert oauth_client_fake.access_token_info == new_token_info
 
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
     def test_get_access_token_check_cache_false(self, oauth_client_fake):
         """
@@ -286,9 +286,9 @@ class TestGetAccessToken:
             returned_token = oauth_client_fake.get_access_token(check_cache=False)
 
         assert returned_token == new_token_info["access_token"]
-        assert oauth_client_fake._access_token_info == new_token_info
+        assert oauth_client_fake.access_token_info == new_token_info
 
-        oauth_client_fake._access_token_info = None
+        oauth_client_fake.access_token_info = None
 
 
 class TestSetExpireTime:
