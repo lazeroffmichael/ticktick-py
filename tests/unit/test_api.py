@@ -15,6 +15,9 @@ from ticktick.managers.tags import TagsManager
 from ticktick.oauth2 import OAuth2
 from unittest.mock import patch
 
+RESPONSE_ONE_URL = 'https://someurl.com/test.json'
+RESPONSE_TWO_URL = 'https://someotherurl.com/anothertest.json'
+RESPONSE_THREE_URL = 'https://nojsonresponse.com/'
 
 
 def mocked_request(*args, **kwargs):
@@ -22,11 +25,22 @@ def mocked_request(*args, **kwargs):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code
+            self.text = ''
 
-    if args[0] == 'http://someurl.com/test.json':
+        def json(self):
+            if args[0] == RESPONSE_THREE_URL:
+                raise ValueError
+            return self.json_data
+
+        def text(self):
+            return self.text
+
+    if args[0] == RESPONSE_ONE_URL:
         return MockResponse({"key1": "value1"}, 200)
-    elif args[0] == 'http://someotherurl.com/anothertest.json':
+    elif args[0] == RESPONSE_TWO_URL:
         return MockResponse({"key2": "value2"}, 200)
+    elif args[0] == RESPONSE_THREE_URL:
+        return MockResponse(None, 200)
 
     return MockResponse(None, 404)
 
@@ -119,6 +133,93 @@ class TestCheckingStatusCode:
         mocked_httpx_response = mocked_request(['404'])
         with pytest.raises(RuntimeError):
             fake_client.check_status_code(mocked_httpx_response, 'Failed')
+
+
+class TestHTTPMethods:
+
+    def test_http_post(self, fake_client):
+        """
+        Tests the http_post method
+        """
+
+        m = mocked_request(RESPONSE_ONE_URL)
+        with patch('httpx.Client.post', return_value=m):
+            response = fake_client.http_post(RESPONSE_ONE_URL, json={})
+
+        assert response == m.json()
+
+    def test_http_post_bad_request(self, fake_client):
+        """
+        Tests returning the response.text when the json is not available
+        """
+        m = mocked_request(RESPONSE_THREE_URL)
+        with patch('httpx.Client.post', return_value=m):
+            response = fake_client.http_post(RESPONSE_THREE_URL, json={})
+
+        assert response == m.text
+
+    def test_http_get(self, fake_client):
+        """
+        Tests the http_post method
+        """
+
+        m = mocked_request(RESPONSE_ONE_URL)
+        with patch('httpx.Client.get', return_value=m):
+            response = fake_client.http_get(RESPONSE_ONE_URL, json={})
+
+        assert response == m.json()
+
+    def test_http_get_bad_request(self, fake_client):
+        """
+        Tests returning the response.text when the json is not available
+        """
+        m = mocked_request(RESPONSE_THREE_URL)
+        with patch('httpx.Client.get', return_value=m):
+            response = fake_client.http_get(RESPONSE_THREE_URL, json={})
+
+        assert response == m.text
+
+    def test_http_delete(self, fake_client):
+        """
+        Tests the http_post method
+        """
+
+        m = mocked_request(RESPONSE_ONE_URL)
+        with patch('httpx.Client.delete', return_value=m):
+            response = fake_client.http_delete(RESPONSE_ONE_URL, json={})
+
+        assert response == m.json()
+
+    def test_http_delete_bad_request(self, fake_client):
+        """
+        Tests returning the response.text when the json is not available
+        """
+        m = mocked_request(RESPONSE_THREE_URL)
+        with patch('httpx.Client.delete', return_value=m):
+            response = fake_client.http_delete(RESPONSE_THREE_URL, json={})
+
+        assert response == m.text
+
+    def test_http_put(self, fake_client):
+        """
+        Tests the http_post method
+        """
+
+        m = mocked_request(RESPONSE_ONE_URL)
+        with patch('httpx.Client.put', return_value=m):
+            response = fake_client.http_put(RESPONSE_ONE_URL, json={})
+
+        assert response == m.json()
+
+    def test_http_put_bad_request(self, fake_client):
+        """
+        Tests returning the response.text when the json is not available
+        """
+        m = mocked_request(RESPONSE_THREE_URL)
+        with patch('httpx.Client.put', return_value=m):
+            response = fake_client.http_put(RESPONSE_THREE_URL, json={})
+
+        assert response == m.text
 
 
 class TestFetchSettings:
