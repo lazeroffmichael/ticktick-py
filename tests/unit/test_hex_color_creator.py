@@ -22,6 +22,6 @@ def test_check_hex_color_bad():
 
 def test_generate_hex_color_and_check():
     """Tests a proper code is generated each time"""
-    for _ in range(100000):
+    for _ in range(1000):
         color = generate_hex_color()
         assert check_hex_color(color)

@@ -23,7 +23,7 @@ class TestCreate:
         assert response['title'] == task['title']
         assert response['projectId'] == 'inbox'
         assert client.get_by_id(response['id'], search='tasks')
-        client.task.delete(response['id'])
+        client.task.delete(response)
 
     def test_create_empty_dict(self, client):
         """
@@ -32,7 +32,7 @@ class TestCreate:
         response = client.task.create({})
         assert response['title'] == ''
         assert client.get_by_id(response['id'], search='tasks')
-        client.task.delete(response['id'])
+        client.task.delete(response)
 
     def test_create_with_description(self, client):
         """
@@ -43,7 +43,7 @@ class TestCreate:
         response = client.task.create(task)
         assert response['title'] == task['title']
         assert response['content'] == task['content']
-        client.task.delete(response['id'])
+        client.task.delete(response)
 
 
 class TestUpdate:
@@ -66,7 +66,7 @@ class TestUpdate:
         assert update["title"] == "New Title"  # assert title has changed
         assert update["id"] == response["id"]  # assert id is the same
 
-        client.task.delete(update["id"])
+        client.task.delete(response)
 
     def test_update_from_local_state(self, client):
         """
@@ -90,7 +90,7 @@ class TestUpdate:
         assert update['id'] == stored_task['id']
         assert stored_task['id'] == response['id']  # assert that it is still the same task
 
-        client.task.delete(response['id'])
+        client.task.delete(response)
 
 
 class TestComplete:
@@ -121,5 +121,58 @@ class TestComplete:
         # task does not exist to mark as complete
         with pytest.raises(Exception):
             client.task.complete(task)
+
+
+class TestDelete:
+
+    def test_delete(self, client):
+        """
+        Tests a created task can be deleted
+        """
+        task = example_task()
+
+        # create task
+        response = client.task.create(task)
+
+        # delete the task
+        deleted = client.task.delete(response)
+
+        assert deleted == response
+
+    def test_delete_multiple(self, client):
+        """
+        Tests multiple created tasks can be deleted
+        """
+        task1 = example_task()
+        task2 = example_task()
+
+        # create task
+        response1 = client.task.create(task1)
+
+        # create task
+        response2 = client.task.create(task2)
+
+        # delete the tasks
+        deleted = client.task.delete([response1, response2])
+
+        assert deleted == [response1, response2]
+
+    def test_delete_multiple_tuple(self, client):
+        """
+        Tests multiple created tasks can be deleted if they are passed as a tuple
+        """
+        task1 = example_task()
+        task2 = example_task()
+
+        # create task
+        response1 = client.task.create(task1)
+
+        # create task
+        response2 = client.task.create(task2)
+
+        # delete the tasks
+        deleted = client.task.delete((response1, response2))
+
+        assert deleted == (response1, response2)
 
 

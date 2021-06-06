@@ -111,7 +111,7 @@ class TaskManager:
 
     def complete(self, task):
         """
-        Marks a task as complete
+        Marks a task as complete. Pass in the task dictionary to be marked as completed.
         """
 
         # generate url
@@ -129,10 +129,52 @@ class TaskManager:
         # return response
         return response
 
+    def _generate_delete_url(self):
+        """
+        Generates end point url for task deletion
+        """
+        return self._client.BASE_URL + 'batch/task'
 
+    def delete(self, task):
+        """
+        Deletes a task. Supports single task deletion, and batch task deletion.
 
+        For a single task pass in the task dictionary. For multiple tasks pass in a list of task dictionaries.
+        """
 
+        # generate url
+        url = self._generate_delete_url()
 
+        to_delete = []
+
+        # if its just a dict then we are going to have to make a list object for it
+        if isinstance(task, dict):
+            # ticktick returns for the 'projectId': 'inbox' instead of the actual inbox id - which is required for
+            # proper deletion
+            if task['projectId'] == 'inbox':
+                task['projectId'] = self._client.inbox_id
+
+            delete_dict = {'projectId': task['projectId'], 'taskId': task['id']}
+            to_delete.append(delete_dict)
+
+        # iterate through "task"
+        else:
+            for item in task:
+                if item['projectId'] == 'inbox':
+                    item['projectId'] = self._client.inbox_id
+                delete_dict = {'projectId': item['projectId'], 'taskId': item['id']}
+                to_delete.append(delete_dict)
+
+        payload = {'delete': to_delete}
+
+        # make request
+        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+
+        # sync local state
+        self._client.sync()
+
+        # return input
+        return task
 
     # @logged_in
     # def create(self,
@@ -485,7 +527,6 @@ class TaskManager:
     #
     #     return self._client.task.update(update_list)
 
-
     def make_subtask(self, obj, parent: str):
         """
         Makes the passed task(s) sub-tasks to the parent task.
@@ -634,7 +675,6 @@ class TaskManager:
             return subtasks[0]  # Return just the dictionary object if its a single task
         else:
             return subtasks
-
 
     # @logged_in
     # def update(self, obj):
@@ -906,131 +946,132 @@ class TaskManager:
     #     else:
     #         return tasks
 
-    @logged_in
-    def delete(self, ids):
-        """
-        Deletes task(s). Supports single task deletion, and batch task deletion.
 
-        !!! tip
-            If a parent task is deleted - the children will remain (unlike normal parent task deletion in `TickTick`)
-
-        Arguments:
-            ids (str or list):
-                **Single Task (str)**: ID string of the task to be deleted.
-
-                **Multiple Tasks (list)**: List of ID strings for the tasks to be deleted.
-
-        Returns:
-            dict or list:
-            **Single Task (dict)**: Dictionary object of the deleted task.
-
-            **Multiple Tasks (list)**: List of dictionary objects for the deleted tasks.
-
-        Raises:
-            TypeError: If `ids` is not a string or list.
-            ValueError: If `ids` does not exist.
-            RuntimeError: If the deletion was unsuccessful.
-
-        !!! example "Task Deletion"
-            === "Single Task Deletion"
-                Pass the ID of the string to be deleted.
-
-                ```python
-                # Lets assume that our task is named "Dentist" and it's in our inbox.
-                task = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
-                deleted_task = client.task.delete(task['id'])
-                ```
-
-                ??? success "Result"
-                    The deleted task object is returned.
-
-                    ```python
-                    {'id': '5ffead3cb04b35082bbced71', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
-                    'title': 'Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
-                    'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
-                    'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
-                    'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T08:20:12.000+0000',
-                    'etag': 'tijkifu0', 'deleted': 0, 'createdTime': '2021-01-13T08:20:12.000+0000',
-                    'creator': 73561212, 'tags': [], 'kind': 'TEXT'}
-                    ```
-
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104425305-615c5200-5535-11eb-93fa-3184b5d679b7.png)
-
-                    **After**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
-
-            === "Multiple Task Deletion"
-                Pass a list of ID strings for the tasks to be deleted.
-
-                ```python
-                # Lets assume we have two tasks we want to delete from our inbox - "Dentist" and "Read"
-                dentist = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
-                read = client.get_by_fields(title="Read", projectId=client.inbox_id, search='tasks')
-                id_list = [dentist['id'], read['id']]
-                deleted_task = client.task.delete(id_list)
-                ```
-
-                ??? success "Result"
-                    A list of the deleted tasks is returned.
-
-                    ```python
-                    [{'id': '5ffeae528f081003f32cb661', 'projectId': 'inbox115781412', 'sortOrder': -1099511627776,
-                    'title': 'Dentist', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
-                    'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
-                    'modifiedTime': '2021-01-13T08:24:50.334+0000', 'etag': 'fwsrqx4j', 'deleted': 0,
-                    'createdTime': '2021-01-13T08:24:50.340+0000', 'creator': 115781412, 'kind': 'TEXT'},
-
-                    {'id': '5ffeae528f081003f32cb664', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
-                    'title': 'Read', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
-                    'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
-                    'modifiedTime': '2021-01-13T08:24:50.603+0000', 'etag': '1sje21ao', 'deleted': 0,
-                    'createdTime': '2021-01-13T08:24:50.609+0000', 'creator': 115781412, 'kind': 'TEXT'}]
-                    ```
-                    **Before**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104425633-c4e67f80-5535-11eb-9735-bea3db63e0ab.png)
-
-                    **After**
-
-                    ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
-
-        """
-        if not isinstance(ids, str) and not isinstance(ids, list):
-            raise TypeError('Ids Must Be A String or List Of Strings')
-        tasks = []
-        if isinstance(ids, str):
-            task = self._client.get_by_fields(id=ids, search='tasks')
-            if not task:
-                raise ValueError(f"Task '{ids}' Does Not Exist To Delete")
-            task = {'projectId': task['projectId'], 'taskId': ids}
-            tasks = [task]
-
-        else:
-            for id in ids:
-                task = self._client.get_by_fields(id=id, search='tasks')
-                if not task:
-                    raise ValueError(f"'Task Id '{id}' Does Not Exist'")
-                task = {'projectId': task['projectId'], 'taskId': id}
-                tasks.append(task)
-
-        url = self._client.BASE_URL + 'batch/task'
-        payload = {'delete': tasks}
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
-        return_list = []
-        if len(tasks) == 1:
-            return_list.append(self._client.get_by_id(ids, search='tasks'))
-        else:
-            for item in tasks:
-                o = self._client.get_by_id(item['taskId'], search='tasks')
-                return_list.append(o)
-        self._client.sync()
-        if len(return_list) == 1:
-            return return_list[0]
-        return return_list
-
+    # @logged_in
+    # def delete(self, ids):
+    #     """
+    #     Deletes task(s). Supports single task deletion, and batch task deletion.
+    #
+    #     !!! tip
+    #         If a parent task is deleted - the children will remain (unlike normal parent task deletion in `TickTick`)
+    #
+    #     Arguments:
+    #         ids (str or list):
+    #             **Single Task (str)**: ID string of the task to be deleted.
+    #
+    #             **Multiple Tasks (list)**: List of ID strings for the tasks to be deleted.
+    #
+    #     Returns:
+    #         dict or list:
+    #         **Single Task (dict)**: Dictionary object of the deleted task.
+    #
+    #         **Multiple Tasks (list)**: List of dictionary objects for the deleted tasks.
+    #
+    #     Raises:
+    #         TypeError: If `ids` is not a string or list.
+    #         ValueError: If `ids` does not exist.
+    #         RuntimeError: If the deletion was unsuccessful.
+    #
+    #     !!! example "Task Deletion"
+    #         === "Single Task Deletion"
+    #             Pass the ID of the string to be deleted.
+    #
+    #             ```python
+    #             # Lets assume that our task is named "Dentist" and it's in our inbox.
+    #             task = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
+    #             deleted_task = client.task.delete(task['id'])
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 The deleted task object is returned.
+    #
+    #                 ```python
+    #                 {'id': '5ffead3cb04b35082bbced71', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
+    #                 'title': 'Dentist', 'content': '', 'startDate': '2021-01-13T08:00:00.000+0000',
+    #                 'dueDate': '2021-01-13T08:00:00.000+0000', 'timeZone': 'America/Los_Angeles',
+    #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
+    #                 'status': 0, 'items': [], 'progress': 0, 'modifiedTime': '2021-01-13T08:20:12.000+0000',
+    #                 'etag': 'tijkifu0', 'deleted': 0, 'createdTime': '2021-01-13T08:20:12.000+0000',
+    #                 'creator': 73561212, 'tags': [], 'kind': 'TEXT'}
+    #                 ```
+    #
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104425305-615c5200-5535-11eb-93fa-3184b5d679b7.png)
+    #
+    #                 **After**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
+    #
+    #         === "Multiple Task Deletion"
+    #             Pass a list of ID strings for the tasks to be deleted.
+    #
+    #             ```python
+    #             # Lets assume we have two tasks we want to delete from our inbox - "Dentist" and "Read"
+    #             dentist = client.get_by_fields(title="Dentist", projectId=client.inbox_id, search='tasks')
+    #             read = client.get_by_fields(title="Read", projectId=client.inbox_id, search='tasks')
+    #             id_list = [dentist['id'], read['id']]
+    #             deleted_task = client.task.delete(id_list)
+    #             ```
+    #
+    #             ??? success "Result"
+    #                 A list of the deleted tasks is returned.
+    #
+    #                 ```python
+    #                 [{'id': '5ffeae528f081003f32cb661', 'projectId': 'inbox115781412', 'sortOrder': -1099511627776,
+    #                 'title': 'Dentist', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
+    #                 'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+    #                 'modifiedTime': '2021-01-13T08:24:50.334+0000', 'etag': 'fwsrqx4j', 'deleted': 0,
+    #                 'createdTime': '2021-01-13T08:24:50.340+0000', 'creator': 115781412, 'kind': 'TEXT'},
+    #
+    #                 {'id': '5ffeae528f081003f32cb664', 'projectId': 'inbox115781412', 'sortOrder': -2199023255552,
+    #                 'title': 'Read', 'content': '', 'timeZone': 'America/Los_Angeles', 'isFloating': False,
+    #                 'reminder': '', 'reminders': [], 'priority': 0, 'status': 0, 'items': [],
+    #                 'modifiedTime': '2021-01-13T08:24:50.603+0000', 'etag': '1sje21ao', 'deleted': 0,
+    #                 'createdTime': '2021-01-13T08:24:50.609+0000', 'creator': 115781412, 'kind': 'TEXT'}]
+    #                 ```
+    #                 **Before**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104425633-c4e67f80-5535-11eb-9735-bea3db63e0ab.png)
+    #
+    #                 **After**
+    #
+    #                 ![image](https://user-images.githubusercontent.com/56806733/104425375-76d17c00-5535-11eb-9e12-3af1cf727957.png)
+    #
+    #     """
+    #     if not isinstance(ids, str) and not isinstance(ids, list):
+    #         raise TypeError('Ids Must Be A String or List Of Strings')
+    #     tasks = []
+    #     if isinstance(ids, str):
+    #         task = self._client.get_by_fields(id=ids, search='tasks')
+    #         if not task:
+    #             raise ValueError(f"Task '{ids}' Does Not Exist To Delete")
+    #         task = {'projectId': task['projectId'], 'taskId': ids}
+    #         tasks = [task]
+    #
+    #     else:
+    #         for id in ids:
+    #             task = self._client.get_by_fields(id=id, search='tasks')
+    #             if not task:
+    #                 raise ValueError(f"'Task Id '{id}' Does Not Exist'")
+    #             task = {'projectId': task['projectId'], 'taskId': id}
+    #             tasks.append(task)
+    #
+    #     url = self._client.BASE_URL + 'batch/task'
+    #     payload = {'delete': tasks}
+    #     response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+    #     return_list = []
+    #     if len(tasks) == 1:
+    #         return_list.append(self._client.get_by_id(ids, search='tasks'))
+    #     else:
+    #         for item in tasks:
+    #             o = self._client.get_by_id(item['taskId'], search='tasks')
+    #             return_list.append(o)
+    #     self._client.sync()
+    #     if len(return_list) == 1:
+    #         return return_list[0]
+    #     return return_list
+    #
 
     @logged_in
     def move(self, obj, new: str):

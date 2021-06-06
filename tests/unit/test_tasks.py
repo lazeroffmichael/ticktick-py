@@ -151,3 +151,86 @@ class TestComplete:
 
         with patch('ticktick.api.TickTickClient.http_post', return_value=task):
             assert task_client.complete(task) == task
+
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_complete_returns_empty(self, mock_object, task_client):
+        """
+        Tests complete() returns a '' (this is the normal recurrence from the post request)
+        """
+        mock_object.return_value = None
+
+        task = example_task_response()
+
+        # have status as one to mark as complete
+        task['status'] = 1
+
+        with patch('ticktick.api.TickTickClient.http_post', return_value=''):
+            assert task_client.complete(task) == task
+
+
+class TestDelete:
+
+    def test_generate_delete_url(self, task_client):
+        """
+        Tests delete url is generated correctly
+        """
+        expected = "https://api.ticktick.com/api/v2/batch/task"
+        assert expected == task_client._generate_delete_url()
+
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_delete_single_dict(self, mock_object, task_client):
+        """
+        Tests deleting a single dictionary
+        """
+        mock_object.return_value = None
+
+        task = example_task_response()
+
+        with patch('ticktick.api.TickTickClient.http_post', return_value={}):
+            assert task_client.delete(task) == task
+
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_delete_single_dict_project_inbox(self, mock_object, task_client):
+        """
+        Tests setting the 'projectId' when it is inbox
+        """
+        mock_object.return_value = None
+
+        task = example_task_response()
+        task['projectId'] = "inbox"
+
+        with patch('ticktick.api.TickTickClient.http_post', return_value={}):
+            assert task_client.delete(task) == task
+
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_delete_multiple_dicts(self, mock_object, task_client):
+        """
+        Tests deleting multiple dictionaries
+        """
+        mock_object.return_value = None
+
+        task1 = example_task_response()
+        task2 = example_task_response()
+        task3 = example_task_response()
+
+        tasks = [task1, task2, task3]
+
+        with patch('ticktick.api.TickTickClient.http_post', return_value={}):
+            assert task_client.delete(tasks) == tasks
+
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_delete_multiple_dicts_project_id_inbox(self, mock_object, task_client):
+        """
+        Tests deleting multiple dictionaries when the project_id of a task is "inbox"
+        """
+        mock_object.return_value = None
+
+        task1 = example_task_response()
+        task2 = example_task_response()
+        task2['projectId'] = "inbox"
+        task3 = example_task_response()
+
+        tasks = [task1, task2, task3]
+
+        with patch('ticktick.api.TickTickClient.http_post', return_value={}):
+            assert task_client.delete(tasks) == tasks
