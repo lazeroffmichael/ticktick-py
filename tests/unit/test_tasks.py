@@ -234,3 +234,189 @@ class TestDelete:
 
         with patch('ticktick.api.TickTickClient.http_post', return_value={}):
             assert task_client.delete(tasks) == tasks
+
+
+class TestBuilder:
+
+    def test_builder_method(self, task_client):
+        """
+        Tests builder method works with just the title
+        """
+        task = task_client.builder("Example")
+        assert task['title'] == "Example"
+        assert len(task) == 1
+
+    def test_builder_method_all(self, task_client):
+        """
+        Tests setting all builder methods
+        """
+        start = datetime.datetime(2, 5, 12)
+        end = datetime.datetime(2, 7, 12)
+        task = task_client.builder(title="Title",
+                                   content="Content",
+                                   desc="Desc",
+                                   allDay=False,
+                                   startDate=start,
+                                   dueDate=end,
+                                   timeZone="US/Pacific",
+                                   reminders=['none'],
+                                   repeat='Nope',
+                                   priority=3,
+                                   sortOrder=4645345,
+                                   items=[])
+        assert len(task) == 12
+        assert task['title'] == "Title"
+        assert task['content'] == "Content"
+        assert task['desc'] == "Desc"
+        assert not task["allDay"]
+        assert task["startDate"] == start
+        assert task["dueDate"] == end
+        assert task["timeZone"] == "US/Pacific"
+        assert task["reminders"] == ['none']
+        assert task["repeat"] == "Nope"
+        assert task["priority"] == 3
+        assert task["sortOrder"] == 4645345
+        assert task["items"] == []
+
+
+class TestGetFromProject:
+
+    def test_get_from_list(self, fake_client):
+        """Tests getting all the tasks from a list"""
+        # Make a fake list
+        fake_list_id = str(uuid.uuid4())
+        fake_list = {'id': fake_list_id}
+        fake_client.state['projects'].append(fake_list)  # Append the fake list
+        # Make some fake tasks
+        task1_title = str(uuid.uuid4())
+        task2_title = str(uuid.uuid4())
+        task1 = {'projectId': fake_list_id, 'title': task1_title}
+        task2 = {'projectId': fake_list_id, 'title': task2_title}
+        # Append fake tasks
+        fake_client.state['tasks'].append(task1)
+        fake_client.state['tasks'].append(task2)
+        tasks = fake_client.task.get_from_project(fake_list_id)
+        assert task1 in tasks and task2 in tasks
+        # Delete the fake objects
+        fake_client.delete_from_local_state(id=fake_list_id, search='projects')
+        fake_client.delete_from_local_state(title=task1_title, search='tasks')
+        fake_client.delete_from_local_state(title=task2_title, search='tasks')
+
+
+class TestTimeConversions:
+
+    def test_time_checks_start_after_end(self, task_client):
+        """Tests exception raised if start date after end date"""
+        start = datetime.datetime(2022, 1, 5)
+        end = datetime.datetime(2022, 1, 2)
+        with pytest.raises(ValueError):
+            task_client.time_conversions(start_date=start, end_date=end)
+
+    def test_invalid_time_zone(self, task_client):
+        """Tests exception raised if time zone not valid"""
+        tz = 'Yeah this not right'
+        with pytest.raises(ValueError):
+            task_client.time_conversions(time_zone=tz)
+
+    def test_time_checks_proper_parse_start(self, fake_client):
+        """Tests proper parsing of date with only start_date"""
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 5)
+        dates = fake_client.task.time_conversions(start)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_checks_proper_parse_end(self, fake_client):
+        fake_client.time_zone = "US/Pacific"
+        end = datetime.datetime(2022, 1, 5)
+        dates = fake_client.task.time_conversions(end)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=fake_client.time_zone)
+        assert dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_checks_proper_parse_start_not_all_day(self, fake_client):
+        """Tests proper date parse of not all day"""
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 5, 14, 56, 34)
+        dates = fake_client.task.time_conversions(start)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert not dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_checks_proper_parse_end_not_all_day(self, fake_client):
+        fake_client.time_zone = "US/Pacific"
+        end = datetime.datetime(2022, 1, 5, 16, 56, 45)
+        dates = fake_client.task.time_conversions(end)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=fake_client.time_zone)
+        assert not dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_all_day_range(self, fake_client):
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 5)
+        end = datetime.datetime(2022, 1, 8)
+        expected = datetime.datetime(2022, 1, 9)
+        dates = fake_client.task.time_conversions(start, end)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=fake_client.time_zone)
+        assert dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_all_day_range_end_of_month(self, fake_client):
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 28)
+        end = datetime.datetime(2022, 1, 31)
+        expected = datetime.datetime(2022, 2, 1)
+        dates = fake_client.task.time_conversions(start, end)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=fake_client.time_zone)
+        assert dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_time_all_day_range_end_of_year(self, fake_client):
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 12, 28)
+        end = datetime.datetime(2022, 12, 31)
+        expected = datetime.datetime(2023, 1, 1)
+        dates = fake_client.task.time_conversions(start, end)
+        assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=fake_client.time_zone)
+        assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=fake_client.time_zone)
+        assert dates['isAllDay']
+        fake_client.time_zone = ''
+
+    def test_not_datetime(self, fake_client):
+        """
+        Tests TypeError is raised when start or end are not a datetime object
+        """
+        fake_client.time_zone = "US/Pacific"
+        start = 'Nope'
+        end = 'Nope'
+        with pytest.raises(TypeError):
+            fake_client.task.time_conversions(start, end)
+        fake_client.time_zone = ''
+
+    def test_not_datetime_end(self, fake_client):
+        """
+        Tests TypeError is raised whene start or end are not a datetime object
+        """
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 28)
+        end = 'Nope'
+        with pytest.raises(TypeError):
+            fake_client.task.time_conversions(start, end)
+        fake_client.time_zone = ''
+
+    def test_start_not_all_day(self, fake_client):
+        """
+        Tests that all day is false if start time is given
+        """
+        fake_client.time_zone = "US/Pacific"
+        start = datetime.datetime(2022, 1, 28, 14, 30)
+        dates = fake_client.task.time_conversions(start)
+        assert not dates['isAllDay']
+        fake_client.time_zone = ''

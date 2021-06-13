@@ -7,221 +7,19 @@ import datetime
 from ticktick.helpers.time_methods import convert_date_to_tick_tick_format
 
 
-def test_time_checks_start_after_end(client):
-    """Tests exception raised if start date after end date"""
-    start = datetime.datetime(2022, 1, 5)
-    end = datetime.datetime(2022, 1, 2)
-    with pytest.raises(ValueError):
-        client.task.time_conversions(start_date=start, end_date=end)
 
 
-def test_invalid_time_zone(client):
-    """Tests exception raised if time zone not valid"""
-    tz = 'Yeah this not right'
-    with pytest.raises(ValueError):
-        client.task.time_conversions(time_zone=tz)
 
 
-def test_time_checks_proper_parse_start(client):
-    """Tests proper parsing of date with only start_date"""
-    start = datetime.datetime(2022, 1, 5)
-    dates = client.task.time_conversions(start)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['isAllDay']
 
 
-def test_time_checks_proper_parse_end(client):
-    end = datetime.datetime(2022, 1, 5)
-    dates = client.task.time_conversions(end)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['isAllDay']
 
 
-def test_time_checks_proper_parse_start_not_all_day(client):
-    """Tests proper date parse of not all day"""
-    start = datetime.datetime(2022, 1, 5, 14, 56, 34)
-    dates = client.task.time_conversions(start)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert not dates['isAllDay']
 
 
-def test_time_checks_proper_parse_end_not_all_day(client):
-    end = datetime.datetime(2022, 1, 5, 16, 56, 45)
-    dates = client.task.time_conversions(end)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(end, tz=client.time_zone)
-    assert not dates['isAllDay']
 
 
-def test_time_all_day_range(client):
-    start = datetime.datetime(2022, 1, 5)
-    end = datetime.datetime(2022, 1, 8)
-    expected = datetime.datetime(2022, 1, 9)
-    dates = client.task.time_conversions(start, end)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
-    assert dates['isAllDay']
 
-
-def test_time_all_day_range_end_of_month(client):
-    start = datetime.datetime(2022, 1, 28)
-    end = datetime.datetime(2022, 1, 31)
-    expected = datetime.datetime(2022, 2, 1)
-    dates = client.task.time_conversions(start, end)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
-    assert dates['isAllDay']
-
-
-def test_time_all_day_range_end_of_year(client):
-    start = datetime.datetime(2022, 12, 28)
-    end = datetime.datetime(2022, 12, 31)
-    expected = datetime.datetime(2023, 1, 1)
-    dates = client.task.time_conversions(start, end)
-    assert dates['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert dates['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
-    assert dates['isAllDay']
-
-
-def test_task_field_checks_invalid_name(client):
-    """Invalid name test"""
-    name = 56
-    with pytest.raises(TypeError):
-        client.task._task_field_checks(task_name=name)
-
-
-def test_task_field_checks_invalid_priority(client):
-    """Invalid Priority test"""
-    priority = 45
-    priority1 = 'Yeah this not right'
-    with pytest.raises(TypeError):
-        client.task._task_field_checks(task_name='', priority=priority)
-    with pytest.raises(TypeError):
-        client.task._task_field_checks(task_name='', priority=priority1)
-
-
-def test_task_field_checks_invalid_project(client):
-    """Invalid list id"""
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(task_name='', project='yeah no')
-
-
-def test_task_fields_checks_invalid_tags(client):
-    """Tests invalid tags"""
-    tag1 = 45
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(task_name='', tags=tag1)
-    tag2 = {67}
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(task_name='', tags=tag2)
-    tag3 = [3]
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(task_name='', tags=tag3)
-
-
-def test_task_fields_content_invalid(client):
-    """Tests invalid content"""
-    content = {67}
-    with pytest.raises(ValueError):
-        client.task._task_field_checks(task_name='', content=content)
-
-
-def test_task_fields_proper_return(client):
-    """Tests proper return of checked values"""
-    task_name = 'hello'
-    priority = 'low'
-    list_id = client.inbox_id
-    tags = ['yup']
-    content = 'yessir'
-    start = datetime.datetime(2022, 12, 28)
-    end = datetime.datetime(2022, 12, 31)
-    expected = datetime.datetime(2023, 1, 1)
-    items = client.task._task_field_checks(task_name=task_name,
-                                           priority=priority,
-                                           project=list_id,
-                                           tags=tags,
-                                           content=content,
-                                           start_date=start,
-                                           end_date=end)
-    assert items['title'] == task_name
-    assert items['priority'] == client.task.PRIORITY_DICTIONARY[priority]
-    assert items['projectId'] == list_id
-    assert items['tags'] == tags
-    assert items['content'] == content
-    assert items['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
-    assert items['isAllDay']
-
-
-def test_builder(client):
-    task_name = 'hello'
-    priority = 'low'
-    list_id = client.inbox_id
-    tags = ['yup']
-    content = 'yessir'
-    start = datetime.datetime(2022, 12, 28)
-    end = datetime.datetime(2022, 12, 31)
-    expected = datetime.datetime(2023, 1, 1)
-    items = client.task.builder(name=task_name,
-                                priority=priority,
-                                project=list_id,
-                                tags=tags,
-                                content=content,
-                                start=start,
-                                end=end)
-    assert items['title'] == task_name
-    assert items['priority'] == client.task.PRIORITY_DICTIONARY[priority]
-    assert items['projectId'] == list_id
-    assert items['tags'] == tags
-    assert items['content'] == content
-    assert items['startDate'] == convert_date_to_tick_tick_format(start, tz=client.time_zone)
-    assert items['dueDate'] == convert_date_to_tick_tick_format(expected, tz=client.time_zone)
-    assert items['isAllDay']
-
-
-def test_create_batch_raise_not_list(client):
-    obj = {'title': 'yum'}
-    with pytest.raises(TypeError):
-        client.task.create(obj)
-    obj = {}
-    with pytest.raises(TypeError):
-        client.task.create(obj)
-
-
-def test_create_batch_success(client):
-    name = 'Test Create Batch'
-    start_date = datetime.datetime(2022, 1, 28)
-    end_date = datetime.datetime(2022, 1, 31)
-    priority = 'HigH'
-    tags = [str(uuid.uuid4()).upper()]
-    content = 'yessir'
-    task1 = client.task.builder(name=name,
-                                start=start_date,
-                                end=end_date,
-                                priority=priority,
-                                tags=tags,
-                                content=content)
-    name2 = 'Test Create Batch 2'
-    start_date2 = datetime.datetime(2022, 12, 28)
-    end_date2 = datetime.datetime(2022, 12, 31)
-    priority2 = 'Medium'
-    tags2 = [str(uuid.uuid4())]
-    content2 = 'yessir'
-    task2 = client.task.builder(name=name2,
-                                start=start_date2,
-                                end=end_date2,
-                                priority=priority2,
-                                tags=tags2,
-                                content=content2)
-
-    the_batch = [task1, task2]
-
-    tasks = client.task.create(the_batch)
-    deleted = client.task.delete([tasks[0]['id'], tasks[1]['id']])
-    tags = client.tag.delete([deleted[0]['tags'][0], deleted[1]['tags'][0]])
 
 
 def test_create_task_just_title(client):
@@ -563,34 +361,7 @@ def test_create_task_with_date_all_day(client):
     client.task.delete(task['id'])
 
 
-def test_create_task_with_specific_time(client):
-    """Tests creating a task with a specific time"""
-    date = datetime.datetime(2022, 12, 31, 14, 30)  # 2:30 PM
-    task = client.task.create(str(uuid.uuid4()), start=date)
-    assert not task['isAllDay']
-    client.task.delete(task['id'])
 
-
-def test_get_from_list(client):
-    """Tests getting all the tasks from a list"""
-    # Make a fake list
-    fake_list_id = str(uuid.uuid4())
-    fake_list = {'id': fake_list_id}
-    client.state['projects'].append(fake_list)  # Append the fake list
-    # Make some fake tasks
-    task1_title = str(uuid.uuid4())
-    task2_title = str(uuid.uuid4())
-    task1 = {'projectId': fake_list_id, 'title': task1_title}
-    task2 = {'projectId': fake_list_id, 'title': task2_title}
-    # Append fake tasks
-    client.state['tasks'].append(task1)
-    client.state['tasks'].append(task2)
-    tasks = client.task.get_from_project(fake_list_id)
-    assert task1 in tasks and task2 in tasks
-    # Delete the fake objects
-    client.delete_from_local_state(id=fake_list_id, search='projects')
-    client.delete_from_local_state(title=task1_title, search='tasks')
-    client.delete_from_local_state(title=task2_title, search='tasks')
 
 
 def test_get_from_list_single(client):
@@ -926,16 +697,3 @@ def test_move_projects_fail_when_task_projects_differ(client):
     with pytest.raises(ValueError):
         client.task.move([tasks[0], tasks[1]], client.inbox_id)
     client.project.delete([p[0]['id'], p[1]['id']])
-
-
-
-
-
-
-
-
-
-
-
-
-

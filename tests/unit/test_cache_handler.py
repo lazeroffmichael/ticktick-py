@@ -9,13 +9,6 @@ from ticktick.cache import CacheHandler
 
 class TestInitMethod:
 
-    def test_default_path(self):
-        """
-        Tests whether the default path is .token-cache
-        """
-        cache = CacheHandler()
-        assert cache.path == ".token-cache"
-
     def test_set_custom_path(self):
         """
         Tests setting a custom path occurs properly

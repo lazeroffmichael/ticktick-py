@@ -54,7 +54,7 @@ class OAuth2:
         self._code = None
 
         # Set the cache handler
-        self._cache = CacheHandler()
+        self.cache = CacheHandler('.token-oauth')
 
         # Set the access token
         self.access_token_info = None
@@ -152,7 +152,7 @@ class OAuth2:
         token_info = self._post(self.OBTAIN_TOKEN_URL, params=payload)
 
         token_info = self._set_expire_time(token_info)
-        self._cache.write_token_to_cache(token_info)
+        self.cache.write_token_to_cache(token_info)
 
         return token_info
 
@@ -209,12 +209,13 @@ class OAuth2:
                                  " in a string literal")
             token_info = self.validate_token(converted_token_dict)
             if token_info is not None:
+                self.cache.write_token_to_cache(token_info)
                 self.access_token_info = token_info
                 return token_info["access_token"]
 
         # check if the cache file exists with the token
         if check_cache:
-            token_info = self.validate_token(self._cache.get_cached_token())
+            token_info = self.validate_token(self.cache.get_cached_token())
             # validate token will always return a valid token
             if token_info is not None:
                 self.access_token_info = token_info

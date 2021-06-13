@@ -46,7 +46,7 @@ class TestInitMethod:
         assert auth._scope == "tasks:write tasks:read"
         assert auth._state is None
         assert auth._code is None
-        assert isinstance(auth._cache, CacheHandler)
+        assert isinstance(auth.cache, CacheHandler)
         assert auth.access_token_info is None
 
     def test_session_passing(self):
@@ -151,7 +151,7 @@ class TestRequestAccessToken:
         assert returned_token["expire_time"] and returned_token["readable_expire_time"]
 
         # make sure token was written to cache
-        cached = oauth_client_fake._cache.get_cached_token()
+        cached = oauth_client_fake.cache.get_cached_token()
         assert cached is not None
         assert new_token_info["access_token"] == cached["access_token"]
 
@@ -160,7 +160,7 @@ class TestRequestAccessToken:
         oauth_client_fake._code = None
         oauth_client_fake._state = None
 
-        os.remove(oauth_client_fake._cache.path)
+        os.remove(oauth_client_fake.cache.path)
 
 
 class TestGetAccessToken:
@@ -186,7 +186,6 @@ class TestGetAccessToken:
         """
         Tests getting a successful
         """
-        # TODO: implement getting access token from environment
         token_info = {"access_token": 48573490857892, "expire_time": int(time.time()) + 1000}
         # write token to environment
         os.environ["ACCESS_TOKEN"] = str(token_info)
@@ -198,6 +197,9 @@ class TestGetAccessToken:
         os.environ.pop("ACCESS_TOKEN")
         oauth_client_fake.access_token_info = None
 
+        # delete cache file
+        os.remove(".token-oauth")
+
     def test_get_access_token_from_cache(self, oauth_client_fake):
         """
         Tests the access token is retrieved from cache if it exists and when it's not expired
@@ -206,8 +208,8 @@ class TestGetAccessToken:
         path = '.token-read'
         token_info = {"access_token": 48573490857892, "expire_time": int(time.time()) + 1000}
         cache = CacheHandler(path)
-        oauth_client_fake._cache = cache
-        oauth_client_fake._cache.write_token_to_cache(token_info)
+        oauth_client_fake.cache = cache
+        oauth_client_fake.cache.write_token_to_cache(token_info)
 
         returned_token = oauth_client_fake.get_access_token()
 
@@ -239,8 +241,8 @@ class TestGetAccessToken:
 
         path = '.token-read-expired'
         cache = CacheHandler(path)
-        oauth_client_fake._cache = cache
-        oauth_client_fake._cache.write_token_to_cache(expired_token_info)
+        oauth_client_fake.cache = cache
+        oauth_client_fake.cache.write_token_to_cache(expired_token_info)
 
         with patch('ticktick.oauth2.OAuth2._request_access_token', return_value=new_token_info):
             returned_token = oauth_client_fake.get_access_token()

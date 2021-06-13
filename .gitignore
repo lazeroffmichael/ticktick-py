@@ -4,4 +4,5 @@
 /site/
 /.idea/
 /docs/images
-/tests/.token-cache
+/tests/integration/.token-oauth
+/tests/.token-oauth

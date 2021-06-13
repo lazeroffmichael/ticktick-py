@@ -10,7 +10,6 @@ class ProjectManager:
         self._client = client_class
         self.access_token = self._client.access_token
 
-    @logged_in
     def builder(self, name: str, color: str = 'random', project_type: str = 'TASK', folder_id: str = None) -> dict:
         """
         Creates and returns a local project object. Helper method for [create][managers.projects.ProjectManager.create]
@@ -88,7 +87,6 @@ class ProjectManager:
 
         return {'name': name, 'color': color, 'kind': project_type, 'groupId': folder_id}
 
-    @logged_in
     def create(self, name, color: str = 'random', project_type: str = 'TASK', folder_id: str = None):
         """
         Creates a project remotely. Supports single project creation or batch project creation.
@@ -261,7 +259,6 @@ class ProjectManager:
                         items[index] = found
             return items
 
-    @logged_in
     def update(self, obj):
         """
         Updates the passed project(s). Supports single project update and multiple project update (batch)
@@ -396,7 +393,6 @@ class ProjectManager:
                         items[index] = found
             return items
 
-    @logged_in
     def delete(self, ids):
         """
         Deletes the project(s) with the passed ID string.
@@ -480,7 +476,6 @@ class ProjectManager:
         else:
             return deleted_list
 
-    @logged_in
     def archive(self, ids):
         """
         Moves the project(s) to a project folder created by `TickTick` called "Archived Lists"
@@ -591,7 +586,6 @@ class ProjectManager:
 
         return self.update(objs)
 
-    @logged_in
     def create_folder(self, name):
         """
         Creates a project folder to allow for project grouping. Project folder names can be repeated.
@@ -701,7 +695,6 @@ class ProjectManager:
                         items[index] = found
             return items
 
-    @logged_in
     def update_folder(self, obj):
         """
         Updates the project folders(s) remotely based off changes made locally.
@@ -818,7 +811,6 @@ class ProjectManager:
                         items[index] = found
             return items
 
-    @logged_in
     def delete_folder(self, ids):
         """
         Deletes the folder(s).

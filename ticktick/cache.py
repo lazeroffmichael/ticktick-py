@@ -11,18 +11,13 @@ class CacheHandler:
     """
 
     def __init__(self,
-                 path=None):
+                 path):
         """
         Initializes the path of the cache
         :param path:
         """
-
-        # set path if provided
-        if path:
-            self.path = path
-
-        else:
-            self.path = ".token-cache"
+        # set path
+        self.path = path
 
     def get_cached_token(self):
         """

@@ -946,7 +946,6 @@ class TaskManager:
     #     else:
     #         return tasks
 
-
     # @logged_in
     # def delete(self, ids):
     #     """
@@ -1073,7 +1072,6 @@ class TaskManager:
     #     return return_list
     #
 
-    @logged_in
     def move(self, obj, new: str):
         """
         Moves task(s) from their current project to the new project. It will move the specified
@@ -1302,7 +1300,6 @@ class TaskManager:
         # Return the tasks in the new list
         return self._client.task.get_from_project(new)
 
-    @logged_in
     def get_from_project(self, project: str):
         """
         Obtains the tasks that are contained in the project.
@@ -1521,7 +1518,7 @@ class TaskManager:
         if start_date is not None and end_date is not None:
             if not isinstance(start_date, datetime.datetime):
                 raise TypeError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
-            if not isinstance(start_date, datetime.datetime):
+            if not isinstance(end_date, datetime.datetime):
                 raise TypeError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
 
             # Check that start_date comes before end_date
@@ -1587,134 +1584,178 @@ class TaskManager:
 
         return {'startDate': start_date, 'dueDate': end_date, 'isAllDay': all_day, 'timeZone': time_zone}
 
-    def _task_field_checks(self,
-                           start_date: datetime = None,
-                           end_date: datetime = None,
-                           time_zone: str = None,
-                           task_name: str = None,
-                           priority: str = 'none',
-                           project: str = None,
-                           tags: list = None,
-                           content: str = '',
-                           ):
+    # def _task_field_checks(self,
+    #                        start_date: datetime = None,
+    #                        end_date: datetime = None,
+    #                        time_zone: str = None,
+    #                        task_name: str = None,
+    #                        priority: str = 'none',
+    #                        project: str = None,
+    #                        tags: list = None,
+    #                        content: str = '',
+    #                        ):
+    #     """
+    #     Performs error checks on the remaining task fields.
+    #     :param task_name:
+    #     :param priority:
+    #     :param project:
+    #     :param tags:
+    #     :param content:
+    #     :return:
+    #     """
+    #     dates = self.time_conversions(start_date=start_date, end_date=end_date, time_zone=time_zone)
+    #     # task_name: -> Make sure task_name is a string
+    #     if not isinstance(task_name, str):
+    #         raise TypeError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
+    #
+    #     # priority: -> Make sure it is a string
+    #     if not isinstance(priority, str):
+    #         raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+    #
+    #     # Lower case the input and make sure it is one of the four options
+    #     lower = priority.lower()
+    #     if lower not in self.PRIORITY_DICTIONARY:
+    #         raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
+    #
+    #     # Priority is now an integer value
+    #     priority = self.PRIORITY_DICTIONARY[lower]
+    #
+    #     # project_id -> Default project id will be none
+    #     if project is None or project == self._client.inbox_id:
+    #         project = self._client.inbox_id
+    #     else:
+    #         project_obj = self._client.get_by_id(project, search='projects')
+    #         if not project_obj:
+    #             raise ValueError(f"List id '{project}' Does Not Exist")
+    #
+    #     # Tag list does not matter -> The user can enter any tag names they want in the list
+    #     if tags is None:
+    #         tags = []
+    #     else:
+    #         # Check if its a string
+    #         if isinstance(tags, str):
+    #             tags = [tags]
+    #         elif isinstance(tags, list):
+    #             for item in tags:
+    #                 if not isinstance(item, str):
+    #                     raise ValueError(f"Individual Tags Inside List Must Be In String Format")
+    #         else:
+    #             raise ValueError(f"Tags Must Be Passed A Single String, Or As A List Of Strings For Multiple Tags")
+    #
+    #     # Content can be whatever string that the user wants to pass but make sure its a string
+    #     if not isinstance(content, str):
+    #         raise ValueError(f"Content Must Be A String")
+    #
+    #     fields = {'title': task_name, 'priority': priority, 'projectId': project, 'tags': tags, 'content': content}
+    #
+    #     return {**dates, **fields}  # Merge the dictionaries
+
+    @staticmethod
+    def builder(title: str = '',
+                content: str = None,
+                desc: str = None,
+                allDay: bool = None,
+                startDate: datetime = None,
+                dueDate: datetime = None,
+                timeZone: str = None,
+                reminders: list = None,
+                repeat: str = None,
+                priority: int = None,
+                sortOrder: int = None,
+                items: list = None):
         """
-        Performs error checks on the remaining task fields.
-        :param task_name:
-        :param priority:
-        :param project:
-        :param tags:
-        :param content:
-        :return:
-        """
-        dates = self.time_conversions(start_date=start_date, end_date=end_date, time_zone=time_zone)
-        # task_name: -> Make sure task_name is a string
-        if not isinstance(task_name, str):
-            raise TypeError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
-
-        # priority: -> Make sure it is a string
-        if not isinstance(priority, str):
-            raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
-
-        # Lower case the input and make sure it is one of the four options
-        lower = priority.lower()
-        if lower not in self.PRIORITY_DICTIONARY:
-            raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
-
-        # Priority is now an integer value
-        priority = self.PRIORITY_DICTIONARY[lower]
-
-        # project_id -> Default project id will be none
-        if project is None or project == self._client.inbox_id:
-            project = self._client.inbox_id
-        else:
-            project_obj = self._client.get_by_id(project, search='projects')
-            if not project_obj:
-                raise ValueError(f"List id '{project}' Does Not Exist")
-
-        # Tag list does not matter -> The user can enter any tag names they want in the list
-        if tags is None:
-            tags = []
-        else:
-            # Check if its a string
-            if isinstance(tags, str):
-                tags = [tags]
-            elif isinstance(tags, list):
-                for item in tags:
-                    if not isinstance(item, str):
-                        raise ValueError(f"Individual Tags Inside List Must Be In String Format")
-            else:
-                raise ValueError(f"Tags Must Be Passed A Single String, Or As A List Of Strings For Multiple Tags")
-
-        # Content can be whatever string that the user wants to pass but make sure its a string
-        if not isinstance(content, str):
-            raise ValueError(f"Content Must Be A String")
-
-        fields = {'title': task_name, 'priority': priority, 'projectId': project, 'tags': tags, 'content': content}
-
-        return {**dates, **fields}  # Merge the dictionaries
-
-    @logged_in
-    def builder(self,
-                name: str,
-                start=None,
-                end=None,
-                priority: str = 'none',
-                project: str = None,
-                tags: list = None,
-                content: str = '',
-                tz: str = None
-                ) -> dict:
-        """
-        Builds a local task object with the passed fields. Performs proper error checking. This function serves as a helper
-        for batch creating tasks in [`create`][managers.tasks.TaskManager.create].
-
-        Arguments:
-            name: Any string is valid.
-            start (datetime): Desired start time.
-            end (datetime): Desired end time.
-            priority: For a priority other than 'none': 'low', 'medium', 'high'.
-            project: The id of the list (project) you want the task to be created in. The default will be your inbox.
-            tags: Single string for the label of the tag, or a list of strings of labels for many tags.
-            content: Desired text to go into the 'Description' field in the task.
-            tz: Timezone string if you want to make your task for a timezone other than the timezone linked to your TickTick account.
-
-        Returns:
-            A dictionary containing the proper fields needed for task creation.
-
-        Raises:
-            TypeError: If any of the parameter types do not match as specified in the parameters table.
-
-        !!! example
-            ```python
-                start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
-                end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
-                title = "Molly's Birthday"
-                remember = "Be there at two and don't forget the snacks"
-                tag = ['Party', 'Friends', 'Food']
-                task = client.task.builder(title,
-                                          start=start_time,
-                                          end=end_time,
-                                          priority='medium',
-                                          content=remember,
-                                          tags=tag)
-            ```
-
-            ??? success "Result"
-                A dictionary object containing the appropriate fields is returned.
-
-                ```python
-                {'startDate': '2022-07-05T21:30:00+0000', 'dueDate': '2022-07-06T06:30:00+0000', 'isAllDay': False, 'timeZone': 'America/Los_Angeles',
-                'title': "Molly's Birthday", 'priority': 3, 'projectId': 'inbox115781412', 'tags': ['Party', 'Friends', 'Food'],
-                'content': "Be there at two and don't forget the snacks"}
-                ```
-
+        Builds a task dictionary with the passed fields. This is a helper
+        method for task creation.
         """
 
-        return self._task_field_checks(task_name=name,
-                                       priority=priority,
-                                       project=project,
-                                       tags=tags,
-                                       content=content,
-                                       start_date=start,
-                                       end_date=end,
-                                       time_zone=tz)
+        task = {'title': title}
+        if content is not None:
+            task['content'] = content
+        if desc is not None:
+            task['desc'] = desc
+        if allDay is not None:
+            task['allDay'] = allDay
+        if startDate is not None:
+            task['startDate'] = startDate
+        if dueDate is not None:
+            task['dueDate'] = dueDate
+        if timeZone is not None:
+            task['timeZone'] = timeZone
+        if reminders is not None:
+            task['reminders'] = reminders
+        if repeat is not None:
+            task['repeat'] = repeat
+        if priority is not None:
+            task['priority'] = priority
+        if sortOrder is not None:
+            task['sortOrder'] = sortOrder
+        if items is not None:
+            task['items'] = items
+
+        return task
+
+    # @logged_in
+    # def builder(self,
+    #             name: str,
+    #             start=None,
+    #             end=None,
+    #             priority: str = 'none',
+    #             project: str = None,
+    #             tags: list = None,
+    #             content: str = '',
+    #             tz: str = None
+    #             ) -> dict:
+    #     """
+    #     Builds a local task object with the passed fields. Performs proper error checking. This function serves as a helper
+    #     for batch creating tasks in [`create`][managers.tasks.TaskManager.create].
+    #
+    #     Arguments:
+    #         name: Any string is valid.
+    #         start (datetime): Desired start time.
+    #         end (datetime): Desired end time.
+    #         priority: For a priority other than 'none': 'low', 'medium', 'high'.
+    #         project: The id of the list (project) you want the task to be created in. The default will be your inbox.
+    #         tags: Single string for the label of the tag, or a list of strings of labels for many tags.
+    #         content: Desired text to go into the 'Description' field in the task.
+    #         tz: Timezone string if you want to make your task for a timezone other than the timezone linked to your TickTick account.
+    #
+    #     Returns:
+    #         A dictionary containing the proper fields needed for task creation.
+    #
+    #     Raises:
+    #         TypeError: If any of the parameter types do not match as specified in the parameters table.
+    #
+    #     !!! example
+    #         ```python
+    #             start_time = datetime(2022, 7, 5, 14, 30)  # 7/5/2022 at 2:30 PM
+    #             end_time = datetime(2022, 7, 5, 23, 30)  # 7/5/2022 at 11:30 PM
+    #             title = "Molly's Birthday"
+    #             remember = "Be there at two and don't forget the snacks"
+    #             tag = ['Party', 'Friends', 'Food']
+    #             task = client.task.builder(title,
+    #                                       start=start_time,
+    #                                       end=end_time,
+    #                                       priority='medium',
+    #                                       content=remember,
+    #                                       tags=tag)
+    #         ```
+    #
+    #         ??? success "Result"
+    #             A dictionary object containing the appropriate fields is returned.
+    #
+    #             ```python
+    #             {'startDate': '2022-07-05T21:30:00+0000', 'dueDate': '2022-07-06T06:30:00+0000', 'isAllDay': False, 'timeZone': 'America/Los_Angeles',
+    #             'title': "Molly's Birthday", 'priority': 3, 'projectId': 'inbox115781412', 'tags': ['Party', 'Friends', 'Food'],
+    #             'content': "Be there at two and don't forget the snacks"}
+    #             ```
+    #
+    #     """
+    #
+    #     return self._task_field_checks(task_name=name,
+    #                                    priority=priority,
+    #                                    project=project,
+    #                                    tags=tags,
+    #                                    content=content,
+    #                                    start_date=start,
+    #                                    end_date=end,
+    #                                    time_zone=tz)

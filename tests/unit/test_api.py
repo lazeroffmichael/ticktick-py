@@ -4,6 +4,7 @@ Module for testing api.py
 
 import pytest
 import uuid
+import os
 
 from ticktick.managers.projects import ProjectManager
 from ticktick.managers.tasks import TaskManager
@@ -13,6 +14,7 @@ from ticktick.managers.pomo import PomoManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.oauth2 import OAuth2
+from ticktick.cache import CacheHandler
 from unittest.mock import patch
 
 RESPONSE_ONE_URL = 'https://someurl.com/test.json'
@@ -53,7 +55,7 @@ class TestInitMethod:
         """
         client = fake_client
 
-        assert client.access_token == ''
+        assert client.access_token == None
         assert client.cookies == {}
         assert client.time_zone == ''
         assert client.profile_id == ''
@@ -90,7 +92,7 @@ class TestPrepareSession:
         # sync return value
         mock3.return_value = None
 
-        fake_client._prepare_session('username', 'password')
+        fake_client._prepare_session("user", "pass")
 
 
 class TestResetLocalState:

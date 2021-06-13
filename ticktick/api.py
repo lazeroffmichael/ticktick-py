@@ -1,4 +1,5 @@
 import httpx
+import os
 
 from ticktick.managers.focus import FocusTimeManager
 from ticktick.managers.habits import HabitManager
@@ -8,6 +9,7 @@ from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.managers.tasks import TaskManager
 from ticktick.oauth2 import OAuth2
+from ticktick.cache import CacheHandler
 
 
 class TickTickClient:
@@ -33,7 +35,7 @@ class TickTickClient:
         """
         # Class members
 
-        self.access_token = ''
+        self.access_token = None
         self.cookies = {}
         self.time_zone = ''
         self.profile_id = ''
@@ -127,7 +129,7 @@ class TickTickClient:
         parameters = {
             'includeWeb': True
         }
-        response = self.http_get(url, params=parameters)
+        response = self.http_get(url, params=parameters, cookies=self.cookies)
 
         self.time_zone = response['timeZone']
         self.profile_id = response['id']
