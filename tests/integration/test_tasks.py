@@ -6,6 +6,7 @@ import pytest
 import uuid
 import datetime
 from ticktick.helpers.time_methods import convert_date_to_tick_tick_format
+import time
 
 
 def example_task():
@@ -149,6 +150,8 @@ class TestDelete:
         # create task
         response1 = client.task.create(task1)
 
+        time.sleep(2)
+
         # create task
         response2 = client.task.create(task2)
 
@@ -188,6 +191,7 @@ class TestMoveAll:
         task1 = {'title': str(uuid.uuid4()), 'projectId': list2['id']}
         task2 = {'title': str(uuid.uuid4()), 'projectId': list2['id']}
         task1 = client.task.create(task1)
+        time.sleep(2)
         task2 = client.task.create(task2)
         # Move the tasks: list2 -> list1
         move = client.task.move_all(list2['id'], list1['id'])
@@ -211,6 +215,7 @@ class TestMakeSubtask:
         parent = {'title': 'Parent Task'}
         child = {'title': 'Child Task'}
         parent_task = client.task.create(parent)
+        time.sleep(2)
         child_task = client.task.create(child)
         try:
             subtask = client.task.make_subtask(child_task, parent_task['id'])
@@ -229,9 +234,13 @@ class TestMakeSubtask:
         Tests creation of a subtask with multiple tasks
         """
         parent = client.task.create({'title': 'Parent Task'})
+        time.sleep(2)
         task1 = client.task.create({'title': 'Child Task 1'})
+        time.sleep(2)
         task2 = client.task.create({'title': 'Child Task 2'})
+        time.sleep(2)
         task3 = client.task.create({'title': 'Child Task 3'})
+        time.sleep(2)
         try:
             tasks = [task1, task2, task3]
             # All should be in the inbox already
@@ -259,6 +268,7 @@ class TestMakeSubtask:
         """Tests that an error is raised if the task doesn't exist in the same project as the parent"""
         parent = client.task.create({'title': 'Parent Task'})  # In inbox
         new_proj = client.project.create(str(uuid.uuid4()))  # New project
+        time.sleep(2)
         child = client.task.create({'title': 'Child Task', 'projectId': new_proj['id']})
         with pytest.raises(ValueError):
             subtask = client.task.make_subtask(child, parent['id'])  # Make the task a subtask of parent
@@ -274,8 +284,10 @@ class TestMoveTasks:
         p1 = client.project.builder(str(uuid.uuid4()))
         p2 = client.project.builder(str(uuid.uuid4()))
         p = client.project.create([p1, p2])  # Create the projects
+        time.sleep(2)
         # Create a tasks in the first project
         task2 = client.task.create({'title': 'Task2', 'projectId': p[0]['id']})
+        time.sleep(2)
         task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
         # Move task1 to p2
         move1 = client.task.move(task1, p[1]['id'])
@@ -294,7 +306,9 @@ class TestMoveTasks:
         p1 = client.project.builder(str(uuid.uuid4()))
         p = client.project.create([p0, p1])  # Create the projects
         task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
+        time.sleep(2)
         task2 = client.task.create({'title': 'Task2', 'projectId': p[0]['id']})
+        time.sleep(2)
         task3 = client.task.create({'title': 'Task3', 'projectId': p[0]['id']})
         # Move task1 and task2 to p1
         move = [task1, task2]
@@ -315,8 +329,8 @@ class TestMoveTasks:
         p1 = client.project.builder(str(uuid.uuid4()))
         p = client.project.create([p0, p1])  # Create the projects
         task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
+        time.sleep(2)
         task2 = client.task.create({'title': 'Task2', 'projectId': p[1]['id']})
         with pytest.raises(ValueError):
             client.task.move([task1, task2], client.inbox_id)
         client.project.delete([p[0]['id'], p[1]['id']])
-

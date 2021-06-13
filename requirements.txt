@@ -4,3 +4,4 @@ httpx
 pytz
 pytest
 regex
+retrying

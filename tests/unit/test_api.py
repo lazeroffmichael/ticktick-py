@@ -14,7 +14,8 @@ from ticktick.managers.pomo import PomoManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.oauth2 import OAuth2
-from ticktick.cache import CacheHandler
+from ticktick.api import _retry_on_request_error
+from retrying import retry
 from unittest.mock import patch
 
 RESPONSE_ONE_URL = 'https://someurl.com/test.json'
@@ -139,11 +140,17 @@ class TestCheckingStatusCode:
 
 class TestHTTPMethods:
 
+    def test_retry_on_request_error(self):
+        """
+        Tests that a boolean is returned when the exception passed to the function
+        is a RunTimeError
+        """
+        assert not _retry_on_request_error(IOError)
+
     def test_http_post(self, fake_client):
         """
         Tests the http_post method
         """
-
         m = mocked_request(RESPONSE_ONE_URL)
         with patch('httpx.Client.post', return_value=m):
             response = fake_client.http_post(RESPONSE_ONE_URL, json={})
