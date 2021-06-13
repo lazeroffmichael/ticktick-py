@@ -450,3 +450,40 @@ class TestTimeConversions:
         dates = fake_client.task.time_conversions(start)
         assert not dates['isAllDay']
         fake_client.time_zone = ''
+
+
+class TestMakeSubtask:
+
+    def test_create_subtask_type_errors(self, fake_client):
+        objs = ''
+        with pytest.raises(TypeError):
+            fake_client.task.make_subtask(objs, parent='')
+        with pytest.raises(TypeError):
+            fake_client.task.make_subtask({}, parent=3)
+        with pytest.raises(ValueError):
+            fake_client.task.make_subtask({}, parent='Yeah this not right')
+
+
+class TestMoveTasks:
+
+    def test_move_projects_single_type_errors(self, fake_client):
+        """Tests type erorrs for move_projects"""
+        with pytest.raises(TypeError):
+            fake_client.task.move('', '')
+        with pytest.raises(TypeError):
+            fake_client.task.move(123, '')
+        with pytest.raises(TypeError):
+            fake_client.task.move({}, 342)
+
+
+class TestGetCompleted:
+
+    def test_get_summary_invalid_time_zone(self, fake_client):
+        """Tests that an exception is raised if an invalid time zone is passed to get_summary"""
+        start = datetime.datetime(2020, 12, 14)
+        end = datetime.datetime(2020, 12, 14)
+        tz = 'THIS AINT IT CHIEF'
+        with pytest.raises(KeyError):
+            fake_client.task.get_completed(start, end, tz=tz)
+
+

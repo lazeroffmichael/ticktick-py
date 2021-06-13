@@ -1,5 +1,4 @@
 import httpx
-httpx.
 import os
 
 from ticktick.managers.focus import FocusTimeManager

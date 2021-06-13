@@ -223,3 +223,100 @@ class TestMakeSubtask:
             assert client.get_by_id(child_task['id'])  # Make sure child task was not deleted.
             client.task.delete(child_task)
             assert subtask['parentId'] == parent_task['id']
+
+    def test_create_subtask_multiple(self, client):
+        """
+        Tests creation of a subtask with multiple tasks
+        """
+        parent = client.task.create({'title': 'Parent Task'})
+        task1 = client.task.create({'title': 'Child Task 1'})
+        task2 = client.task.create({'title': 'Child Task 2'})
+        task3 = client.task.create({'title': 'Child Task 3'})
+        try:
+            tasks = [task1, task2, task3]
+            # All should be in the inbox already
+            subtask = client.task.make_subtask(tasks, parent=parent['id'])
+        except:
+            client.task.delete(parent)  # Delete parent
+            # Delete tasks
+            client.task.delete(task1)
+            client.task.delete(task2)
+            client.task.delete(task3)
+            assert False
+        else:
+            retrieved1 = client.get_by_id(obj_id=task1['id'], search='tasks')
+            retrieved2 = client.get_by_id(obj_id=task2['id'], search='tasks')
+            retrieved3 = client.get_by_id(obj_id=task3['id'], search='tasks')
+            client.task.delete(parent)
+            client.task.delete(task1)
+            client.task.delete(task2)
+            client.task.delete(task3)
+            assert retrieved1['parentId'] == parent['id']
+            assert retrieved2['parentId'] == parent['id']
+            assert retrieved3['parentId'] == parent['id']
+
+    def test_create_child_subtask_different_project(self, client):
+        """Tests that an error is raised if the task doesn't exist in the same project as the parent"""
+        parent = client.task.create({'title': 'Parent Task'})  # In inbox
+        new_proj = client.project.create(str(uuid.uuid4()))  # New project
+        child = client.task.create({'title': 'Child Task', 'projectId': new_proj['id']})
+        with pytest.raises(ValueError):
+            subtask = client.task.make_subtask(child, parent['id'])  # Make the task a subtask of parent
+        client.task.delete(parent)
+        client.task.delete(child)
+        client.project.delete(new_proj['id'])
+
+
+class TestMoveTasks:
+
+    def test_move_projects_success(self, client):
+        """Tests moving a single task to a new project"""
+        p1 = client.project.builder(str(uuid.uuid4()))
+        p2 = client.project.builder(str(uuid.uuid4()))
+        p = client.project.create([p1, p2])  # Create the projects
+        # Create a tasks in the first project
+        task2 = client.task.create({'title': 'Task2', 'projectId': p[0]['id']})
+        task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
+        # Move task1 to p2
+        move1 = client.task.move(task1, p[1]['id'])
+        # Check that project id for move1 is changed
+        assert move1['projectId'] == p[1]['id']
+        # Check that task2 still exists in p1
+        p1_tasks = client.task.get_from_project(p[0]['id'])
+        assert p1_tasks
+        # Check that task1 has moved
+        assert client.task.get_from_project(p[1]['id']) == [move1]
+        # Delete the objects
+        client.project.delete([p[0]['id'], p[1]['id']])  # Tasks are deleted as well.
+
+    def test_move_projects_success_multiple(self, client):
+        p0 = client.project.builder(str(uuid.uuid4()))
+        p1 = client.project.builder(str(uuid.uuid4()))
+        p = client.project.create([p0, p1])  # Create the projects
+        task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
+        task2 = client.task.create({'title': 'Task2', 'projectId': p[0]['id']})
+        task3 = client.task.create({'title': 'Task3', 'projectId': p[0]['id']})
+        # Move task1 and task2 to p1
+        move = [task1, task2]
+        moved = client.task.move(move, p[1]['id'])  # Move to p1
+        # Make sure task3 still is in p0
+        assert client.task.get_from_project(p[0]['id'])
+        # Make sure task1 and task2 are in p1
+        assert moved[0]['projectId'] == p[1]['id'] and moved[1]['projectId'] == p[1]['id']
+        p1_tasks = client.task.get_from_project(p[1]['id'])
+        assert moved[0] in p1_tasks and moved[1] in p1_tasks
+        client.project.delete([p[0]['id'], p[1]['id']])
+
+    def test_move_projects_fail_when_task_projects_differ(self, client):
+        """
+        Tests exception is raised when the project id's differ when trying to move
+        """
+        p0 = client.project.builder(str(uuid.uuid4()))
+        p1 = client.project.builder(str(uuid.uuid4()))
+        p = client.project.create([p0, p1])  # Create the projects
+        task1 = client.task.create({'title': 'Task1', 'projectId': p[0]['id']})
+        task2 = client.task.create({'title': 'Task2', 'projectId': p[1]['id']})
+        with pytest.raises(ValueError):
+            client.task.move([task1, task2], client.inbox_id)
+        client.project.delete([p[0]['id'], p[1]['id']])
+
