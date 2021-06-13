@@ -21,7 +21,7 @@ class TestCreate:
         task = example_task()
         response = client.task.create(task)
         assert response['title'] == task['title']
-        assert response['projectId'] == 'inbox'
+        assert response['projectId'] == client.inbox_id
         assert client.get_by_id(response['id'], search='tasks')
         client.task.delete(response)
 
@@ -176,3 +176,50 @@ class TestDelete:
         assert deleted == (response1, response2)
 
 
+class TestMoveAll:
+
+    def test_move_list_pass(self, client):
+        """Tests moving all the tasks from one list into a new list"""
+        list1_name = str(uuid.uuid4())
+        list2_name = str(uuid.uuid4())
+        list1 = client.project.create(list1_name)
+        list2 = client.project.create(list2_name)
+        # Tasks will be created in list2
+        task1 = {'title': str(uuid.uuid4()), 'projectId': list2['id']}
+        task2 = {'title': str(uuid.uuid4()), 'projectId': list2['id']}
+        task1 = client.task.create(task1)
+        task2 = client.task.create(task2)
+        # Move the tasks: list2 -> list1
+        move = client.task.move_all(list2['id'], list1['id'])
+        for ids in move:
+            assert ids['id'] == task1['id'] or ids['id'] == task2['id']
+        list2_tasks = client.task.get_from_project(list2['id'])
+        assert not list2_tasks  # Assert that all the tasks in list 2 are gone
+        list1_tasks = client.task.get_from_project(list1['id'])
+        for task in list1_tasks:
+            assert task['projectId'] == list1['id']
+        # Deleting the lists will delete the tasks
+        client.project.delete(list1['id'])
+        client.project.delete(list2['id'])
+
+
+class TestMakeSubtask:
+
+    def test_create_subtask_single(self, client):
+        # Create the parent task
+        parent = client.task.builder('Parent Task')
+        parent = {'title': 'Parent Task'}
+        child = {'title': 'Child Task'}
+        parent_task = client.task.create(parent)
+        child_task = client.task.create(child)
+        try:
+            subtask = client.task.make_subtask(child_task, parent_task['id'])
+        except:
+            client.task.delete(child_task)
+            client.task.delete(parent_task)
+            assert False
+        else:
+            client.task.delete(parent_task)
+            assert client.get_by_id(child_task['id'])  # Make sure child task was not deleted.
+            client.task.delete(child_task)
+            assert subtask['parentId'] == parent_task['id']

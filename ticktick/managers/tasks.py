@@ -71,6 +71,10 @@ class TaskManager:
         # except KeyError:
         #     pass
 
+        # set 'inbox' to be the actual inbox id
+        if response['projectId'] == 'inbox':
+            response['projectId'] = self._client.inbox_id
+
         # return response
         return response
 

@@ -1,4 +1,5 @@
 import httpx
+httpx.
 import os
 
 from ticktick.managers.focus import FocusTimeManager
@@ -13,7 +14,6 @@ from ticktick.cache import CacheHandler
 
 
 class TickTickClient:
-
     BASE_URL = 'https://api.ticktick.com/api/v2/'
 
     OPEN_API_BASE_URL = 'https://api.ticktick.com'
@@ -87,7 +87,7 @@ class TickTickClient:
             password: TickTick Password
 
         """
-        url = self.BASE_URL + 'user/signon'
+        url = self.BASE_URL + 'user/signin'
         user_info = {
             'username': username,
             'password': password

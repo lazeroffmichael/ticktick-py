@@ -86,6 +86,17 @@ class TestCreate:
         with patch('ticktick.api.TickTickClient.http_post', return_value=example_task_response()):
             assert task_client.create({}) == example_task_response()
 
+    @patch('ticktick.api.TickTickClient.sync')
+    def test_create_make_inbox_id(self, mock_object, task_client, fake_client):
+        """
+        Tests that when the project id is 'inbox' that it is set to the users actual inbox id
+        """
+        mock_object.return_value = None
+        return_value = example_task_response()
+        return_value['projectId'] = 'inbox'
+        with patch('ticktick.api.TickTickClient.http_post', return_value=return_value):
+            task = task_client.create(return_value)
+            assert task['projectId'] == fake_client.inbox_id
 
 class TestUpdate:
 
@@ -301,6 +312,25 @@ class TestGetFromProject:
         fake_client.delete_from_local_state(id=fake_list_id, search='projects')
         fake_client.delete_from_local_state(title=task1_title, search='tasks')
         fake_client.delete_from_local_state(title=task2_title, search='tasks')
+
+    def test_get_from_list_single(self, fake_client):
+        # Make a fake list
+        fake_list_id = str(uuid.uuid4())
+        fake_list = {'id': fake_list_id}
+        fake_client.state['projects'].append(fake_list)  # Append the fake list
+        # Make some fake tasks
+        task1_title = str(uuid.uuid4())
+        task1 = {'projectId': fake_list_id, 'title': task1_title}
+        fake_client.state['tasks'].append(task1)
+        tasks = fake_client.task.get_from_project(fake_list_id)
+        assert tasks[0] == task1
+        fake_client.delete_from_local_state(id=fake_list_id, search='projects')
+        fake_client.delete_from_local_state(title=task1_title, search='tasks')
+
+    def test_get_from_list_error(self, fake_client):
+        """Tests exception raised if list doesn't exist"""
+        with pytest.raises(ValueError):
+            fake_client.task.get_from_project(str(uuid.uuid4()))
 
 
 class TestTimeConversions:

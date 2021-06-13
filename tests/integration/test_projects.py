@@ -169,7 +169,8 @@ def test_delete_list_pass_multiple(client):
 
 def test_delete_list_pass_single_with_task(client):
     project = client.project.create(str(uuid.uuid4()))
-    task = client.task.create('Hello', project=project['id'])
+    task = {'title': 'Hello', "projectId": project['id']}
+    task = client.task.create(task)
     assert task['projectId'] == project['id']
     deleted = client.project.delete(project['id'])
     assert deleted == project
@@ -179,16 +180,17 @@ def test_delete_list_pass_single_with_task(client):
 
 def test_delete_list_pass_multiple_with_tasks(client):
     project = client.project.create(str(uuid.uuid4()))
-    task1 = client.task.builder('Hello', project=project['id'])
-    task2 = client.task.builder('Hello2', project=project['id'])
-    task3 = client.task.builder('Hello3', project=project['id'])
-    tasks = [task1, task2, task3]
-    created = client.task.create(tasks)
+    task1 = {'title': 'Hello', 'projectId': project['id']}
+    task1 = client.task.create(task1)
+    task2 = {'title': 'Hello', 'projectId': project['id']}
+    task2 = client.task.create(task2)
+    task3 = {'title': 'Hello', 'projectId': project['id']}
+    task3 = client.task.create(task3)
     deleted = client.project.delete(project['id'])
     assert deleted == project
-    assert not client.get_by_id(created[0]['id'])
-    assert not client.get_by_id(created[1]['id'])
-    assert not client.get_by_id(created[2]['id'])
+    assert not client.get_by_id(task1['id'])
+    assert not client.get_by_id(task2['id'])
+    assert not client.get_by_id(task3['id'])
     assert not client.get_by_id(project['id'])
 
 
@@ -368,6 +370,3 @@ def test_update_folders_fail(client):
         client.project.update_folder('')
     with pytest.raises(TypeError):
         client.project.update_folder(34324)
-
-
-
