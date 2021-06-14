@@ -1,8 +1,5 @@
 import datetime
 import pytz
-import time
-import uuid
-import copy
 
 from ticktick.helpers.time_methods import convert_local_time_to_utc, convert_date_to_tick_tick_format
 from ticktick.helpers.constants import DATE_FORMAT
@@ -1219,7 +1216,6 @@ class TaskManager:
         else:
             return return_list
 
-    @logged_in
     def move_all(self, old: str, new: str) -> list:
         """
         Moves all the tasks from the old project to the new project.
@@ -1243,7 +1239,7 @@ class TaskManager:
             school_project = client.get_by_fields(name='School', search='projects')
             work_project = client.get_by_fields(name='Work', search='projects')
             # Call the method
-            moved_tasks = client.task.move_projects(school_project['id'], work_project['id'])
+            moved_tasks = client.task.move_all(school_project['id'], work_project['id'])
             ```
 
             ??? success "Result"
@@ -1296,7 +1292,6 @@ class TaskManager:
             })
 
         url = self._client.BASE_URL + 'batch/taskProject'
-        url2 = self._client.BASE_URL + 'batch/task'
         # Make the initial call to move the tasks
         self._client.http_post(url, json=task_project, cookies=self._client.cookies)
 

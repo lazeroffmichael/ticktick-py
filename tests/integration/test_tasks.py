@@ -170,6 +170,8 @@ class TestDelete:
         # create task
         response1 = client.task.create(task1)
 
+        time.sleep(2)
+
         # create task
         response2 = client.task.create(task2)
 
@@ -334,3 +336,27 @@ class TestMoveTasks:
         with pytest.raises(ValueError):
             client.task.move([task1, task2], client.inbox_id)
         client.project.delete([p[0]['id'], p[1]['id']])
+
+
+class TestMoveAll:
+
+    def test_move_all(self, client):
+        """
+        Tests moving all the tasks in one project to another project
+        """
+        project1 = client.project.builder(str(uuid.uuid4()))
+        project2 = client.project.builder(str(uuid.uuid4()))
+        # Create the projects
+        projects = client.project.create([project1, project2])
+        # Create two tasks
+        task1 = client.task.create({'title': 'Task1', 'projectId': projects[0]['id']})
+        time.sleep(2)
+        task2 = client.task.create({'title': 'Task2', 'projectId': projects[0]['id']})
+        # Move tasks from first project to second project
+        moved = client.task.move_all(projects[0]['id'], projects[1]['id'])
+        # Make sure that no tasks are in project 1 anymore
+        assert not client.task.get_from_project(projects[0]['id'])
+        # Make sure that there are two tasks in project 2
+        assert len(client.task.get_from_project(projects[1]['id'])) == 2
+        # Delete both projects
+        client.project.delete([projects[0]['id'], projects[1]['id']])
