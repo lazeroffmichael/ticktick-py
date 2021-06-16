@@ -46,6 +46,22 @@ class TestCreate:
         assert response['content'] == task['content']
         client.task.delete(response)
 
+    def test_create_with_date(self, client):
+        """
+        Tests all day single date
+        """
+        start = datetime.datetime(2027, 1, 1)
+        task = client.task.builder("Task", startDate=start)
+        response = client.task.create(task)
+        assert response['startDate'] == convert_date_to_tick_tick_format(start, "US/Pacific")
+        client.task.delete(response)
+
+    def test_create_with_date_specific(self, client):
+        """
+        Tests specific single date
+        """
+        pass
+
 
 class TestUpdate:
 

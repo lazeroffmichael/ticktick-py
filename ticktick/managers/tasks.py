@@ -781,7 +781,7 @@ class TaskManager:
     #                 'isFloating': False, 'isAllDay': True, 'reminders': [], 'exDate': [], 'priority': 0,
     #                 'status': 0, 'items': [], 'progress': 70, 'modifiedTime': '2021-01-13T20:30:05.000+0000',
     #                 'etag': 'hdz5rbcj', 'deleted': 0, 'createdTime': '2021-01-13T20:30:05.000+0000',
-    #                 'creator': 557493756, 'kind': 'TEXT'}]
+    #                 'creator': 55493756, 'kind': 'TEXT'}]
     #                 ```
     #
     #                 **Before**
@@ -1499,158 +1499,64 @@ class TaskManager:
         response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
         return response
 
-    def time_conversions(self, start_date: datetime = None, end_date: datetime = None, time_zone: str = None):
+    def dates(self, start, due=None, tz=None):
         """
-        Performs the proper checks and conversions for converting datetime object to TickTick time string
-        :return: (start_date, end_date)
+        Performs necessary date conversions
+
+        1. All Day Start Time
+        2. All Day Start and End Time
+        3. Specific Start Time
+        4. Specific Start and End Time
+
         """
-        # Date
-        # If another time zone is not entered, default to the profile
-        if time_zone is None:
-            time_zone = self._client.time_zone
+        dates = {}
+        # Set time zone
+        if tz is not None:
+            dates['timeZone'] = tz
         else:
-            if time_zone not in pytz.all_timezones_set:
-                raise ValueError(f"Timezone '{time_zone}' Is Invalid")
+            tz = self._client.time_zone
 
-        all_day = None  # all day will begin at none
-        # Lets first check if both dates  are passed in, and if they are if start date comes before end date
-        if start_date is not None and end_date is not None:
-            if not isinstance(start_date, datetime.datetime):
-                raise TypeError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
-            if not isinstance(end_date, datetime.datetime):
-                raise TypeError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
+        # Check if just start date
+        if due is None:
+            dates['startDate'] = convert_date_to_tick_tick_format(start, tz)
+            return dates
 
-            # Check that start_date comes before end_date
-            if start_date > end_date:
-                raise ValueError(f"Start Date: '{start_date}' cannot come after End Date: '{end_date}'")
-            if (start_date.hour != 0 or start_date.minute != 0 or start_date.second != 0 or start_date.microsecond != 0
-                    or end_date.hour != 0 or end_date.minute != 0 or end_date.second != 0 or end_date.microsecond != 0):
-                # A specific hour, minute, second, or microsecond was given - so all day is not false and there
-                # is a specific time.
-                all_day = False
-            else:
-                all_day = True
+        # Check all day for both
+        if (start.hour != 0 or start.minute != 0 or start.second != 0 or start.microsecond != 0
+            or due.hour != 0 or due.minute != 0 or due.second != 0 or due.microsecond != 0):
+            # Just convert the dates and return
+            dates['startDate'] = convert_date_to_tick_tick_format(start, tz)
+            dates['dueDate'] = convert_date_to_tick_tick_format(due, tz)
+            return dates
 
-            if all_day:
-                # All day is true, however normally right now if we were to use a date like Jan 1 - Jan 3,
-                # TickTick would create a task that is only Jan 1 - Jan 2 since the date would be up to Jan 3
-                # Lets account for that by making the date actually be one more than the current end date
-                # This will allow for more natural date input for all day tasks
-                days = monthrange(end_date.year, end_date.month)
-                if end_date.day + 1 > days[1]:  # Last day of the month
-                    if end_date.month + 1 > 12:  # Last month of the year
-                        year = end_date.year + 1  # Both last day of month and last day of year
-                        day = 1
-                        month = 1
-                    else:  # Not last month of year, just reset the day and increment the month
-                        year = end_date.year
-                        month = end_date.month + 1
-                        day = 1
-                else:  # Dont have to worry about incrementing year or month
-                    year = end_date.year
-                    day = end_date.day + 1
-                    month = end_date.month
+        # All day is true, however normally right now if we were to use a date like Jan 1 - Jan 3,
+        # TickTick would create a task that is only Jan 1 - Jan 2 since the date would be up to Jan 3
+        # Lets account for that by making the date actually be one more than the current end date
+        # This will allow for more natural date input for all day tasks
+        days = monthrange(due.year, due.month)
+        if due.day + 1 > days[1]:  # Last day of the month
+            if due.month + 1 > 12:  # Last month of the year
+                year = due.year + 1  # Both last day of month and last day of year
+                day = 1
+                month = 1
+            else:  # Not last month of year, just reset the day and increment the month
+                year = due.year
+                month = due.month + 1
+                day = 1
+        else:  # Dont have to worry about incrementing year or month
+            year = due.year
+            day = due.day + 1
+            month = due.month
 
-                end_date = datetime.datetime(year, month, day)  # No hours, mins, or seconds needed
-            start_date = convert_date_to_tick_tick_format(start_date, time_zone)
-            end_date = convert_date_to_tick_tick_format(end_date, time_zone)
+        due = datetime.datetime(year, month, day)  # No hours, mins, or seconds needed
 
-        # start_date passed but end_date not passed
-        elif start_date is not None and end_date is None:
-            if not isinstance(start_date, datetime.datetime):
-                raise TypeError(f"Invalid Start Date: {start_date} -> Must Be A Datetime Object")
-            # Determine all day
-            if start_date.hour != 0 or start_date.minute != 0 or start_date.second != 0 or start_date.microsecond != 0:
-                all_day = False
-            else:
-                all_day = True
-            # Parse start_date
-            start_date = convert_date_to_tick_tick_format(start_date, time_zone)
-            end_date = start_date
+        dates['startDate'] = convert_date_to_tick_tick_format(start, tz)
+        dates['dueDate'] = convert_date_to_tick_tick_format(due, tz)
 
-        # end_date passed but start_date not passed
-        elif end_date is not None and start_date is None:
-            if not isinstance(end_date, datetime.datetime):
-                raise TypeError(f"Invalid End Date: {end_date} -> Must Be A Datetime Object")
-            # Determine all day
-            if end_date.hour != 0 or end_date.minute != 0 or end_date.second != 0 or end_date.microsecond != 0:
-                all_day = False
-            else:
-                all_day = True
-            # But end_date will actually take the place of start_date
-            end_date = convert_date_to_tick_tick_format(end_date, time_zone)
-            start_date = end_date
+        return dates
 
-        return {'startDate': start_date, 'dueDate': end_date, 'isAllDay': all_day, 'timeZone': time_zone}
-
-    # def _task_field_checks(self,
-    #                        start_date: datetime = None,
-    #                        end_date: datetime = None,
-    #                        time_zone: str = None,
-    #                        task_name: str = None,
-    #                        priority: str = 'none',
-    #                        project: str = None,
-    #                        tags: list = None,
-    #                        content: str = '',
-    #                        ):
-    #     """
-    #     Performs error checks on the remaining task fields.
-    #     :param task_name:
-    #     :param priority:
-    #     :param project:
-    #     :param tags:
-    #     :param content:
-    #     :return:
-    #     """
-    #     dates = self.time_conversions(start_date=start_date, end_date=end_date, time_zone=time_zone)
-    #     # task_name: -> Make sure task_name is a string
-    #     if not isinstance(task_name, str):
-    #         raise TypeError(f"Invalid Task Name {task_name} -> Task Name Must Be A String")
-    #
-    #     # priority: -> Make sure it is a string
-    #     if not isinstance(priority, str):
-    #         raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
-    #
-    #     # Lower case the input and make sure it is one of the four options
-    #     lower = priority.lower()
-    #     if lower not in self.PRIORITY_DICTIONARY:
-    #         raise TypeError(f"Priority must be 'none', 'low', 'medium', or 'high'")
-    #
-    #     # Priority is now an integer value
-    #     priority = self.PRIORITY_DICTIONARY[lower]
-    #
-    #     # project_id -> Default project id will be none
-    #     if project is None or project == self._client.inbox_id:
-    #         project = self._client.inbox_id
-    #     else:
-    #         project_obj = self._client.get_by_id(project, search='projects')
-    #         if not project_obj:
-    #             raise ValueError(f"List id '{project}' Does Not Exist")
-    #
-    #     # Tag list does not matter -> The user can enter any tag names they want in the list
-    #     if tags is None:
-    #         tags = []
-    #     else:
-    #         # Check if its a string
-    #         if isinstance(tags, str):
-    #             tags = [tags]
-    #         elif isinstance(tags, list):
-    #             for item in tags:
-    #                 if not isinstance(item, str):
-    #                     raise ValueError(f"Individual Tags Inside List Must Be In String Format")
-    #         else:
-    #             raise ValueError(f"Tags Must Be Passed A Single String, Or As A List Of Strings For Multiple Tags")
-    #
-    #     # Content can be whatever string that the user wants to pass but make sure its a string
-    #     if not isinstance(content, str):
-    #         raise ValueError(f"Content Must Be A String")
-    #
-    #     fields = {'title': task_name, 'priority': priority, 'projectId': project, 'tags': tags, 'content': content}
-    #
-    #     return {**dates, **fields}  # Merge the dictionaries
-
-    @staticmethod
-    def builder(title: str = '',
+    def builder(self,
+                title: str = '',
                 content: str = None,
                 desc: str = None,
                 allDay: bool = None,
@@ -1666,7 +1572,6 @@ class TaskManager:
         Builds a task dictionary with the passed fields. This is a helper
         method for task creation.
         """
-
         task = {'title': title}
         if content is not None:
             task['content'] = content
@@ -1674,12 +1579,6 @@ class TaskManager:
             task['desc'] = desc
         if allDay is not None:
             task['allDay'] = allDay
-        if startDate is not None:
-            task['startDate'] = startDate
-        if dueDate is not None:
-            task['dueDate'] = dueDate
-        if timeZone is not None:
-            task['timeZone'] = timeZone
         if reminders is not None:
             task['reminders'] = reminders
         if repeat is not None:
@@ -1691,7 +1590,14 @@ class TaskManager:
         if items is not None:
             task['items'] = items
 
-        return task
+        dates = {}
+
+        # date conversions
+        if startDate is not None:
+            dates = self.dates(startDate, dueDate, timeZone)
+
+        # merge dicts
+        return {**dates, **task}
 
     # @logged_in
     # def builder(self,

@@ -317,10 +317,12 @@ class TickTickClient:
         """
         Finds and returns the objects in `state` that match the inputted fields.
 
-        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list,
+        else the entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
-            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+            we can find an object by
             comparing any fields contained in those objects.
 
             For example: Lets say we have 3 task objects that are titled 'Hello', and we want to obtain all of them.
@@ -347,7 +349,8 @@ class TickTickClient:
 
 
         Arguments:
-            search: Key in [`state`](api.md#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
+            search: Key in [`state`](api.md#state) that the search should take place in. If empty the
+            entire [`state`](api.md#state) dictionary will be searched.
             **kwargs: Matching fields in the object to look for.
 
         Returns:
@@ -417,11 +420,13 @@ class TickTickClient:
         """
         Returns the dictionary of the object corresponding to the passed id.
 
-        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the
+        entire [`state`](api.md#state) dictionary will be searched.
 
 
         !!! example
-            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+            we can find an object by
             comparing the id fields.
 
             For example: Lets get the object that corresponds to an id referenced by `my_id`.
@@ -448,7 +453,8 @@ class TickTickClient:
 
         Arguments:
             obj_id: Id of the item.
-            search: Key in [`state`](api.md#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
+            search: Key in [`state`](api.md#state) that the search should take place in. If empty the
+            entire [`state`](api.md#state) dictionary will be searched.
 
         Returns:
             The dictionary object of the item if found, or an empty dictionary if not found.
@@ -480,10 +486,12 @@ class TickTickClient:
         """
         Returns the dictionary object of the item with the matching etag.
 
-        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list, else the
+        entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
-            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+            we can find an object by
             comparing the etag fields.
 
             For example: Lets get the object that corresponds to an etag referenced by `my_etag`.
@@ -510,7 +518,8 @@ class TickTickClient:
 
         Arguments:
             etag: The etag of the object that you are looking for.
-            search: Key in [`state`](#state) that the search should take place in. If empty the entire [`state`](api.md#state) dictionary will be searched.
+            search: Key in [`state`](#state) that the search should take place in. If empty the
+            entire [`state`](api.md#state) dictionary will be searched.
 
         Returns:
             The dictionary object of the item if found, or an empty dictionary if not found.
@@ -543,10 +552,12 @@ class TickTickClient:
         """
         Deletes a single object from the local `state` dictionary. **Does not delete any items remotely.**
 
-        If search is specified, it will only search the specific [`state`](api.md#state) list, else the entire [`state`](api.md#state) dictionary will be searched.
+        If search is specified, it will only search the specific [`state`](api.md#state) list,
+        else the entire [`state`](api.md#state) dictionary will be searched.
 
         !!! example
-            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields, we can find an object by
+            Since each TickTick object like tasks, lists, and tags are just dictionaries of fields,
+            we can find an object by
             comparing the fields.
 
             For example: Lets say that we wanted to find and delete an existing task object from our local state
@@ -560,7 +571,8 @@ class TickTickClient:
 
             deleted_task = client.delete_from_local_state(title='Get Groceries')
             ```
-            `deleted_task` would now hold the object that was deleted from the [`state`](api.md#state) dictionary if it was found.
+            `deleted_task` would now hold the object that was deleted from the [`state`](api.md#state)
+            dictionary if it was found.
 
             Furthermore if we know the type of object we are looking for, we can make the search more efficient by
             specifying the key its located under in the [`state`](api.md#state) dictionary.
@@ -575,7 +587,8 @@ class TickTickClient:
 
 
         Arguments:
-            search: A specific item to look through in the [`state`](api.md#state) dictionary. When not specified the entire [`state`](api.md#state) dictionary will be searched.
+            search: A specific item to look through in the [`state`](api.md#state) dictionary. When not specified the
+            entire [`state`](api.md#state) dictionary will be searched.
             **kwargs: Matching fields in the object to look for.
 
         Returns:

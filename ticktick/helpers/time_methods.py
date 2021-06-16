@@ -46,7 +46,7 @@ def convert_local_time_to_utc(original_time, time_zone: str):
     return time_zone_dt.astimezone(utc).replace(tzinfo=None)
 
 
-def convert_date_to_tick_tick_format(date, tz: str):
+def convert_date_to_tick_tick_format(datetime_obj, tz: str):
     """
     Parses ISO 8601 Format to Tick Tick Date Format
 
@@ -59,7 +59,7 @@ def convert_date_to_tick_tick_format(date, tz: str):
         TickTick Required Format: 2020-12-23T01:56:07+0000 -> Where the last colon is removed for timezone
 
     Arguments:
-        date (datetime): Datetime object to be parsed.
+        datetime_obj (datetime): Datetime object to be parsed.
         tz: Time zone string.
 
     Returns:
@@ -83,7 +83,7 @@ def convert_date_to_tick_tick_format(date, tz: str):
             '2022-12-31T22:30:45+0000'
             ```
     """
-    date = convert_local_time_to_utc(date, tz)
+    date = convert_local_time_to_utc(datetime_obj, tz)
     date = date.replace(tzinfo=datetime.timezone.utc).isoformat()
     date = date[::-1].replace(":", "", 1)[::-1]
     return date
