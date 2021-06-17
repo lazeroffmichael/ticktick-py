@@ -1,4 +1,4 @@
-![ci](https://github.com/lazeroffmichael/ticktick-py/workflows/ci/badge.svg)
+![unit-tests](https://github.com/lazeroffmichael/ticktick-py/workflows/ci/badge.svg)
 [![documentation](https://img.shields.io/badge/docs-mkdocs%20material-blue.svg?style=flat)](https://lazeroffmichael.github.io/ticktick-py/)
 
 # ticktick-py
