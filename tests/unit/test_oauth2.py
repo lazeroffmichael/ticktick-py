@@ -7,7 +7,7 @@ import os
 import uuid
 import time
 
-from ticktick.oauth2 import OAuth2
+from ticktick.oauth2 import OAuth2, requests_retry_session
 from ticktick.cache import CacheHandler
 from unittest.mock import patch
 
@@ -39,7 +39,6 @@ class TestInitMethod:
                           redirect_uri=redirect_uri)
 
         # assert the members match
-        assert isinstance(auth.session, httpx.Client)
         assert auth._client_id == client_id
         assert auth._client_secret == client_secret
         assert auth._redirect_uri == redirect_uri
@@ -63,22 +62,6 @@ class TestInitMethod:
                           redirect_uri=redirect_uri,
                           session=session)
         assert auth.session == session
-
-    def test_session_passing_fail(self):
-        """
-        Tests passing an invalid session creates a valid session
-        """
-        session = "Not valid"
-        client_id = str(uuid.uuid4())
-        client_secret = str(uuid.uuid4())
-        redirect_uri = str(uuid.uuid4())
-        with patch('ticktick.oauth2.OAuth2.get_access_token'):
-            auth = OAuth2(client_id=client_id,
-                          client_secret=client_secret,
-                          redirect_uri=redirect_uri,
-                          session=session)
-        assert auth.session != session
-        assert isinstance(auth.session, httpx.Client)
 
 
 class TestURLMethods:

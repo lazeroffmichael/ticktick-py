@@ -31,7 +31,7 @@ class TestInitMethod:
         client_id = str(uuid.uuid4())
         with patch('ticktick.oauth2.OAuth2.get_access_token'):
             auth = OAuth2(client_id, client_id, client_id)
-        with pytest.raises(RuntimeError):
+        with pytest.raises(Exception):
             TickTickClient(user, passw, auth)
 
 

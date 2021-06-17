@@ -1,5 +1,4 @@
-import httpx
-import os
+import requests
 
 from ticktick.managers.focus import FocusTimeManager
 from ticktick.managers.habits import HabitManager
@@ -9,14 +8,10 @@ from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.managers.tasks import TaskManager
 from ticktick.oauth2 import OAuth2
-from retrying import retry
 
 
-def _retry_on_request_error(exception):
-    """
-    Returns true when the exception is a RuntimeError exception.
-    """
-    return isinstance(exception, RuntimeError)
+
+
 
 
 class TickTickClient:
@@ -123,7 +118,7 @@ class TickTickClient:
         if response.status_code != 200:
             raise RuntimeError(error_message)
 
-    def _settings(self) -> httpx:
+    def _settings(self):
         """
         Sets the time_zone and profile_id.
 
@@ -169,7 +164,6 @@ class TickTickClient:
 
         return response
 
-    @retry(retry_on_exception=_retry_on_request_error, wait_fixed=2000, stop_max_attempt_number=4)
     def http_post(self, url, **kwargs):
         """
         Sends an http post request with the specified url and keyword arguments.
@@ -192,7 +186,6 @@ class TickTickClient:
         except ValueError:
             return response.text
 
-    @retry(retry_on_exception=_retry_on_request_error, wait_fixed=2000, stop_max_attempt_number=4)
     def http_get(self, url, **kwargs):
         """
         Sends an http get request with the specified url and keyword arguments.
@@ -215,7 +208,6 @@ class TickTickClient:
         except ValueError:
             return response.text
 
-    @retry(retry_on_exception=_retry_on_request_error, wait_fixed=2000, stop_max_attempt_number=4)
     def http_delete(self, url, **kwargs):
         """
         Sends an http delete request with the specified url and keyword arguments.
@@ -238,7 +230,6 @@ class TickTickClient:
         except ValueError:
             return response.text
 
-    @retry(retry_on_exception=_retry_on_request_error, wait_fixed=2000, stop_max_attempt_number=4)
     def http_put(self, url, **kwargs):
         """
         Sends an http put request with the specified url and keyword arguments.

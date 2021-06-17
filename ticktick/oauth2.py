@@ -1,4 +1,4 @@
-import httpx
+import requests
 import webbrowser
 import time
 import logging
@@ -7,9 +7,33 @@ import os
 
 from urllib.parse import urlparse, urlencode, parse_qsl
 from ticktick.cache import CacheHandler
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 log = logging.getLogger(__name__)
 
+
+def requests_retry_session(retries=3,
+                           backoff_factor=1,
+                           status_forcelist=(405, 500, 502, 504),
+                           session=None,
+                           allowed_methods=frozenset(['GET', 'POST', 'PUT', 'DELETE'])):
+    """
+    Method for http retries
+    """
+    session = session or requests.session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+        allowed_methods=allowed_methods
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 class OAuth2:
     """
@@ -29,11 +53,7 @@ class OAuth2:
                  check_cache=True
                  ):
         # If a proper session is passed then we will just use the existing session
-        if isinstance(session, httpx.Client):
-            self.session = session
-        else:
-            # build a new session
-            self.session = httpx.Client()
+        self.session = session or requests_retry_session()
 
         # Set the client_id
         self._client_id = client_id

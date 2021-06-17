@@ -344,7 +344,7 @@ class TestTimeConversions:
         start = datetime.datetime(2027, 1, 5)
         task_client._client.time_zone = 'US/Pacific'
         converted = convert_date_to_tick_tick_format(start, 'US/Pacific')
-        expected = {'startDate': converted}
+        expected = {'startDate': converted, 'allDay': True}
         assert task_client.dates(start) == expected
         task_client._client.time_zone = ''
 
@@ -354,7 +354,7 @@ class TestTimeConversions:
         """
         start = datetime.datetime(2027, 1, 5)
         converted = convert_date_to_tick_tick_format(start, 'US/Pacific')
-        expected = {'startDate': converted, 'timeZone': 'US/Pacific'}
+        expected = {'startDate': converted, 'timeZone': 'US/Pacific', 'allDay': True}
         assert task_client.dates(start, tz='US/Pacific') == expected
 
     def test_dates_start_date_specific(self, task_client):
@@ -363,7 +363,7 @@ class TestTimeConversions:
         """
         start = datetime.datetime(2027, 1, 5, 14, 30)
         converted = convert_date_to_tick_tick_format(start, 'US/Pacific')
-        expected = {'startDate': converted, 'timeZone': 'US/Pacific'}
+        expected = {'startDate': converted, 'timeZone': 'US/Pacific', 'allDay': False}
         assert task_client.dates(start, tz='US/Pacific') == expected
 
     def test_dates_start_date_specified_no_timezone(self, fake_client):
@@ -373,7 +373,7 @@ class TestTimeConversions:
         fake_client.time_zone = 'US/Pacific'
         start = datetime.datetime(2027, 1, 5, 14, 30)
         converted = convert_date_to_tick_tick_format(start, 'US/Pacific')
-        expected = {'startDate': converted}
+        expected = {'startDate': converted, 'allDay': False}
         assert fake_client.task.dates(start) == expected
         fake_client.time_zone = ''
 
@@ -386,7 +386,7 @@ class TestTimeConversions:
         end = datetime.datetime(2021, 1, 5, 17, 30)
         converted_start = convert_date_to_tick_tick_format(start, 'US/Pacific')
         converted_end = convert_date_to_tick_tick_format(end, 'US/Pacific')
-        expected = {'startDate': converted_start, 'dueDate': converted_end}
+        expected = {'startDate': converted_start, 'dueDate': converted_end, 'allDay': False}
         assert fake_client.task.dates(start, end) == expected
         fake_client.time_zone = ''
 
@@ -399,7 +399,7 @@ class TestTimeConversions:
         end = datetime.datetime(2027, 3, 31)
         expected_start = convert_date_to_tick_tick_format(start, 'US/Pacific')
         expected_end = convert_date_to_tick_tick_format(datetime.datetime(2027, 4, 1), 'US/Pacific')
-        expected = {'startDate': expected_start, 'dueDate': expected_end}
+        expected = {'startDate': expected_start, 'dueDate': expected_end, 'allDay': True}
         actual = fake_client.task.dates(start, end)
         assert expected == actual
         fake_client.time_zone = ''
@@ -415,7 +415,7 @@ class TestTimeConversions:
         end2 = datetime.datetime(2027, 1, 8)
         expected_start = convert_date_to_tick_tick_format(start, tz)
         expected_end = convert_date_to_tick_tick_format(end2, tz)
-        expected = {'startDate': expected_start, 'dueDate': expected_end}
+        expected = {'startDate': expected_start, 'dueDate': expected_end, 'allDay': True}
         assert expected == fake_client.task.dates(start, end)
         fake_client.time_zone = tz
 
@@ -430,7 +430,7 @@ class TestTimeConversions:
         end2 = datetime.datetime(2028, 1, 1)
         expected_start = convert_date_to_tick_tick_format(start, tz)
         expected_end = convert_date_to_tick_tick_format(end2, tz)
-        expected = {'startDate': expected_start, 'dueDate': expected_end}
+        expected = {'startDate': expected_start, 'dueDate': expected_end, 'allDay': True}
         assert expected == fake_client.task.dates(start, end)
         fake_client.time_zone = ''
 

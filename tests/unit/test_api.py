@@ -4,7 +4,6 @@ Module for testing api.py
 
 import pytest
 import uuid
-import os
 
 from ticktick.managers.projects import ProjectManager
 from ticktick.managers.tasks import TaskManager
@@ -14,8 +13,6 @@ from ticktick.managers.pomo import PomoManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.oauth2 import OAuth2
-from ticktick.api import _retry_on_request_error
-from retrying import retry
 from unittest.mock import patch
 
 RESPONSE_ONE_URL = 'https://someurl.com/test.json'
@@ -56,7 +53,7 @@ class TestInitMethod:
         """
         client = fake_client
 
-        assert client.access_token == None
+        assert client.access_token is None
         assert client.cookies == {}
         assert client.time_zone == ''
         assert client.profile_id == ''
@@ -136,99 +133,6 @@ class TestCheckingStatusCode:
         mocked_httpx_response = mocked_request(['404'])
         with pytest.raises(RuntimeError):
             fake_client.check_status_code(mocked_httpx_response, 'Failed')
-
-
-class TestHTTPMethods:
-
-    def test_retry_on_request_error(self):
-        """
-        Tests that a boolean is returned when the exception passed to the function
-        is a RunTimeError
-        """
-        assert not _retry_on_request_error(IOError)
-
-    def test_http_post(self, fake_client):
-        """
-        Tests the http_post method
-        """
-        m = mocked_request(RESPONSE_ONE_URL)
-        with patch('httpx.Client.post', return_value=m):
-            response = fake_client.http_post(RESPONSE_ONE_URL, json={})
-
-        assert response == m.json()
-
-    def test_http_post_bad_request(self, fake_client):
-        """
-        Tests returning the response.text when the json is not available
-        """
-        m = mocked_request(RESPONSE_THREE_URL)
-        with patch('httpx.Client.post', return_value=m):
-            response = fake_client.http_post(RESPONSE_THREE_URL, json={})
-
-        assert response == m.text
-
-    def test_http_get(self, fake_client):
-        """
-        Tests the http_post method
-        """
-
-        m = mocked_request(RESPONSE_ONE_URL)
-        with patch('httpx.Client.get', return_value=m):
-            response = fake_client.http_get(RESPONSE_ONE_URL, json={})
-
-        assert response == m.json()
-
-    def test_http_get_bad_request(self, fake_client):
-        """
-        Tests returning the response.text when the json is not available
-        """
-        m = mocked_request(RESPONSE_THREE_URL)
-        with patch('httpx.Client.get', return_value=m):
-            response = fake_client.http_get(RESPONSE_THREE_URL, json={})
-
-        assert response == m.text
-
-    def test_http_delete(self, fake_client):
-        """
-        Tests the http_post method
-        """
-
-        m = mocked_request(RESPONSE_ONE_URL)
-        with patch('httpx.Client.delete', return_value=m):
-            response = fake_client.http_delete(RESPONSE_ONE_URL, json={})
-
-        assert response == m.json()
-
-    def test_http_delete_bad_request(self, fake_client):
-        """
-        Tests returning the response.text when the json is not available
-        """
-        m = mocked_request(RESPONSE_THREE_URL)
-        with patch('httpx.Client.delete', return_value=m):
-            response = fake_client.http_delete(RESPONSE_THREE_URL, json={})
-
-        assert response == m.text
-
-    def test_http_put(self, fake_client):
-        """
-        Tests the http_post method
-        """
-
-        m = mocked_request(RESPONSE_ONE_URL)
-        with patch('httpx.Client.put', return_value=m):
-            response = fake_client.http_put(RESPONSE_ONE_URL, json={})
-
-        assert response == m.json()
-
-    def test_http_put_bad_request(self, fake_client):
-        """
-        Tests returning the response.text when the json is not available
-        """
-        m = mocked_request(RESPONSE_THREE_URL)
-        with patch('httpx.Client.put', return_value=m):
-            response = fake_client.http_put(RESPONSE_THREE_URL, json={})
-
-        assert response == m.text
 
 
 class TestFetchSettings:
