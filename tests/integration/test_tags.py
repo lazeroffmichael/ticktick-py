@@ -173,18 +173,6 @@ def test_tag_delete_multiple(client):
     assert tags[2]['label'] == deleted[2]['label']
 
 
-def test_tag_delete_task_preserved(client):
-    tag1_name = str(uuid.uuid4()).upper()
-    tag = client.tag.create(tag1_name)
-    task_name = str(uuid.uuid4()).upper()
-    task = client.task.create(task_name, tags=tag1_name)
-    # Delete the tag
-    deleted = client.tag.delete(tag1_name)
-    found = client.get_by_id(task['id'])
-    assert not client.get_by_fields(label=tag1_name, search='tags')
-    client.task.delete(task['id'])
-
-
 def test_tag_batch_create(client):
     """Tests batch tag creation success"""
     label1 = str(uuid.uuid4()).upper()

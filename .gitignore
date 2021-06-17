@@ -4,3 +4,6 @@
 /site/
 /.idea/
 /docs/images
+/tests/integration/.token-oauth
+/tests/.token-oauth
+.token-oauth

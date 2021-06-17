@@ -1,6 +1,6 @@
 mkdocs-material
 mkdocstrings
-httpx
+requests
 pytz
 pytest
 regex

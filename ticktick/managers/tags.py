@@ -141,7 +141,6 @@ class TagsManager:
         # Perform checks
         return self._check_fields(label, color=color, parent_label=parent, sort=sort)
 
-    @logged_in
     def create(self,
                label,
                color: str = 'random',
@@ -316,7 +315,6 @@ class TagsManager:
             else:
                 return items
 
-    @logged_in
     def rename(self, old: str, new: str) -> dict:
         """
         Renames a tag.
@@ -390,7 +388,6 @@ class TagsManager:
         # Return the etag of the updated object
         return self._client.get_by_etag(new_obj['etag'], search='tags')
 
-    @logged_in
     def color(self, label: str, color: str) -> dict:
         """
         Change the color of a tag. For batch changing colors, see [update][managers.tags.TagsManager.update].
@@ -453,7 +450,6 @@ class TagsManager:
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']])
 
-    @logged_in
     def sorting(self, label: str, sort: int) -> dict:
         """
         Change the sort type of a tag. For batch changing sort types, see [update][managers.tags.TagsManager.update].
@@ -512,7 +508,6 @@ class TagsManager:
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']])
 
-    @logged_in
     def nesting(self, child: str, parent: str) -> dict:
         """
         Update tag nesting. Move an already created tag to be nested underneath a parent tag - or ungroup an already
@@ -678,7 +673,6 @@ class TagsManager:
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']], search='tags')
 
-    @logged_in
     def update(self, obj):
         """
         Generic update method. Supports single and batch tag update.
@@ -814,7 +808,6 @@ class TagsManager:
                 items[index] = found  # Place at the correct index
             return items
 
-    @logged_in
     def merge(self, label, merged: str):
         """
 
@@ -960,7 +953,6 @@ class TagsManager:
 
         return kept_obj
 
-    @logged_in
     def delete(self, label):
         """
         Delete tag(s). Supports single tag deletion and "mock" batch tag deletion.

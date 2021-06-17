@@ -2,7 +2,7 @@ class HabitManager:
 
     def __init__(self, client_class):
         self._client = client_class
-        self.access_token = self._client.access_token
+        self.access_token = ''
 
     #   ---------------------------------------------------------------------------------------------------------------
     #   Habit Methods

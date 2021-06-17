@@ -7,6 +7,7 @@ repo_name: "lazeroffmichael/ticktick-py"
 nav:
   - Overview: index.md
   - Usage:
+      - Authorization: usage/oauth2.md
       - API and Important Information: usage/api.md
       - Tasks: usage/tasks.md
       - Projects: usage/projects.md
