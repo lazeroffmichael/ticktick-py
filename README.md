@@ -4,6 +4,8 @@
 # ticktick-py
 ## Unofficial TickTick API Client for Python 3
 
+## [Full Documentation](https://lazeroffmichael.github.io/ticktick-py/)
+
 ## Description
 `ticktick-py` is an unofficial API library for interacting with [TickTick.com](<https://www.ticktick.com/>). 
 It allows
