@@ -35,6 +35,7 @@ def requests_retry_session(retries=3,
     session.mount('https://', adapter)
     return session
 
+
 class OAuth2:
     """
     Implements the Authorization flow for TickTick's Open API
@@ -47,11 +48,63 @@ class OAuth2:
                  client_secret: str,
                  redirect_uri: str,
                  scope: str = "tasks:write tasks:read",  # only available options right now
-                 state=None,
+                 state: str = None,
                  session=None,
-                 env_key=None,
-                 check_cache=True
+                 env_key: str = None,
+                 cache_path: str = '.token-oauth',
+                 check_cache: bool = True
                  ):
+        """
+        Initialize the object.
+
+        Arguments:
+            client_id: Client ID string
+            client_secret: Client secret string
+            redirect_uri: Redirect uri
+            scope: Scope for the permissions. Current options are only the default.
+            state (str): State parameter
+            session (requests session): Requests session
+            env_key: The environment variable name where the access token dictionary is stored as a string literal.
+            cache_path: The desired path of the file where the access token information will be stored.
+            check_cache: Whether to check the cache file for the access token information
+
+        !!! examples
+
+            === "Standard Method"
+
+                This way would instantiate the steps to get a new access token, or just retrieve the cached one.
+
+                ```python
+                oauth = OAuth2(client_id=cliend_id,
+                               client_secret=client_secret,
+                               redirect_uri=redirect_uri)
+                ```
+
+            === "Check Environment Method"
+
+                If you are in a situation where you don't want to keep the cached token file, you can save the
+                access token dictionary as a string literal in your environment, and pass the name of the variable to
+                prevent having to request a new access token.
+
+                ``` python
+                auth_client = OAuth2(client_id=client_id,
+                                client_secret=client_secret,
+                                redirect_uri=redirect_uri,
+                                env_key='ACCESS_TOKEN_DICT')
+                ```
+
+                Where in the environment you have declared `ACCESS_TOKEN_DICT` to be
+                the string literal of the token dictionary:
+
+                ```
+                '{'access_token': '628ff081-5331-4a37-8ddk-021974c9f43g',
+                'token_type': 'bearer', 'expires_in': 14772375,
+                'scope': 'tasks:read tasks:write',
+                'expire_time': 1637192935,
+                'readable_expire_time':
+                'Wed Nov 17 15:48:55 2021'}'
+                ```
+        """
         # If a proper session is passed then we will just use the existing session
         self.session = session or requests_retry_session()
 
@@ -74,7 +127,7 @@ class OAuth2:
         self._code = None
 
         # Set the cache handler
-        self.cache = CacheHandler('.token-oauth')
+        self.cache = CacheHandler(cache_path)
 
         # Set the access token
         self.access_token_info = None
@@ -82,7 +135,7 @@ class OAuth2:
         # get access token
         self.get_access_token(check_cache=check_cache, check_env=env_key)
 
-    def get_auth_url(self):
+    def _get_auth_url(self):
         """
         Returns the url for authentication
         """
@@ -108,7 +161,7 @@ class OAuth2:
                  "authorization you will be redirected to the redirect url that you provided with extra parameters "
                  "provided in the url. Paste the url that you "
                  "were redirected to into the console")
-        url = self.get_auth_url()
+        url = self._get_auth_url()
         webbrowser.open(url)
 
     def _get_redirected_url(self):
@@ -119,7 +172,7 @@ class OAuth2:
         url = self._get_user_input(prompt)
 
         # get the parsed parameters from the url
-        self._code, self._state = self.get_auth_response_parameters(url)
+        self._code, self._state = self._get_auth_response_parameters(url)
 
     @staticmethod
     def _get_user_input(prompt: str = ''):
@@ -129,7 +182,7 @@ class OAuth2:
         return input(prompt)
 
     @staticmethod
-    def get_auth_response_parameters(url):
+    def _get_auth_response_parameters(url):
         """
         Gets the code and state members contained in the redirected url.
 
@@ -203,13 +256,26 @@ class OAuth2:
     def get_access_token(self, check_cache: bool = True, check_env: str = None):
         """
         Retrieves the authorization token from cache or makes a new request for it.
+
+
+        !!! note
+            This method does not need to be called explicitly.
+
+        Arguments:
+            check_cache (bool): Boolean on whether to check if the access token is in a cache file.
+            check_env (str): The environment variable name where the token dictionary is saved as a string literal.
+
         Priority order for getting the access token:
+
         1) From an already set class member in the current running instance
+
         2) From an environment variable where the token dictionary is in a string literal form,
-        and the name of the environment variable is the value of the "check_env" parameter
-        3) From a cache file that contains the access token dictionary
+        and the name of the environment variable name is the value passed to the "check_env" parameter
+
+        3) From a cache file that contains the access token dictionary (normal case)
+
         4) From a new token request (which will create a new cache file that contains the access
-        token dictionary)
+        token dictionary) (initial case if never setup)
         """
         # check the local state for if the access token exists
         if self.access_token_info is not None:
@@ -264,8 +330,12 @@ class OAuth2:
     def is_token_expired(token_dict):
         """
         Returns a boolean for if the access token is expired
-        :param token_dict:  p;;
-        :return:
+
+        Arguments:
+            token_dict (dict): Access token dictionary
+
+        Returns:
+            bool: Whether the access token is expired
         """
         current_time = int(time.time())
         return token_dict["expire_time"] - current_time < 60
@@ -273,6 +343,12 @@ class OAuth2:
     def validate_token(self, token_dict):
         """
         Validates whether the access token is valid
+
+        Arguments:
+            token_dict (dict): Access token dictionary
+
+        Returns:
+            None or dict: None if the token_dict is not valid, else token_dict
         """
         # if the token info dictionary does not exist then bounce
         if token_dict is None:

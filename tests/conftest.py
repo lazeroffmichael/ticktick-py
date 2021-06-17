@@ -23,7 +23,7 @@ def client():
     yield return_client
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def fake_client():
     user = str(uuid.uuid4())
     passw = str(uuid.uuid4())

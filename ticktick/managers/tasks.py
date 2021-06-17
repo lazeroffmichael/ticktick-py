@@ -1033,8 +1033,8 @@ class TaskManager:
         method.
 
         Arguments:
-            start (datetime.datetime): Desired start time
-            due (datetime.datetime): Desired end time
+            start (datetime): Desired start time
+            due (datetime): Desired end time
             tz (str): Time zone string if the desired time zone is not the account default.
 
         Returns:

@@ -12,7 +12,7 @@ from ticktick.cache import CacheHandler
 from unittest.mock import patch
 
 
-@pytest.yield_fixture(scope="module")
+@pytest.fixture(scope="module")
 def oauth_client_fake():
     client_id = "aPzhUPvXPaDgAXwznM"
     client_secret = "hyE^TaeRiM^EirOicoC~oNNusWu5fLlA"
@@ -72,7 +72,7 @@ class TestURLMethods:
         """
         expected = "https://ticktick.com/oauth/authorize?client_id=aPzhUPvXPaDgAXwznM&scope=tasks%3Awrite+tasks%3Aread&res" \
                    "ponse_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A8080&state=None"
-        assert expected == oauth_client_fake.get_auth_url()
+        assert expected == oauth_client_fake._get_auth_url()
 
     def test_get_redirected_url(self, oauth_client_fake):
         """
@@ -96,7 +96,7 @@ class TestURLMethods:
         url = "http://127.0.0.1:8080/?code=qlh8WV&state=None"
         code = "qlh8WV"
         state = "None"
-        returned_code, returned_state = oauth_client_fake.get_auth_response_parameters(url)
+        returned_code, returned_state = oauth_client_fake._get_auth_response_parameters(url)
         assert returned_code == code
         assert returned_state == state
 

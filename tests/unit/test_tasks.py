@@ -11,7 +11,7 @@ from ticktick.managers.tasks import TaskManager
 from unittest.mock import patch
 
 
-@pytest.yield_fixture(scope='module')
+@pytest.fixture(scope='module')
 def task_client(fake_client):
     """
     Yields a TasksManager() instance

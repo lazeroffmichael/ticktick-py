@@ -7,10 +7,6 @@
     task = client.task.method()
     ```
 
-
-!!! question "Question About Logging In or Other Functionality Available?"
-    [API and Important Information](api.md)
-
 !!! tip
     All supported methods are documented below with usage examples, take a look!
 
@@ -63,7 +59,38 @@
             "completedTime": "2019-11-13T03:00:00+0000"
         }
     ```
+## Subtask Items
 
+| Name          | Description                                                                              | Schema             |
+|---------------|------------------------------------------------------------------------------------------|--------------------|
+| id            | Subtask identifier                                                                       | string             |
+| title         | Subtask title                                                                            | string             |
+| status        | The completion status of subtask Value : Normal: 0, Completed: 1                         | integer (int32)    |
+| completedTime | Subtask completed time in "yyyy-MM-dd'T'HH:mm:ssZ" Example : "2019-11-13T03:00:00+0000"  | string (date-time) |
+| isAllDay      | All day                                                                                  | boolean            |
+| sortOrder     | Subtask sort order Example : 234444                                                      | integer (int64)    |
+| startDate     | Subtask start date time in "yyyy-MM-dd'T'HH:mm:ssZ" Example : "2019-11-13T03:00:00+0000" | string (date-time) |
+| timeZone      | Subtask timezone Example : "America/Los_Angeles"                                         | string             |
 
+## Task Items
+
+| Name          | Description                                                                          | Schema                  |
+|---------------|--------------------------------------------------------------------------------------|-------------------------|
+| id            | Task identifier                                                                      | string                  |
+| projectId     | Task project id                                                                      | string                  |
+| title         | Task title                                                                           | string                  |
+| allDay        | All day                                                                              | boolean                 |
+| completedTime | Task completed time in "yyyy-MM-dd'T'HH:mm:ssZ" Example : "2019-11-13T03:00:00+0000" | string (date-time)      |
+| content       | Task content                                                                         | string                  |
+| desc          | Task description of checklist                                                        | string                  |
+| dueDate       | Task due date time in "yyyy-MM-dd'T'HH:mm:ssZ" Example : "2019-11-13T03:00:00+0000"  | string (date-time)      |
+| items         | Subtasks of Task                                                                     | < ChecklistItem > array |
+| priority      | Task priority Value : None:0, Low:1, Medium:3, High5                                 | integer (int32)         |
+| reminders     | List of reminder triggers Example : [ "TRIGGER:P0DT9H0M0S", "TRIGGER:PT0S" ]         | < string > array        |
+| repeat        | Recurring rules of task Example : "RRULE:FREQ=DAILY;INTERVAL=1"                      | string                  |
+| sortOrder     | Task sort order Example : 12345                                                      | integer (int64)         |
+| startDate     | Start date time in "yyyy-MM-dd'T'HH:mm:ssZ" Example : "2019-11-13T03:00:00+0000"     | string (date-time)      |
+| status        | Task completion status Value : Normal: 0, Completed: 1                               | integer (int32)         |
+| timeZone      | Task timezone Example : "America/Los_Angeles"                                        | string                  |
 
 ::: managers.tasks

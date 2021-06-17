@@ -152,7 +152,6 @@ allow access the first time, and whenever the token expires. As of now it seems 
 - **General**
     - Enhanced Team Support
 - **Tasks**
-    - Notification and Repeats For Tasks
     - Get and Restore From Trash  
 - **Projects**
     - Smart List Support

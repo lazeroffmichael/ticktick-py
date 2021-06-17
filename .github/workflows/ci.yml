@@ -1,11 +1,9 @@
-name: ci
+name: unit-tests
 on:
   push:
     branches:
       - master
       - main
-  schedule:
-    - cron: "0 2 15 * *"
 jobs:
   
   tests:
@@ -36,7 +34,7 @@ jobs:
         TICKTICK_USER: ${{ secrets.TICKTICK_USER }}
         TICKTICK_PASS: ${{ secrets.TICKTICK_PASS }}
       run: |
-        pytest
+        pytest tests/unit
         
   documentation:
     name: Build documentation

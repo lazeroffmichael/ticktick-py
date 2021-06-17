@@ -2,20 +2,6 @@ The [`TickTickClient`][api.TickTickClient] class is the origin for interactions 
 It is important to understand how the local data for your profile is stored and
 the names that you will interact with in order to access the different features.
 
-## Logging In
-
-!!! info
-    A successful login is required.
-
-!!! success "Initializing Your Session"
-
-    ``` python
-    from ticktick import api
-    client = api.TickTickClient('username', 'password')  # Enter correct username and password
-    ```
-
-    Once you have initialized your session, all interactions will occur through the instance, in this case: ```client```
-
 ##State
 
 The `state` public member is a dictionary that contains objects linked to your TickTick profile. The dictionary is
@@ -115,22 +101,13 @@ Different functionality can be accessed through different public members of the 
 
 ## That's It!
 
-That's all the required information for how to get started with the API! To see how to use individual features, check these out next:
+That's all the required information for how to get started with the library! To see how to use individual features, check these out next:
 
 - [Tasks](tasks.md)
 - [Projects](projects.md)
 - [Tags](tags.md)
 ---
 
-    ## `TickTickClient Documentation`
+## `TickTickClient Documentation`
     
 ::: api
-    
-    
-
-
-    
-    
-    
-
-

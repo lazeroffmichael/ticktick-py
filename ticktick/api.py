@@ -1,5 +1,3 @@
-import requests
-
 from ticktick.managers.focus import FocusTimeManager
 from ticktick.managers.habits import HabitManager
 from ticktick.managers.pomo import PomoManager
@@ -8,10 +6,6 @@ from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.managers.tasks import TaskManager
 from ticktick.oauth2 import OAuth2
-
-
-
-
 
 
 class TickTickClient:
@@ -24,7 +18,7 @@ class TickTickClient:
     def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
         """
         Initializes a client session. In order to interact with the API
-        a successful login must occur. See [Logging In](api.md#logging-in) for help.
+        a successful login must occur.
 
         Arguments:
             username: TickTick Username
