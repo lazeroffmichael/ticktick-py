@@ -1,4 +1,8 @@
-### 2.0.0 
+### 2.0.1 - 6/24/21
+- Changed Retry from urllib3 library to come directly from the package instead of through Requests package
+- Updated package requirements in requirements.txt
+
+### 2.0.0 - 6/16/21
 - Major Change: Implemented TickTick OpenAPI Scheme
 
 #### Tasks
