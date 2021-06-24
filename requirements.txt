@@ -1,4 +1,4 @@
-mkdocs-material==7.1.5
+mkdocs-material
 mkdocstrings==0.15.1
 requests
 urllib3==1.26.5
