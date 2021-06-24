@@ -1,7 +1,6 @@
 """
 Tests the oauth2 module
 """
-import httpx
 import pytest
 import os
 import uuid
@@ -47,21 +46,6 @@ class TestInitMethod:
         assert auth._code is None
         assert isinstance(auth.cache, CacheHandler)
         assert auth.access_token_info is None
-
-    def test_session_passing(self):
-        """
-        Tests initializing with a previous session passes
-        """
-        session = httpx.Client()
-        client_id = str(uuid.uuid4())
-        client_secret = str(uuid.uuid4())
-        redirect_uri = str(uuid.uuid4())
-        with patch('ticktick.oauth2.OAuth2.get_access_token'):
-            auth = OAuth2(client_id=client_id,
-                          client_secret=client_secret,
-                          redirect_uri=redirect_uri,
-                          session=session)
-        assert auth.session == session
 
 
 class TestURLMethods:
