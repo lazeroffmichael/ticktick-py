@@ -1,3 +1,6 @@
+### 2.0.1 - 6/24/21
+- Change Retry class to come from urllib3 library instead of requests 
+
 ### 2.0.0 - 6/16/21
 - Major Change: Implemented TickTick OpenAPI Scheme
 
