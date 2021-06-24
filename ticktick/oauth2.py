@@ -8,7 +8,7 @@ import os
 from urllib.parse import urlparse, urlencode, parse_qsl
 from ticktick.cache import CacheHandler
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util.retry import Retry
 
 log = logging.getLogger(__name__)
 
