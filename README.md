@@ -15,17 +15,17 @@ using [Python](https://www.python.org/).
 ## Features
 
 The library automatically fetches all the tasks, tags, lists, and more linked to your profile and stores them in a 
-dictionary named [`state`](usage/api/#state).
+dictionary named [`state`](docs/usage/api.md).
 
- - [Tasks](usage/tasks.md)
+ - [Tasks](docs/usage/tasks.md)
     - Create, Update, and Delete Tasks
     - Acquire all your uncompleted tasks
     - Move tasks easily between projects
     - Acquire all completed tasks in a certain date range
- - [Tags](usage/tags.md)
+ - [Tags](docs/usage/tags.md)
     - Batch create, update, and delete tags
     - Create tags with parameters that are not usually allowed: `\\ / " # : * ? < > | Space`
- - [Projects](usage/projects.md)
+ - [Projects](docs/usage/projects.md)
     - Batch create, update, and delete 'lists' (projects)
     - Batch archive projects
 
@@ -65,7 +65,7 @@ print(full_task)
 
 ![image](https://user-images.githubusercontent.com/56806733/121826787-7c5ef980-cc6e-11eb-8483-745df39e973b.png)
 
-Most methods will return the object that was changed. Consult the [usage](usage/api.md) documentation for more information on specific methods.
+Most methods will return the object that was changed. Consult the [usage](docs/usage/api.md) documentation for more information on specific methods.
 
     
 ## Installation
@@ -135,7 +135,7 @@ open.
 
 The default permissions are to Read and Write tasks (and are the only options right now). You can change the permissions
 by specifying the `scope` parameter when creating your OAuth2 instance. More information can be found in the 
-[OAuth2 documention](usage/oauth2.md).
+[OAuth2 documention](docs/usage/oauth2.md).
 
 In the console you will be prompted to enter the URL that you were redirected to. It will be your specified OAuth URL 
 with some added parameters.
