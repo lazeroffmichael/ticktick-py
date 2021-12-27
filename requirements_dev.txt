@@ -1,0 +1,6 @@
+-r requirements.txt
+httpx
+pytest
+python-dotenv
+mkdocs-material
+mkdocstrings
