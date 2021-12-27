@@ -1,0 +1,2547 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Unofficial TickTick API For Python 3">
+      
+      
+      
+        <link rel="canonical" href="https://lazeroffmichael.github.io/ticktick-py/usage/api/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.3">
+    
+    
+      
+        <title>API and Important Information - ticktick-py</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.edf004c2.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ab47bd">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../css/mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="purple" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#state" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="ticktick-py" class="md-header__button md-logo" aria-label="ticktick-py" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ticktick-py
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API and Important Information
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/lazeroffmichael/ticktick-py/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    lazeroffmichael/ticktick-py
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="ticktick-py" class="md-nav__button md-logo" aria-label="ticktick-py" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    ticktick-py
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/lazeroffmichael/ticktick-py/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    lazeroffmichael/ticktick-py
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../oauth2/" class="md-nav__link">
+        Authorization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          API and Important Information
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        API and Important Information
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    State
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functionality" class="md-nav__link">
+    Functionality
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#useful-methods" class="md-nav__link">
+    Useful Methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thats-it" class="md-nav__link">
+    That's It!
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ticktickclient-documentation" class="md-nav__link">
+    TickTickClient Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api" class="md-nav__link">
+    api
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api.TickTickClient" class="md-nav__link">
+    TickTickClient
+  </a>
+  
+    <nav class="md-nav" aria-label="TickTickClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.check_status_code" class="md-nav__link">
+    check_status_code()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.delete_from_local_state" class="md-nav__link">
+    delete_from_local_state()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.get_by_etag" class="md-nav__link">
+    get_by_etag()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.get_by_fields" class="md-nav__link">
+    get_by_fields()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.get_by_id" class="md-nav__link">
+    get_by_id()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.http_delete" class="md-nav__link">
+    http_delete()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.http_get" class="md-nav__link">
+    http_get()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.http_post" class="md-nav__link">
+    http_post()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.http_put" class="md-nav__link">
+    http_put()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.parse_etag" class="md-nav__link">
+    parse_etag()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.parse_id" class="md-nav__link">
+    parse_id()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.reset_local_state" class="md-nav__link">
+    reset_local_state()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api.TickTickClient.sync" class="md-nav__link">
+    sync()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tasks/" class="md-nav__link">
+        Tasks
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../projects/" class="md-nav__link">
+        Projects
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tags/" class="md-nav__link">
+        Tags
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helpers/" class="md-nav__link">
+        Helpers
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+<a href="https://github.com/lazeroffmichael/ticktick-py/edit/master/docs/usage/api.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+  <h1>API and Important Information</h1>
+
+<p>The <a href="#api.TickTickClient"><code>TickTickClient</code></a> class is the origin for interactions with the API.
+It is important to understand how the local data for your profile is stored and
+the names that you will interact with in order to access the different features.</p>
+<h2 id="state">State<a class="headerlink" href="#state" title="Permanent link">&para;</a></h2>
+<p>The <code>state</code> public member is a dictionary that contains objects linked to your TickTick profile. The dictionary is
+automatically updated and synced when changes are made through the API.</p>
+<div class="admonition example">
+<p class="admonition-title"><code>state</code></p>
+<div class="tabbed-set" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Members</label><div class="tabbed-content">
+<p>The lists are comprised of dictionaries that contain all the fields for each type of TickTick object: tasks, tags, etc.</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Contains</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tasks</code></td>
+<td><code>list</code></td>
+<td>All uncompleted task objects</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td><code>list</code></td>
+<td>All tag objects</td>
+</tr>
+<tr>
+<td><code>projects</code></td>
+<td><code>list</code></td>
+<td>All project objects</td>
+</tr>
+<tr>
+<td><code>project_folders</code></td>
+<td><code>list</code></td>
+<td>All project folder objects</td>
+</tr>
+</tbody>
+</table>
+</div>
+<input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Accessing</label><div class="tabbed-content">
+<p>Members can be accessed by normal dictionary indexing using the member strings.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that &#39;client&#39; is the name that references the TickTickClient class.</span>
+
+<span class="n">uncompleted_tasks</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;tasks&#39;</span><span class="p">]</span>
+<span class="n">all_tags</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span>
+</code></pre></div>
+</div>
+<input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><label for="__tabbed_1_3">Example Task Object</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;5ff24e4b8f08904035b304d9&#39;</span><span class="p">,</span> <span class="s1">&#39;projectId&#39;</span><span class="p">:</span> <span class="s1">&#39;inbox416323287&#39;</span><span class="p">,</span> <span class="s1">&#39;sortOrder&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1099511627776</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Get Groceries&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;startDate&#39;</span><span class="p">:</span> <span class="s1">&#39;2021-05-06T21:30:00.000+0000&#39;</span><span class="p">,</span> <span class="s1">&#39;dueDate&#39;</span><span class="p">:</span> <span class="s1">&#39;2021-05-06T21:30:00.000+0000&#39;</span><span class="p">,</span> <span class="s1">&#39;timeZone&#39;</span><span class="p">:</span> <span class="s1">&#39;America/Los_Angeles&#39;</span><span class="p">,</span> <span class="s1">&#39;isFloating&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;isAllDay&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;reminders&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;items&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;modifiedTime&#39;</span><span class="p">:</span> <span class="s1">&#39;2021-01-03T23:07:55.004+0000&#39;</span><span class="p">,</span> <span class="s1">&#39;etag&#39;</span><span class="p">:</span> <span class="s1">&#39;ol2zesef&#39;</span><span class="p">,</span> <span class="s1">&#39;deleted&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;createdTime&#39;</span><span class="p">:</span> <span class="s1">&#39;2021-01-03T23:07:55.011+0000&#39;</span><span class="p">,</span> <span class="s1">&#39;creator&#39;</span><span class="p">:</span> <span class="mi">359368200</span><span class="p">,</span> <span class="s1">&#39;kind&#39;</span><span class="p">:</span> <span class="s1">&#39;TEXT&#39;</span><span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="functionality">Functionality<a class="headerlink" href="#functionality" title="Permanent link">&para;</a></h2>
+<p>Different functionality can be accessed through different public members of the <code>TickTickClient</code> instance:</p>
+<div class="admonition example">
+<p class="admonition-title">Functionality</p>
+<div class="tabbed-set" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><label for="__tabbed_2_1">Method Managers</label><div class="tabbed-content">
+<p>Accessing the methods for each type of member is easy. It is in this format:</p>
+<p><code>client</code>(or whatever name references the <code>TickTickClient</code> instance).<code>manager</code>(members in table below).<code>method()</code></p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Functionality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>task</code></td>
+<td>Task Methods</td>
+</tr>
+<tr>
+<td><code>tag</code></td>
+<td>Tag Methods</td>
+</tr>
+<tr>
+<td><code>project</code></td>
+<td>List Methods</td>
+</tr>
+</tbody>
+</table>
+</div>
+<input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><label for="__tabbed_2_2">Example Usage</label><div class="tabbed-content">
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that &#39;client&#39; is the name that references the TickTickClient instance.</span>
+
+<span class="n">created_task</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;My Created Task&#39;</span><span class="p">)</span>
+<span class="n">deleted_project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">project_id</span><span class="p">)</span>
+</code></pre></div>
+<p>Make sure to check the individual documentation for the different method managers.</p>
+</div>
+</div>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Other Public Members</p>
+<div class="tabbed-set" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><label for="__tabbed_3_1">Useful Members</label><div class="tabbed-content">
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>profile_id</code></td>
+<td><code>str</code></td>
+<td>ID assigned to your profile</td>
+</tr>
+<tr>
+<td><code>inbox_id</code></td>
+<td><code>str</code></td>
+<td>Inbox ID assigned to your profile</td>
+</tr>
+<tr>
+<td><code>time_zone</code></td>
+<td><code>str</code></td>
+<td>Timezone string linked to your TickTick profile</td>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td><code>dict</code></td>
+<td>Holds all the item objects in your profile (described above)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><label for="__tabbed_3_2">Members That Shouldn't Be Messed With</label><div class="tabbed-content">
+<p>Messing with these values could produce unwanted effects.</p>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>access_token</code></td>
+<td><code>str</code></td>
+<td>Instance token generated by TickTick for your session.</td>
+</tr>
+<tr>
+<td><code>cookies</code></td>
+<td><code>dict</code></td>
+<td>Cookies required for your session.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<h2 id="useful-methods">Useful Methods<a class="headerlink" href="#useful-methods" title="Permanent link">&para;</a></h2>
+<p><code>TickTickClient</code> has a lot of helper functions in its documentation...however these should be the only of use methods to you:</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>It's recommended that you look at the documentation for these three methods to see how to obtain / delete objects from
+the local <code>state</code> dictionary - an important feature that will be useful when updating / deleting TickTick objects remotely.</p>
+</div>
+<ul>
+<li><a href="#api.TickTickClient.delete_from_local_state"><code>delete_from_local_state</code></a></li>
+<li><a href="#api.TickTickClient.get_by_fields"><code>get_by_fields</code></a></li>
+<li><a href="#api.TickTickClient.get_by_id"><code>get_by_id</code></a></li>
+<li><a href="#api.TickTickClient.get_by_etag"><code>get_by_etag</code></a></li>
+</ul>
+<h2 id="thats-it">That's It!<a class="headerlink" href="#thats-it" title="Permanent link">&para;</a></h2>
+<p>That's all the required information for how to get started with the library! To see how to use individual features, check these out next:</p>
+<ul>
+<li><a href="../tasks/">Tasks</a></li>
+<li><a href="../projects/">Projects</a></li>
+<li><a href="../tags/">Tags</a></li>
+</ul>
+<hr />
+<h2 id="ticktickclient-documentation"><code>TickTickClient Documentation</code><a class="headerlink" href="#ticktickclient-documentation" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="api"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="api.TickTickClient" class="doc doc-heading">
+        <code>
+TickTickClient        </code>
+
+
+
+<a href="#api.TickTickClient" class="headerlink" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">oauth</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+<a href="#api.TickTickClient.__init__" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initializes a client session. In order to interact with the API
+a successful login must occur.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>username</code></td>
+        <td><code>str</code></td>
+        <td><p>TickTick Username</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>password</code></td>
+        <td><code>str</code></td>
+        <td><p>TickTick Password</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>oauth</code></td>
+        <td><code>OAuth2</code></td>
+        <td><p>OAuth2 manager</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the login was not successful.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">oauth</span><span class="p">:</span> <span class="n">OAuth2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes a client session. In order to interact with the API</span>
+<span class="sd">    a successful login must occur.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        username: TickTick Username</span>
+<span class="sd">        password: TickTick Password</span>
+<span class="sd">        oauth: OAuth2 manager</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the login was not successful.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Class members</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">access_token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cookies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">time_zone</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">profile_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inbox_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">reset_local_state</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">oauth_manager</span> <span class="o">=</span> <span class="n">oauth</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">oauth_manager</span><span class="o">.</span><span class="n">session</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_session</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+    <span class="c1"># Mangers for the different operations</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">focus</span> <span class="o">=</span> <span class="n">FocusTimeManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">habit</span> <span class="o">=</span> <span class="n">HabitManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">ProjectManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pomo</span> <span class="o">=</span> <span class="n">PomoManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">SettingsManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">TagsManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">TaskManager</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.check_status_code" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#api.TickTickClient.check_status_code" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Verifies the http response was status code 200.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>response</code></td>
+        <td><code>httpx</code></td>
+        <td><p>Httpx response</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>error_message</code></td>
+        <td><code>str</code></td>
+        <td><p>Error message to be included with the exception</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RuntimeError</code></td>
+        <td><p>If the status code of the response was not 200.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">error_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Verifies the http response was status code 200.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        response (httpx): Httpx response</span>
+<span class="sd">        error_message: Error message to be included with the exception</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: If the status code of the response was not 200.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.delete_from_local_state" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">delete_from_local_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.delete_from_local_state" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Deletes a single object from the local <code>state</code> dictionary. <strong>Does not delete any items remotely.</strong></p>
+<p>If search is specified, it will only search the specific <a href="./#state"><code>state</code></a> list,
+else the entire <a href="./#state"><code>state</code></a> dictionary will be searched.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<p>Since each TickTick object like tasks, lists, and tags are just dictionaries of fields,
+we can find an object by
+comparing the fields.</p>
+<p>For example: Lets say that we wanted to find and delete an existing task object from our local state
+with the name 'Get Groceries'. To do this, we can specify the field(s) that we want to compare for in
+the task objects -&gt; in this case the <code>title</code> 'Get Groceries'.</p>
+<p>The call to the function would look like this:</p>
+<p><div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">deleted_task</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_from_local_state</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Get Groceries&#39;</span><span class="p">)</span>
+</code></pre></div>
+<code>deleted_task</code> would now hold the object that was deleted from the <a href="./#state"><code>state</code></a>
+dictionary if it was found.</p>
+<p>Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+specifying the key its located under in the <a href="./#state"><code>state</code></a> dictionary.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">deleted_task</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">delete_from_local_state</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Get Groceries&#39;</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="s1">&#39;tasks&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>The search will now only look through <code>tasks</code> in <code>state</code>.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>search</code></td>
+        <td><code>str</code></td>
+        <td><p>A specific item to look through in the <a href="./#state"><code>state</code></a> dictionary. When not specified the</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Matching fields in the object to look for.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The dictionary of the object that was deleted.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If no key word arguments are provided.</p></td>
+      </tr>
+      <tr>
+        <td><code>KeyError</code></td>
+        <td><p>If the search key provided is not a key in <a href="./#state"><code>state</code></a>.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">delete_from_local_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Deletes a single object from the local `state` dictionary. **Does not delete any items remotely.**</span>
+
+<span class="sd">    If search is specified, it will only search the specific [`state`](api.md#state) list,</span>
+<span class="sd">    else the entire [`state`](api.md#state) dictionary will be searched.</span>
+
+<span class="sd">    !!! example</span>
+<span class="sd">        Since each TickTick object like tasks, lists, and tags are just dictionaries of fields,</span>
+<span class="sd">        we can find an object by</span>
+<span class="sd">        comparing the fields.</span>
+
+<span class="sd">        For example: Lets say that we wanted to find and delete an existing task object from our local state</span>
+<span class="sd">        with the name &#39;Get Groceries&#39;. To do this, we can specify the field(s) that we want to compare for in</span>
+<span class="sd">        the task objects -&gt; in this case the `title` &#39;Get Groceries&#39;.</span>
+
+<span class="sd">        The call to the function would look like this:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        deleted_task = client.delete_from_local_state(title=&#39;Get Groceries&#39;)</span>
+<span class="sd">        ```</span>
+<span class="sd">        `deleted_task` would now hold the object that was deleted from the [`state`](api.md#state)</span>
+<span class="sd">        dictionary if it was found.</span>
+
+<span class="sd">        Furthermore if we know the type of object we are looking for, we can make the search more efficient by</span>
+<span class="sd">        specifying the key its located under in the [`state`](api.md#state) dictionary.</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        deleted_task = client.delete_from_local_state(title=&#39;Get Groceries&#39;, search=&#39;tasks&#39;)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        The search will now only look through `tasks` in `state`.</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        search: A specific item to look through in the [`state`](api.md#state) dictionary. When not specified the</span>
+<span class="sd">        entire [`state`](api.md#state) dictionary will be searched.</span>
+<span class="sd">        **kwargs: Matching fields in the object to look for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The dictionary of the object that was deleted.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If no key word arguments are provided.</span>
+<span class="sd">        KeyError: If the search key provided is not a key in [`state`](api.md#state).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check that kwargs is not empty</span>
+    <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must Include Field(s) To Be Searched For&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">search</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">&#39; Is Not Present In self.state Dictionary&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Search just in the desired list</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Go through the state dictionary list and delete the object that matches the fields</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">])):</span>
+            <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">][</span><span class="n">item</span><span class="p">][</span><span class="n">field</span><span class="p">]:</span>
+                    <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">all_match</span><span class="p">:</span>
+                <span class="n">deleted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">][</span><span class="n">item</span><span class="p">]</span>
+                <span class="c1"># Delete the item</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">][</span><span class="n">item</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">deleted</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No key passed, search entire self.state dictionary</span>
+        <span class="c1"># Search the first level of the state dictionary</span>
+        <span class="k">for</span> <span class="n">primary_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">skip_primary_key</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">middle_key</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Search the individual lists of the dictionary</span>
+            <span class="k">for</span> <span class="n">middle_key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primary_key</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">skip_primary_key</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="c1"># Match the fields in the kwargs dictionary to the specific object -&gt; if all match add index</span>
+                <span class="k">for</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="c1"># if the field doesn&#39;t exist, we can assume every other item in the list doesn&#39;t have the</span>
+                    <span class="c1"># field either -&gt; so skip this primary_key entirely</span>
+                    <span class="k">if</span> <span class="n">fields</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primary_key</span><span class="p">][</span><span class="n">middle_key</span><span class="p">]:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">skip_primary_key</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primary_key</span><span class="p">][</span><span class="n">middle_key</span><span class="p">][</span><span class="n">fields</span><span class="p">]:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">all_match</span><span class="p">:</span>
+                    <span class="n">deleted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primary_key</span><span class="p">][</span><span class="n">middle_key</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primary_key</span><span class="p">][</span><span class="n">middle_key</span><span class="p">]</span>
+                    <span class="k">return</span> <span class="n">deleted</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.get_by_etag" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_by_etag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etag</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.get_by_etag" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Returns the dictionary object of the item with the matching etag.</p>
+<p>If search is specified, it will only search the specific <a href="./#state"><code>state</code></a> list, else the
+entire <a href="./#state"><code>state</code></a> dictionary will be searched.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<p>Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+we can find an object by
+comparing the etag fields.</p>
+<p>For example: Lets get the object that corresponds to an etag referenced by <code>my_etag</code>.</p>
+<p>The call to the function would look like this:</p>
+<p><div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_etag</span><span class="p">(</span><span class="n">my_etag</span><span class="p">)</span>
+</code></pre></div>
+<code>found_obj</code> would now reference the object if it was found, else it would reference an empty dictionary.</p>
+<p>Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+specifying the key its located under in the <a href="./#state"><code>state</code></a> dictionary.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_etag</span><span class="p">(</span><span class="n">my_etag</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="s1">&#39;projects&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>The search will now only look through <code>projects</code> in <a href="./#state"><code>state</code></a>.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>etag</code></td>
+        <td><code>str</code></td>
+        <td><p>The etag of the object that you are looking for.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>search</code></td>
+        <td><code>str</code></td>
+        <td><p>Key in <a href="#api.TickTickClient.get_by_etag--state"><code>state</code></a> that the search should take place in. If empty the</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The dictionary object of the item if found, or an empty dictionary if not found.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>KeyError</code></td>
+        <td><p>If the search key provided is not a key in <a href="./#state"><code>state</code></a>.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_by_etag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the dictionary object of the item with the matching etag.</span>
+
+<span class="sd">    If search is specified, it will only search the specific [`state`](api.md#state) list, else the</span>
+<span class="sd">    entire [`state`](api.md#state) dictionary will be searched.</span>
+
+<span class="sd">    !!! example</span>
+<span class="sd">        Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,</span>
+<span class="sd">        we can find an object by</span>
+<span class="sd">        comparing the etag fields.</span>
+
+<span class="sd">        For example: Lets get the object that corresponds to an etag referenced by `my_etag`.</span>
+
+<span class="sd">        The call to the function would look like this:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_obj = client.get_by_etag(my_etag)</span>
+<span class="sd">        ```</span>
+<span class="sd">        `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.</span>
+
+<span class="sd">        Furthermore if we know the type of object we are looking for, we can make the search more efficient by</span>
+<span class="sd">        specifying the key its located under in the [`state`](api.md#state) dictionary.</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_obj = client.get_by_etag(my_etag, search=&#39;projects&#39;)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        The search will now only look through `projects` in [`state`](api.md#state).</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        etag: The etag of the object that you are looking for.</span>
+<span class="sd">        search: Key in [`state`](#state) that the search should take place in. If empty the</span>
+<span class="sd">        entire [`state`](api.md#state) dictionary will be searched.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The dictionary object of the item if found, or an empty dictionary if not found.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        KeyError: If the search key provided is not a key in [`state`](api.md#state).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">search</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">&#39; Is Not Present In self.state Dictionary&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Search just in the desired list</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">index</span><span class="p">[</span><span class="s1">&#39;etag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">etag</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">index</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Search all items in self.state</span>
+        <span class="k">for</span> <span class="n">prim_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">our_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">prim_key</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;etag&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">our_object</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">our_object</span><span class="p">[</span><span class="s1">&#39;etag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">etag</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">our_object</span>
+    <span class="c1"># Return empty dictionary if not found</span>
+    <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.get_by_fields" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_by_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.get_by_fields" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds and returns the objects in <code>state</code> that match the inputted fields.</p>
+<p>If search is specified, it will only search the specific <a href="./#state"><code>state</code></a> list,
+else the entire <a href="./#state"><code>state</code></a> dictionary will be searched.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<p>Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+we can find an object by
+comparing any fields contained in those objects.</p>
+<p>For example: Lets say we have 3 task objects that are titled 'Hello', and we want to obtain all of them.</p>
+<p>The call to the function would look like this:</p>
+<p><div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_objs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_fields</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
+</code></pre></div>
+<code>found_objs</code> would now reference a list containing the 3 objects with titles 'Hello'.</p>
+<p>Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+specifying the key its located under in the <a href="#api.TickTickClient.get_by_fields--state"><code>state</code></a> dictionary.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_fields</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="s1">&#39;tasks&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>The search will now only look through <code>tasks</code> in <a href="./#state"><code>state</code></a>.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>search</code></td>
+        <td><code>str</code></td>
+        <td><p>Key in <a href="./#state"><code>state</code></a> that the search should take place in. If empty the</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Matching fields in the object to look for.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict or list</code></td>
+      <td><p><strong>Single Object (dict)</strong>: The dictionary of the object.</p>
+<p><strong>Multiple Objects (list)</strong>: A list of dictionary objects.</p>
+<p><strong>Nothing Found (list)</strong>: Empty List</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If no key word arguments are provided.</p></td>
+      </tr>
+      <tr>
+        <td><code>KeyError</code></td>
+        <td><p>If the search key provided is not a key in <code>state</code>.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_by_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds and returns the objects in `state` that match the inputted fields.</span>
+
+<span class="sd">    If search is specified, it will only search the specific [`state`](api.md#state) list,</span>
+<span class="sd">    else the entire [`state`](api.md#state) dictionary will be searched.</span>
+
+<span class="sd">    !!! example</span>
+<span class="sd">        Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,</span>
+<span class="sd">        we can find an object by</span>
+<span class="sd">        comparing any fields contained in those objects.</span>
+
+<span class="sd">        For example: Lets say we have 3 task objects that are titled &#39;Hello&#39;, and we want to obtain all of them.</span>
+
+<span class="sd">        The call to the function would look like this:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_objs = client.get_by_fields(title=&#39;Hello&#39;)</span>
+<span class="sd">        ```</span>
+<span class="sd">        `found_objs` would now reference a list containing the 3 objects with titles &#39;Hello&#39;.</span>
+
+<span class="sd">        Furthermore if we know the type of object we are looking for, we can make the search more efficient by</span>
+<span class="sd">        specifying the key its located under in the [`state`](#state) dictionary.</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_obj = client.get_by_fields(title=&#39;Hello&#39;, search=&#39;tasks&#39;)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        The search will now only look through `tasks` in [`state`](api.md#state).</span>
+
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        search: Key in [`state`](api.md#state) that the search should take place in. If empty the</span>
+<span class="sd">        entire [`state`](api.md#state) dictionary will be searched.</span>
+<span class="sd">        **kwargs: Matching fields in the object to look for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict or list:</span>
+<span class="sd">        **Single Object (dict)**: The dictionary of the object.</span>
+
+<span class="sd">        **Multiple Objects (list)**: A list of dictionary objects.</span>
+
+<span class="sd">        **Nothing Found (list)**: Empty List</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If no key word arguments are provided.</span>
+<span class="sd">        KeyError: If the search key provided is not a key in `state`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">kwargs</span> <span class="o">==</span> <span class="p">{}:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must Include Field(s) To Be Searched For&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">search</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">&#39; Is Not Present In self.state Dictionary&quot;</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># If a specific key was passed for self.state</span>
+        <span class="c1"># Go through self.state[key_name] and see if all the fields in kwargs match</span>
+        <span class="c1"># If all don&#39;t match return empty list</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">]:</span>
+            <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">!=</span> <span class="n">index</span><span class="p">[</span><span class="n">field</span><span class="p">]:</span>
+                    <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">all_match</span><span class="p">:</span>
+                <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No key passed, search entire self.state dictionary</span>
+        <span class="c1"># Search the first level of the state dictionary</span>
+        <span class="k">for</span> <span class="n">primarykey</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">skip_primary_key</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">middle_key</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Search the individual lists of the dictionary</span>
+            <span class="k">for</span> <span class="n">middle_key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primarykey</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">skip_primary_key</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="c1"># Match the fields in the kwargs dictionary to the specific object -&gt; if all match add index</span>
+                <span class="k">for</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="c1"># if the field doesn&#39;t exist, we can assume every other item in the list doesn&#39;t have the</span>
+                    <span class="c1"># field either -&gt; so skip this primary_key entirely</span>
+                    <span class="k">if</span> <span class="n">fields</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primarykey</span><span class="p">][</span><span class="n">middle_key</span><span class="p">]:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">skip_primary_key</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">fields</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primarykey</span><span class="p">][</span><span class="n">middle_key</span><span class="p">][</span><span class="n">fields</span><span class="p">]:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">all_match</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">all_match</span><span class="p">:</span>
+                    <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">primarykey</span><span class="p">][</span><span class="n">middle_key</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objects</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.get_by_id" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.get_by_id" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Returns the dictionary of the object corresponding to the passed id.</p>
+<p>If search is specified, it will only search the specific <a href="./#state"><code>state</code></a> list, else the
+entire <a href="./#state"><code>state</code></a> dictionary will be searched.</p>
+<div class="admonition example">
+<p class="admonition-title">Example</p>
+<p>Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,
+we can find an object by
+comparing the id fields.</p>
+<p>For example: Lets get the object that corresponds to an id referenced by <code>my_id</code>.</p>
+<p>The call to the function would look like this:</p>
+<p><div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">my_id</span><span class="p">)</span>
+</code></pre></div>
+<code>found_obj</code> would now reference the object if it was found, else it would reference an empty dictionary.</p>
+<p>Furthermore if we know the type of object we are looking for, we can make the search more efficient by
+specifying the key its located under in the <a href="./#state"><code>state</code></a> dictionary.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="n">found_obj</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_by_id</span><span class="p">(</span><span class="n">my_id</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="s1">&#39;projects&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>The search will now only look through <code>projects</code> in <a href="./#state"><code>state</code></a>.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>obj_id</code></td>
+        <td><code>str</code></td>
+        <td><p>Id of the item.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>search</code></td>
+        <td><code>str</code></td>
+        <td><p>Key in <a href="./#state"><code>state</code></a> that the search should take place in. If empty the</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The dictionary object of the item if found, or an empty dictionary if not found.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>KeyError</code></td>
+        <td><p>If the search key provided is not a key in <a href="./#state"><code>state</code></a>.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the dictionary of the object corresponding to the passed id.</span>
+
+<span class="sd">    If search is specified, it will only search the specific [`state`](api.md#state) list, else the</span>
+<span class="sd">    entire [`state`](api.md#state) dictionary will be searched.</span>
+
+
+<span class="sd">    !!! example</span>
+<span class="sd">        Since each TickTick object like tasks, projects, and tags are just dictionaries of fields,</span>
+<span class="sd">        we can find an object by</span>
+<span class="sd">        comparing the id fields.</span>
+
+<span class="sd">        For example: Lets get the object that corresponds to an id referenced by `my_id`.</span>
+
+<span class="sd">        The call to the function would look like this:</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_obj = client.get_by_id(my_id)</span>
+<span class="sd">        ```</span>
+<span class="sd">        `found_obj` would now reference the object if it was found, else it would reference an empty dictionary.</span>
+
+<span class="sd">        Furthermore if we know the type of object we are looking for, we can make the search more efficient by</span>
+<span class="sd">        specifying the key its located under in the [`state`](api.md#state) dictionary.</span>
+
+<span class="sd">        ```python</span>
+<span class="sd">        # Assumes that `client` is the name referencing the TickTickClient instance.</span>
+
+<span class="sd">        found_obj = client.get_by_id(my_id, search=&#39;projects&#39;)</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        The search will now only look through `projects` in [`state`](api.md#state).</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        obj_id: Id of the item.</span>
+<span class="sd">        search: Key in [`state`](api.md#state) that the search should take place in. If empty the</span>
+<span class="sd">        entire [`state`](api.md#state) dictionary will be searched.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The dictionary object of the item if found, or an empty dictionary if not found.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        KeyError: If the search key provided is not a key in [`state`](api.md#state).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">search</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">search</span><span class="si">}</span><span class="s2">&#39; Is Not Present In self.state Dictionary&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Search just in the desired list</span>
+    <span class="k">if</span> <span class="n">search</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">search</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">index</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">obj_id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">index</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Search all items in self.state</span>
+        <span class="k">for</span> <span class="n">prim_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">our_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">prim_key</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">our_object</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">our_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">obj_id</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">our_object</span>
+    <span class="c1"># Return empty dictionary if not found</span>
+    <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.http_delete" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">http_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.http_delete" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Sends an http delete request with the specified url and keyword arguments.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>str</code></td>
+        <td><p>Url to send the request.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Arguments to send with the request.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The json parsed response if possible or just a string of the response text if not.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the request could not be completed.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">http_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends an http delete request with the specified url and keyword arguments.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        url (str): Url to send the request.</span>
+<span class="sd">        **kwargs: Arguments to send with the request.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The json parsed response if possible or just a string of the response text if not.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the request could not be completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s1">&#39;Could Not Complete Request&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.http_get" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">http_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.http_get" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Sends an http get request with the specified url and keyword arguments.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>str</code></td>
+        <td><p>Url to send the request.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Arguments to send with the request.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The json parsed response if possible or just a string of the response text if not.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the request could not be completed.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">http_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends an http get request with the specified url and keyword arguments.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        url (str): Url to send the request.</span>
+<span class="sd">        **kwargs: Arguments to send with the request.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The json parsed response if possible or just a string of the response text if not.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the request could not be completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s1">&#39;Could Not Complete Request&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.http_post" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">http_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.http_post" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Sends an http post request with the specified url and keyword arguments.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>str</code></td>
+        <td><p>Url to send the request.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Arguments to send with the request.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The json parsed response if possible or just a string of the response text if not.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the request could not be completed.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">http_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends an http post request with the specified url and keyword arguments.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        url (str): Url to send the request.</span>
+<span class="sd">        **kwargs: Arguments to send with the request.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The json parsed response if possible or just a string of the response text if not.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the request could not be completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s1">&#39;Could Not Complete Request&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.http_put" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">http_put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.http_put" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Sends an http put request with the specified url and keyword arguments.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>url</code></td>
+        <td><code>str</code></td>
+        <td><p>Url to send the request.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td></td>
+        <td><p>Arguments to send with the request.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>dict</code></td>
+      <td><p>The json parsed response if possible or just a string of the response text if not.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the request could not be completed.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">http_put</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends an http put request with the specified url and keyword arguments.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        url (str): Url to send the request.</span>
+<span class="sd">        **kwargs: Arguments to send with the request.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: The json parsed response if possible or just a string of the response text if not.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the request could not be completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_status_code</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s1">&#39;Could Not Complete Request&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">text</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.parse_etag" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">parse_etag</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#api.TickTickClient.parse_etag" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Parses the etag of a successful creation of a tag object.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The response from TickTick upon a successful tag creation is in this form:</p>
+<p><div class="highlight"><pre><span></span><code>{&quot;id2etag&quot;:{&quot;MyTag&quot;:&quot;vxzpwo38&quot;},&quot;id2error&quot;:{}}
+</code></pre></div>
+We want to obtain "vxzpwo38" in this example - the etag of the object.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>response</code></td>
+        <td><code>dict</code></td>
+        <td><p>Dictionary from the successful creation of a tag object</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>multiple</code></td>
+        <td><code>bool</code></td>
+        <td><p>Specifies whether there are multiple etags to return.</p></td>
+        <td><code>False</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>str</code></td>
+      <td><p>A single etag string if not multiple, or a list of etag strings if multiple.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">parse_etag</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">multiple</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the etag of a successful creation of a tag object.</span>
+
+<span class="sd">    !!! info</span>
+<span class="sd">        The response from TickTick upon a successful tag creation is in this form:</span>
+
+<span class="sd">        ```md</span>
+<span class="sd">        {&quot;id2etag&quot;:{&quot;MyTag&quot;:&quot;vxzpwo38&quot;},&quot;id2error&quot;:{}}</span>
+<span class="sd">        ```</span>
+<span class="sd">        We want to obtain &quot;vxzpwo38&quot; in this example - the etag of the object.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        response: Dictionary from the successful creation of a tag object</span>
+<span class="sd">        multiple: Specifies whether there are multiple etags to return.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        A single etag string if not multiple, or a list of etag strings if multiple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">etag</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;id2etag&#39;</span><span class="p">]</span>
+    <span class="n">etag2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">etag</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">multiple</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">etag</span><span class="p">[</span><span class="n">etag2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">etags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">etag2</span><span class="p">)):</span>
+            <span class="n">etags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">etag</span><span class="p">[</span><span class="n">etag2</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">etags</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.parse_id" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">parse_id</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#api.TickTickClient.parse_id" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Parses the Id of a successful creation of a TickTick object.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The response from the TickTick servers is in this form:</p>
+<p><div class="highlight"><pre><span></span><code>{&#39;id2etag&#39;: {&#39;5ff2bcf68f08093e5b745a30&#39;: &#39;3okkc2xm&#39;}, &#39;id2error&#39;: {}}
+</code></pre></div>
+We want to obtain '5ff2bcf68f08093e5b745a30' in this example - the id of the object.</p>
+</div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>response</code></td>
+        <td><code>dict</code></td>
+        <td><p>Dictionary containing the Dd from the TickTick servers.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>str</code></td>
+      <td><p>Id string of the object.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">parse_id</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the Id of a successful creation of a TickTick object.</span>
+<span class="sd">    !!! info</span>
+<span class="sd">        The response from the TickTick servers is in this form:</span>
+
+<span class="sd">        ```md</span>
+<span class="sd">        {&#39;id2etag&#39;: {&#39;5ff2bcf68f08093e5b745a30&#39;: &#39;3okkc2xm&#39;}, &#39;id2error&#39;: {}}</span>
+<span class="sd">        ```</span>
+<span class="sd">        We want to obtain &#39;5ff2bcf68f08093e5b745a30&#39; in this example - the id of the object.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        response: Dictionary containing the Dd from the TickTick servers.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Id string of the object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">id_tag</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;id2etag&#39;</span><span class="p">]</span>
+    <span class="n">id_tag</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">id_tag</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">id_tag</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.reset_local_state" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">reset_local_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.reset_local_state" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Resets the contents of the items in the <a href="./#state"><code>state</code></a> dictionary.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reset_local_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resets the contents of the items in the [`state`](api.md#state) dictionary.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;projects&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;project_folders&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;tasks&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;user_settings&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">}</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="api.TickTickClient.sync" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a href="#api.TickTickClient.sync" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Populates the <code>TickTickClient</code> <a href="./#state"><code>state</code></a> dictionary with the contents of your account.</p>
+<p><strong>This method is called when necessary by other methods and does not need to be explicitly called.</strong></p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>httpx</code></td>
+      <td><p>The response from the get request.</p></td>
+    </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>RunTimeError</code></td>
+        <td><p>If the request could not be completed.</p></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>ticktick/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Populates the `TickTickClient` [`state`](api.md#state) dictionary with the contents of your account.</span>
+
+<span class="sd">    **This method is called when necessary by other methods and does not need to be explicitly called.**</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        httpx: The response from the get request.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RunTimeError: If the request could not be completed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">http_get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">INITIAL_BATCH_URL</span><span class="p">,</span> <span class="n">cookies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cookies</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">)</span>
+
+    <span class="c1"># Inbox Id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inbox_id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;inboxId&#39;</span><span class="p">]</span>
+    <span class="c1"># Set list groups</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;project_folders&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;projectGroups&#39;</span><span class="p">]</span>
+    <span class="c1"># Set lists</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;projects&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;projectProfiles&#39;</span><span class="p">]</span>
+    <span class="c1"># Set Uncompleted Tasks</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;tasks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;syncTaskBean&#39;</span><span class="p">][</span><span class="s1">&#39;update&#39;</span><span class="p">]</span>
+    <span class="c1"># Set tags</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../oauth2/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Authorization" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Authorization
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../tasks/" class="md-footer__link md-footer__link--next" aria-label="Next: Tasks" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Tasks
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "toc.integrate"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.0bbba5b5.min.js"}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e1a181d9.min.js"></script>
+      
+    
+  </body>
+</html>
