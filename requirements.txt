@@ -1,7 +1,4 @@
-mkdocs-material
-mkdocstrings
 requests
 urllib3
 pytz==2021.1
-pytest
 regex==2021.4.4
