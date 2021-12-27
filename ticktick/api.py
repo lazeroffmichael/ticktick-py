@@ -15,6 +15,10 @@ class TickTickClient:
 
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
+    USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0"
+
+    HEADERS = {'User-Agent': USER_AGENT}
+
     def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
         """
         Initializes a client session. In order to interact with the API
@@ -92,7 +96,7 @@ class TickTickClient:
             'remember': True
         }
 
-        response = self.http_post(url, json=user_info, params=parameters)
+        response = self.http_post(url, json=user_info, params=parameters, headers=self.HEADERS)
 
         self.access_token = response['token']
         self.cookies['t'] = self.access_token
@@ -124,7 +128,7 @@ class TickTickClient:
         parameters = {
             'includeWeb': True
         }
-        response = self.http_get(url, params=parameters, cookies=self.cookies)
+        response = self.http_get(url, params=parameters, cookies=self.cookies, headers=self.HEADERS)
 
         self.time_zone = response['timeZone']
         self.profile_id = response['id']
@@ -143,7 +147,7 @@ class TickTickClient:
         Raises:
             RunTimeError: If the request could not be completed.
         """
-        response = self.http_get(self.INITIAL_BATCH_URL, cookies=self.cookies)
+        response = self.http_get(self.INITIAL_BATCH_URL, cookies=self.cookies, headers=self.HEADERS)
 
         # Inbox Id
         self.inbox_id = response['inboxId']

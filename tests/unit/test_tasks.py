@@ -61,8 +61,9 @@ class TestInitMethod:
         """
         assert task_client._client == fake_client
         assert task_client.oauth_access_token == fake_client.oauth_manager.access_token_info['access_token']
-        assert task_client.headers == {'Content-Type': 'application/json',
-                                       'Authorization': 'Bearer {}'.format(task_client.oauth_access_token)}
+        assert task_client.oauth_headers == {'Content-Type': 'application/json',
+                                             'Authorization': 'Bearer {}'.format(task_client.oauth_access_token),
+                                             'User-Agent': fake_client.USER_AGENT}
 
         fake_client.oauth_manager.access_token_info = None
 

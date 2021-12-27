@@ -30,6 +30,7 @@ class TagsManager:
     def __init__(self, client_class):
         self._client = client_class
         self.access_token = self._client.access_token
+        self.headers = self._client.HEADERS
 
     def _sort_string_value(self, sort_type: int) -> str:
         """
@@ -295,7 +296,7 @@ class TagsManager:
 
         url = self._client.BASE_URL + 'batch/tag'
         payload = {'add': obj}
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
 
         if not batch:
@@ -381,7 +382,7 @@ class TagsManager:
             'name': obj['name'],
             'newName': new
         }
-        response = self._client.http_put(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_put(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         # Response from TickTick does not return the new etag of the object, we must find it ourselves
         new_obj = self._client.get_by_fields(name=temp_new, search='tags')
@@ -446,7 +447,7 @@ class TagsManager:
         payload = {
             'update': [obj]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']])
 
@@ -504,7 +505,7 @@ class TagsManager:
         payload = {
             'update': [obj]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']])
 
@@ -669,7 +670,7 @@ class TagsManager:
         payload = {
             'update': [pobj, obj]
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         return self._client.get_by_etag(response['id2etag'][obj['name']], search='tags')
 
@@ -791,7 +792,7 @@ class TagsManager:
 
         url = self._client.BASE_URL + 'batch/tag'
         payload = {'update': obj_list}
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
 
         if not batch:
@@ -948,7 +949,7 @@ class TagsManager:
                 'name': labels['name'],
                 'newName': kept_obj['name']
             }
-            self._client.http_put(url, json=payload, cookies=self._client.cookies)
+            self._client.http_put(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
 
         return kept_obj
@@ -1061,7 +1062,7 @@ class TagsManager:
             params = {
                 'name': tag_obj['name']
             }
-            response = self._client.http_delete(url, params=params, cookies=self._client.cookies)
+            response = self._client.http_delete(url, params=params, cookies=self._client.cookies, headers=self.headers)
             # Find the tag in the tags list and delete it, then return the deleted object
             objects.append(self._client.delete_from_local_state(search='tags', etag=tag_obj['etag']))
         self._client.sync()
