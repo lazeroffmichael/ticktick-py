@@ -1,6 +1,6 @@
 -r requirements.txt
-httpx
-pytest
-python-dotenv
-mkdocs-material
-mkdocstrings
+httpx==0.21.1
+pytest==6.2.5
+python-dotenv==0.19.2
+mkdocs-material==8.1.3
+mkdocstrings==0.16.2

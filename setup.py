@@ -18,11 +18,11 @@ URL = 'https://github.com/lazeroffmichael/ticktick-py'
 EMAIL = 'lazeroffmichael@gmail.com'
 AUTHOR = 'Michael Lazeroff'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '2.0.1'
+VERSION = '2.0.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-     'requests', 'pytz==2021.1', 'regex==2021.4.4', 'urllib3'
+     'requests==2.26.0', 'pytz==2021.1', 'regex==2021.4.4', 'urllib3==1.26.7'
 ]
 
 # What packages are optional?
