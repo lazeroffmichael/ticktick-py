@@ -24,9 +24,12 @@ class TaskManager:
         if self._client.oauth_manager.access_token_info is not None:
             self.oauth_access_token = self._client.oauth_manager.access_token_info['access_token']
 
-        # create header dictionary
-        self.headers = {'Content-Type': 'application/json',
-                        'Authorization': 'Bearer {}'.format(self.oauth_access_token)}
+        # oauth headers have some extra fields
+        self.oauth_headers = {'Content-Type': 'application/json',
+                              'Authorization': 'Bearer {}'.format(self.oauth_access_token),
+                              'User-Agent': self._client.USER_AGENT}
+
+        self.headers = self._client.HEADERS
 
     def _generate_create_url(self):
         """
@@ -141,7 +144,7 @@ class TaskManager:
         url = self._generate_create_url()
 
         # make request
-        response = self._client.http_post(url=url, json=task, headers=self.headers)
+        response = self._client.http_post(url=url, json=task, headers=self.oauth_headers)
 
         # sync local state
         self._client.sync()
@@ -241,7 +244,7 @@ class TaskManager:
         url = self._generate_update_url(task['id'])
 
         # make request
-        response = self._client.http_post(url=url, json=task, headers=self.headers)
+        response = self._client.http_post(url=url, json=task, headers=self.oauth_headers)
 
         # sync local state
         self._client.sync()
@@ -303,7 +306,7 @@ class TaskManager:
         url = self._generate_mark_complete_url(task['projectId'], task['id'])
 
         # make request
-        response = self._client.http_post(url=url, json=task, headers=self.headers)
+        response = self._client.http_post(url=url, json=task, headers=self.oauth_headers)
 
         # sync local state
         self._client.sync()
@@ -442,9 +445,8 @@ class TaskManager:
                 to_delete.append(delete_dict)
 
         payload = {'delete': to_delete}
-
         # make request
-        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
 
         # sync local state
         self._client.sync()
@@ -590,7 +592,7 @@ class TaskManager:
             subtasks.append(temp)
 
         url = self._client.BASE_URL + 'batch/taskParent'
-        response = self._client.http_post(url, json=subtasks, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=subtasks, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         # Find and return the updated child objects
         subtasks = []
@@ -732,7 +734,7 @@ class TaskManager:
                 })
 
         url = self._client.BASE_URL + 'batch/taskProject'
-        self._client.http_post(url, json=move_tasks, cookies=self._client.cookies)
+        self._client.http_post(url, json=move_tasks, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         # Return the tasks in the new list
         ids = [x['id'] for x in obj]
@@ -821,7 +823,7 @@ class TaskManager:
 
         url = self._client.BASE_URL + 'batch/taskProject'
         # Make the initial call to move the tasks
-        self._client.http_post(url, json=task_project, cookies=self._client.cookies)
+        self._client.http_post(url, json=task_project, cookies=self._client.cookies, headers=self.headers)
 
         self._client.sync()
         # Return the tasks in the new list
@@ -1023,7 +1025,7 @@ class TaskManager:
             'to': end.strftime(DATE_FORMAT),
             'limit': 100
         }
-        response = self._client.http_get(url, params=parameters, cookies=self._client.cookies)
+        response = self._client.http_get(url, params=parameters, cookies=self._client.cookies, headers=self.headers)
         return response
 
     def dates(self, start, due=None, tz=None):

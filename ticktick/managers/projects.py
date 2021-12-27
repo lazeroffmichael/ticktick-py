@@ -9,6 +9,7 @@ class ProjectManager:
     def __init__(self, client_class):
         self._client = client_class
         self.access_token = self._client.access_token
+        self.headers = self._client.HEADERS
 
     def builder(self, name: str, color: str = 'random', project_type: str = 'TASK', folder_id: str = None) -> dict:
         """
@@ -241,7 +242,7 @@ class ProjectManager:
         payload = {
             'add': obj
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         if len(obj) == 1:
             return self._client.get_by_id(self._client.parse_id(response), search='projects')
@@ -375,7 +376,7 @@ class ProjectManager:
         payload = {
             'update': tasks
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         if len(tasks) == 1:
             return self._client.get_by_id(self._client.parse_id(response), search='projects')
@@ -462,7 +463,7 @@ class ProjectManager:
         payload = {
             'delete': ids
         }
-        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         # Delete the list
         deleted_list = []
         for current_id in ids:
@@ -677,7 +678,7 @@ class ProjectManager:
         payload = {
             'add': objs
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         if len(objs) == 1:
             return self._client.get_by_id(self._client.parse_id(response), search='project_folders')
@@ -793,7 +794,7 @@ class ProjectManager:
         payload = {
             'update': tasks
         }
-        response = self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        response = self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         self._client.sync()
         if len(tasks) == 1:
             return self._client.get_by_id(self._client.parse_id(response), search='project_folders')
@@ -919,7 +920,7 @@ class ProjectManager:
         payload = {
             'delete': ids
         }
-        self._client.http_post(url, json=payload, cookies=self._client.cookies)
+        self._client.http_post(url, json=payload, cookies=self._client.cookies, headers=self.headers)
         # Delete the list
         deleted_list = []
         for current_id in ids:
