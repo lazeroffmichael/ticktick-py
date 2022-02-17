@@ -5,7 +5,10 @@ from ticktick.managers.projects import ProjectManager
 from ticktick.managers.settings import SettingsManager
 from ticktick.managers.tags import TagsManager
 from ticktick.managers.tasks import TaskManager
-from ticktick.oauth2 import OAuth2
+from ticktick.oauth2 import (
+    OAuth2,
+    requests_retry_session
+)
 
 
 class TickTickClient:
@@ -19,15 +22,18 @@ class TickTickClient:
 
     HEADERS = {'User-Agent': USER_AGENT}
 
-    def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
+    def __init__(self, username: str, password: str, oauth: OAuth2, token: str=None) -> None:
         """
         Initializes a client session. In order to interact with the API
         a successful login must occur.
+        
+        Alternatively only the token can be provided.
 
         Arguments:
             username: TickTick Username
             password: TickTick Password
             oauth: OAuth2 manager
+            token: Access Token
 
         Raises:
             RunTimeError: If the login was not successful.
@@ -42,9 +48,9 @@ class TickTickClient:
         self.state = {}
         self.reset_local_state()
         self.oauth_manager = oauth
-        self._session = self.oauth_manager.session
+        self._session = self.oauth_manager.session if self.oauth_manager else request_retry_session()
 
-        self._prepare_session(username, password)
+        self._prepare_session(username, password, token)
 
         # Mangers for the different operations
         self.focus = FocusTimeManager(self)
@@ -55,11 +61,18 @@ class TickTickClient:
         self.tag = TagsManager(self)
         self.task = TaskManager(self)
 
-    def _prepare_session(self, username, password):
+    def _prepare_session(self, username, password, token=None):
         """
         Creates all the necessary calls to prepare the session
         """
-        self._login(username, password)
+        # check if token is already provided or login is required
+        if token:
+            self.access_token = token
+            self.cookies['t'] = self.access_token
+        else:
+            self._login(username, password)
+        
+        # sync settings and state
         self._settings()
         self.sync()
 
