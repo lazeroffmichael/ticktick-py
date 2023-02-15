@@ -168,7 +168,7 @@ class HabitManager:
         Returns:
               http_response: {'id2etag': {}, 'id2error': {}} is the expected value if everything worked
         """
-        checkin_id = self.get_checkin(habit_id, date)['id']
+        checkin_id = self.get_checkin(habit_id, date)
         goal = self.get_goal(habit_id)
         if checkin_id is None:
             checkin_id = habit_id[0:5:1]
@@ -189,6 +189,7 @@ class HabitManager:
                 "delete": []
             }
         else:
+            habit_id = habit_id['id']
             payload = {
                 "add": [],
                 "update": [
