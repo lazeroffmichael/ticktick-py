@@ -61,7 +61,7 @@ class HabitManager:
             modified_time: Internal timestamp for the modification of the habit. Best left unchanged
             sort_order: Sort order
             section_id: id of the section. -1 for "other"
-            status: TODO: Further research required
+            status: 0 for active, 1 for archived
             step: TODO: Further research required
             total_checkins: Total amount of checkins. Best left unchanged
             completed_cycles: TODO: Further research required
@@ -122,6 +122,35 @@ class HabitManager:
                 habit_id
             ]
         }
+        return self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
+                                      cookies=self._client.cookies,
+                                      headers=self._client.HEADERS,
+                                      json=payload)
+
+    def archive(self, habit_id, archived_time=datetime.now(), archive_status=True):
+        """
+        Archives the given habit.
+
+        Arguments:
+            habit_id: habit id
+            archived_time: Internal time. Best left unchanged
+            archive_status: Whether to archive or un-archive.
+
+        Returns:
+              http_response
+        """
+        habit = self.get_habit(habit_id)
+        if archive_status:
+            habit['archivedTime'] = archived_time.isoformat()
+            habit['status'] = 1
+        else:
+            habit['status'] = 0
+        payload = {
+            "add": [],
+            "update": [habit],
+            "delete": []
+        }
+
         return self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
                                       cookies=self._client.cookies,
                                       headers=self._client.HEADERS,
