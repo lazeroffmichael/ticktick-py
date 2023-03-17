@@ -68,6 +68,8 @@ class HabitManager:
             ex_dates: TODO: Further research required
         """
 
+        generated_id = secrets.token_hex(24)
+
         payload = {
             "add": [
                 {
@@ -77,7 +79,7 @@ class HabitManager:
                     "encouragement": encouragement,
                     "etag": etag,
                     "goal": goal,
-                    "id": "TODO",
+                    "id": generated_id,
                     "modifiedTime": str(modified_time),
                     "name": name,
                     "recordEnable": record_enable,
