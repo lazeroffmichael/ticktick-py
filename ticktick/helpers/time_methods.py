@@ -87,3 +87,25 @@ def convert_date_to_tick_tick_format(datetime_obj, tz: str):
     date = date.replace(tzinfo=datetime.timezone.utc).isoformat()
     date = date[::-1].replace(":", "", 1)[::-1]
     return date
+
+
+def convert_date_to_stamp(datetime_obj):
+    """
+    Converts a datetime_obj to the required TickTick stamp
+
+    Returns:
+        str: The date stamp
+
+    ??? example
+        ```python
+        date = datetime(2022, 12, 31)
+        stamp = convert_date_to_stamp(date)
+        ```
+
+        ??? success "Result"
+            A stamp string of the date input
+
+            20221231
+    """
+
+    return datetime_obj.strftime("%Y%m%d")

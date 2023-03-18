@@ -44,8 +44,6 @@ class TickTickClient:
         self.oauth_manager = oauth
         self._session = self.oauth_manager.session
 
-        self._prepare_session(username, password)
-
         # Mangers for the different operations
         self.focus = FocusTimeManager(self)
         self.habit = HabitManager(self)
@@ -54,6 +52,8 @@ class TickTickClient:
         self.settings = SettingsManager(self)
         self.tag = TagsManager(self)
         self.task = TaskManager(self)
+
+        self._prepare_session(username, password)
 
     def _prepare_session(self, username, password):
         """
@@ -159,6 +159,8 @@ class TickTickClient:
         self.state['tasks'] = response['syncTaskBean']['update']
         # Set tags
         self.state['tags'] = response['tags']
+        # Set habits
+        self.state['habits'] = self.habit.get_all()
 
         return response
 
