@@ -13,16 +13,27 @@ class HabitManager:
         self._client = client_class
         self.access_token = ''
 
+        # set access token to valid oauth access token if available
+        if self._client.oauth_manager.access_token_info is not None:
+            self.oauth_access_token = self._client.oauth_manager.access_token_info['access_token']
+
+        # oauth headers have some extra fields
+        self.oauth_headers = {'Content-Type': 'application/json',
+                              'Authorization': 'Bearer {}'.format(self.oauth_access_token),
+                              'User-Agent': self._client.USER_AGENT}
+
+        self.headers = self._client.HEADERS
+
     #   ---------------------------------------------------------------------------------------------------------------
     #   Habit Methods
     def create(self,
                color="#97E38B",
                icon="habit_daily_check_in",
-               created_time=datetime.now(),
+               created_time=None,
                encouragement="",
-               etag="",
+               etag=None,
                goal=1,
-               modified_time=datetime.now(),
+               modified_time=None,
                name="Daily",
                record_enable="false",
                reminders=[],
@@ -35,7 +46,7 @@ class HabitManager:
                unit="Count",
                section_id=-1,
                target_days=0,
-               target_start_date=time_methods.convert_date_to_stamp(datetime.now()),
+               target_start_date=time_methods.convert_date_to_stamp(datetime.utcnow()),
                completed_cycles=0,
                ex_dates=[]):
 
@@ -66,22 +77,31 @@ class HabitManager:
             completed_cycles: TODO: Further research required
             ex_dates: TODO: Further research required
         Returns:
-              Server response. Successful if id2etag not empty
+              Server response and sent payload habit. Successful if id2etag of server response not empty
         """
 
-        generated_id = secrets.token_hex(24)
+        generated_id = secrets.token_hex(12)
+
+        if created_time is None:
+            created_time = datetime.utcnow()
+
+        if modified_time is None:
+            modified_time = datetime.utcnow()
+
+        if etag is None:
+            etag = secrets.token_hex(8)
 
         payload = {
             "add": [
                 {
                     "color": color,
                     "iconRes": icon,
-                    "createdTime": str(created_time),
+                    "createdTime": str(created_time.isoformat() + "+0000"),
                     "encouragement": encouragement,
                     "etag": etag,
                     "goal": goal,
                     "id": generated_id,
-                    "modifiedTime": str(modified_time),
+                    "modifiedTime": str(modified_time.isoformat() + "+0000"),
                     "name": name,
                     "recordEnable": record_enable,
                     "reminders": reminders,
@@ -103,10 +123,13 @@ class HabitManager:
             "delete": []
         }
 
-        return self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
-                                      cookies=self._client.cookies,
-                                      headers=self._client.HEADERS,
-                                      json=payload)
+        response = self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
+                                          cookies=self._client.cookies,
+                                          headers=self._client.HEADERS,
+                                          json=payload)
+
+        self._client.sync()
+        return response, payload['add']
 
     def delete(self, habit_id):
         """
@@ -125,10 +148,13 @@ class HabitManager:
                 habit_id
             ]
         }
-        return self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
-                                      cookies=self._client.cookies,
-                                      headers=self._client.HEADERS,
-                                      json=payload)
+
+        response = self._client.http_post(url=self.HABITS_BASE_URL + "/batch",
+                                          cookies=self._client.cookies,
+                                          headers=self._client.HEADERS,
+                                          json=payload)
+        self._client.sync()
+        return response
 
     def archive(self, habit_id, archived_time=datetime.now(), archive_status=True):
         """
