@@ -17,7 +17,7 @@ class HabitManager:
     #   Habit Methods
     def create(self,
                color="#97E38B",
-               icon_res="habit_daily_check_in",
+               icon="habit_daily_check_in",
                created_time=datetime.now(),
                encouragement="",
                etag="",
@@ -40,16 +40,15 @@ class HabitManager:
                ex_dates=[]):
 
         """
-        Creates a new habit.
+        Creates a new habit
 
         Arguments:
             name: Name of the new habit
-            icon_res: Icon of the new habit. txt_<char> for a single text char or icon name.
-                Known names: 'habit_daily_check_in', ..., TODO: research all icon names...
+            icon: Use helpers.icons for a list of available icons or txt_CHAR with a single Unicode character as CHAR
             color: Color of the habit icon. Only relevant if icon is a single letter
             reminders: Reminders set for the habit. Example: ["15:00", "16:30", "19:30"]
             repeat_rule: Frequency at which the habit should repeat. Special TickTick Syntax String
-            record_enable: Auto-Pop-Up Habit Log when finishing habit for the day. Default is False
+            record_enable: Auto-Pop-Up Habit Log when finishing habit for the day
             target_days: Amount of target days
             target_start_date: Date at which the habit day target starts
             habit_type: habit type. Available: 'Boolean' (for on/off habits) or 'Real' (for counting habits)
@@ -57,7 +56,7 @@ class HabitManager:
             unit: Name of the counting unit. Only relevant if habit is counting
             created_time: Internal timestamp for the creation of the habit. Best left unchanged
             encouragement: Encouragement message that displays beneath the habit. Might only be available in the app
-            etag: TODO: Further research required
+            etag: internal tag
             modified_time: Internal timestamp for the modification of the habit. Best left unchanged
             sort_order: Sort order
             section_id: id of the section. -1 for "other"
@@ -66,6 +65,8 @@ class HabitManager:
             total_checkins: Total amount of checkins. Best left unchanged
             completed_cycles: TODO: Further research required
             ex_dates: TODO: Further research required
+        Returns:
+              Server response. Successful if id2etag not empty
         """
 
         generated_id = secrets.token_hex(24)
@@ -74,7 +75,7 @@ class HabitManager:
             "add": [
                 {
                     "color": color,
-                    "iconRes": icon_res,
+                    "iconRes": icon,
                     "createdTime": str(created_time),
                     "encouragement": encouragement,
                     "etag": etag,
@@ -109,13 +110,13 @@ class HabitManager:
 
     def delete(self, habit_id):
         """
-        Deletes a habit.
+        Deletes a habit
 
         Arguments:
             habit_id: Which habit to delete
 
         Returns:
-            http_response: {'id2etag': {}, 'id2error': {}} is the expected value if everything worked
+            Server response. Successful if id2etag and id2error empty
         """
         payload = {
             "add": [],
@@ -135,11 +136,11 @@ class HabitManager:
 
         Arguments:
             habit_id: habit id
-            archived_time: Internal time. Best left unchanged
-            archive_status: Whether to archive or un-archive.
+            archived_time: Internal archive time
+            archive_status: Whether to archive or un-archive
 
         Returns:
-              http_response
+              Server response. Successful if id2etag not empty
         """
         habit = self.get_habit(habit_id)
         if archive_status:
@@ -164,11 +165,11 @@ class HabitManager:
 
         Arguments:
             habit_id: id of the habit
-            value (int): new value of the checkin. Use 1.0 for on/off habits
+            value (int): new value of the checkin. Use 1.0/0.0 for on/off habits
             date (datetime): date at which to change the checkin
 
         Returns:
-              http_response: {'id2etag': {}, 'id2error': {}} is the expected value if everything worked
+              Server response. Successful if id2etag and id2error empty
         """
         checkin_id = self.get_checkin(habit_id, date)
         goal = self.get_goal(habit_id)
@@ -216,7 +217,7 @@ class HabitManager:
     def get_sections(self):
         """
         Returns:
-            sections (list): All sections in the format:
+            sections (list): All sections in the format
             {
                 "id": "<section_id>",
                 "name": "<name> example: _morning",
@@ -236,10 +237,10 @@ class HabitManager:
         Provides all "checkins" for a given habit after the given date.
 
         Arguments:
-            habit_id: id of current habit
-            after_date: Exclusive (!) date after which the checkins should be counted.
+            habit_id: id of habit
+            after_date: Exclusive date after which the checkins should be counted.
 
-        Returns the following format:
+        Returns format
         {
           "checkins": {
             "<habit_id>": [
@@ -270,7 +271,7 @@ class HabitManager:
     def get_checkin(self, habit_id, date):
         """
         Returns:
-            Checkin of specified habit_id on specified date. Returns None if there is no checkin on that date
+            Checkin of specified habit_id on specified date or None if no checkin exists on given date
         """
         self._client.sync()
         wanted_stamp = time_methods.convert_date_to_stamp(date)
@@ -282,7 +283,7 @@ class HabitManager:
     def get_goal(self, habit_id):
         """
         Returns:
-            The goal of the habit with id habit_id
+            The (amount) goal of the habit with id habit_id
         """
         return self.get_habit(habit_id)['goal']
 
@@ -290,7 +291,7 @@ class HabitManager:
         self._client.sync()
         """
         Returns:
-            habit_id of habit with name: name
+            habit_id of first habit with case-sensitive name matching parameter
         """
 
         for habit in self._client.state['habits']:
@@ -299,13 +300,14 @@ class HabitManager:
 
     def get_habit(self, habit_id):
         """
-        Returns habit
+        Returns:
+            habit with id habit_id
         """
         self._client.sync()
-
         for habit in self._client.state['habits']:
             if habit['id'] == habit_id:
                 return habit
+        raise ValueError("Habit with id %s not found" % habit_id)
 
     def get_all(self):
         """
@@ -315,7 +317,7 @@ class HabitManager:
         use this method to obtain habits when the client state is out of sync!
 
         Returns:
-            httpx: The response from the get request.
+            Server Response.
         """
         return self._client.http_get(url=self.HABITS_BASE_URL,
                                      cookies=self._client.cookies,
