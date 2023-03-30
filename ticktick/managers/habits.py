@@ -44,11 +44,11 @@ class HabitManager:
 
         Arguments:
             name: Name of the new habit
-            icon: Check helpers.icons for a list of available icons
+            icon: Use helpers.icons for a list of available icons or txt_CHAR with a single Unicode character as CHAR
             color: Color of the habit icon. Only relevant if icon is a single letter
             reminders: Reminders set for the habit. Example: ["15:00", "16:30", "19:30"]
             repeat_rule: Frequency at which the habit should repeat. Special TickTick Syntax String
-            record_enable: Auto-Pop-Up Habit Log when finishing habit for the day. Default is False
+            record_enable: Auto-Pop-Up Habit Log when finishing habit for the day
             target_days: Amount of target days
             target_start_date: Date at which the habit day target starts
             habit_type: habit type. Available: 'Boolean' (for on/off habits) or 'Real' (for counting habits)
