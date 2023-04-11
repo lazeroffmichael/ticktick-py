@@ -4,11 +4,13 @@ import time
 import logging
 import ast
 import os
+import base64
 
 from urllib.parse import urlparse, urlencode, parse_qsl
 from ticktick.cache import CacheHandler
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+
 
 log = logging.getLogger(__name__)
 
@@ -35,14 +37,14 @@ def requests_retry_session(retries=3,
     session.mount('https://', adapter)
     return session
 
-
+def encode_base64(string_to_encode):
+    encoded_bytes = base64.b64encode(string_to_encode.encode("utf-8"))
+    encoded_string = encoded_bytes.decode("utf-8")
+    return encoded_string
 class OAuth2:
     """
     Implements the Authorization flow for TickTick's Open API
     """
-    OAUTH_AUTHORIZE_URL = "https://ticktick.com/oauth/authorize"
-    OBTAIN_TOKEN_URL = "https://ticktick.com/oauth/token"
-
     def __init__(self,
                  client_id: str,
                  client_secret: str,
@@ -52,7 +54,8 @@ class OAuth2:
                  session=None,
                  env_key: str = None,
                  cache_path: str = '.token-oauth',
-                 check_cache: bool = True
+                 check_cache: bool = True,
+                 dida365: bool = False
                  ):
         """
         Initialize the object.
@@ -105,6 +108,13 @@ class OAuth2:
                 'Wed Nov 17 15:48:55 2021'}'
                 ```
         """
+        self.dida365 = dida365
+        if dida365 == False:
+            self.OAUTH_AUTHORIZE_URL = "https://ticktick.com/oauth/authorize"
+            self.OBTAIN_TOKEN_URL = "https://ticktick.com/oauth/token"
+        else:
+            self.OAUTH_AUTHORIZE_URL = "https://dida365.com/oauth/authorize"
+            self.OBTAIN_TOKEN_URL = "https://dida365.com/oauth/token"
         # If a proper session is passed then we will just use the existing session
         self.session = session or requests_retry_session()
 
@@ -212,17 +222,32 @@ class OAuth2:
         self._get_redirected_url()
 
         # create the payload
-        payload = {
-            "client_id": self._client_id,
-            "client_secret": self._client_secret,
-            "code": self._code,
-            "grant_type": "authorization_code",  # currently only option
-            "scope": self._scope,
-            "redirect_uri": self._redirect_uri
-        }
-
         # make the request
-        token_info = self._post(self.OBTAIN_TOKEN_URL, params=payload)
+        if self.dida365 == True:
+            headers = {'Authorization': f'Basic {encode_base64(f"{self._client_id}:{self._client_secret}")}',
+                       "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.1.6) ",
+                       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                       "Accept-Language": "en-us",
+                       "Connection": "keep-alive",
+                       "Accept-Charset": "GB2312,utf-8;q=0.7,*;q=0.7"
+                       }
+            payload = {
+                "code": self._code,
+                "grant_type": "authorization_code",  # currently only option
+                "scope": self._scope,
+                "redirect_uri": self._redirect_uri
+            }
+            token_info = self._post( self.OBTAIN_TOKEN_URL, headers=headers, data=payload)
+        else:
+            payload = {
+                "client_id": self._client_id,
+                "client_secret": self._client_secret,
+                "code": self._code,
+                "grant_type": "authorization_code",  # currently only option
+                "scope": self._scope,
+                "redirect_uri": self._redirect_uri
+            }
+            token_info = self._post(self.OBTAIN_TOKEN_URL, params=payload)
 
         token_info = self._set_expire_time(token_info)
         self.cache.write_token_to_cache(token_info)
@@ -244,7 +269,8 @@ class OAuth2:
             RunTimeError: If the request could not be completed.
         """
 
-        response = self.session.post(url, **kwargs)
+        response = self.session.request("POST",url, **kwargs)
+        print(response.content)
         if response.status_code != 200:
             raise RuntimeError("POST request could not be completed")
 

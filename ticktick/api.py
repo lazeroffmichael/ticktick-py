@@ -9,17 +9,13 @@ from ticktick.oauth2 import OAuth2
 
 
 class TickTickClient:
-    BASE_URL = 'https://api.ticktick.com/api/v2/'
 
-    OPEN_API_BASE_URL = 'https://api.ticktick.com'
-
-    INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
     USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0"
 
     HEADERS = {'User-Agent': USER_AGENT}
 
-    def __init__(self, username: str, password: str, oauth: OAuth2) -> None:
+    def __init__(self, username: str, password: str, oauth: OAuth2, dida365: bool = False) -> None:
         """
         Initializes a client session. In order to interact with the API
         a successful login must occur.
@@ -32,6 +28,18 @@ class TickTickClient:
         Raises:
             RunTimeError: If the login was not successful.
         """
+        if dida365 == False:
+            self.BASE_URL = 'https://api.ticktick.com/api/v2/'
+
+            self.OPEN_API_BASE_URL = 'https://api.ticktick.com'
+
+            self.INITIAL_BATCH_URL = self.BASE_URL + 'batch/check/0'
+        else:
+            self.BASE_URL = 'https://api.dida365.com/api/v2/'
+
+            self.OPEN_API_BASE_URL = 'https://api.dida365.com'
+
+            self.INITIAL_BATCH_URL = self.BASE_URL + 'batch/check/0'
         # Class members
 
         self.access_token = None
