@@ -162,6 +162,7 @@ class OAuth2:
                  "provided in the url. Paste the url that you "
                  "were redirected to into the console")
         url = self._get_auth_url()
+        print(url)
         webbrowser.open(url)
 
     def _get_redirected_url(self):
