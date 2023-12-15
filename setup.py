@@ -18,16 +18,16 @@ URL = 'https://github.com/lazeroffmichael/ticktick-py'
 EMAIL = 'lazeroffmichael@gmail.com'
 AUTHOR = 'Michael Lazeroff'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '2.0.2'
+VERSION = '2.0.3'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-     'requests==2.26.0', 'pytz==2021.1', 'regex==2021.4.4', 'urllib3==1.26.7'
+    'requests==2.26.0', 'pytz==2021.1', 'regex==2021.4.4', 'urllib3==1.26.7'
 ]
 
 # What packages are optional?
 EXTRAS = {
-     'tests': ['pytest']
+    'tests': ['pytest']
 }
 
 # The rest you shouldn't have to touch too much :)
@@ -80,7 +80,8 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        os.system(
+            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
         os.system('twine upload dist/*')
@@ -103,7 +104,8 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(
+        exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
 

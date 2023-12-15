@@ -1,3 +1,9 @@
+### 2.0.3 - 7/8/23
+- btw04 [PR #43](https://github.com/lazeroffmichael/ticktick-py/pull/43): Fix broken login by adding new header
+
+### 2.0.2 - 12/27/21
+- Dependency updates
+
 ### 2.0.1 - 6/24/21
 - Change Retry class to come from urllib3 library instead of requests 
 
