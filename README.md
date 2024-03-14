@@ -6,8 +6,6 @@
 
 ## [Full Documentation](https://lazeroffmichael.github.io/ticktick-py/)
 
-## This fork aims to implement the habit, pomo, and focus feature. Feel free to contribute or contact me with any questions!
-
 ## Description
 `ticktick-py` is an unofficial API library for interacting with [TickTick.com](<https://www.ticktick.com/>). 
 It allows
