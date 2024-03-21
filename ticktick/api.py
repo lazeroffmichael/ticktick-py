@@ -17,9 +17,9 @@ class TickTickClient:
 
     INITIAL_BATCH_URL = BASE_URL + 'batch/check/0'
 
-    USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0"
-    X_DEVICE_ = '{"platform":"web","os":"OS X","device":"Firefox 95.0","name":"unofficial api!","version":4531,' \
-                '"id":"6490' + secrets.token_hex(10) + '","channel":"website","campaign":"","websocket":""}'
+    USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:95.0) Gecko/20100101 Firefox/95.0'
+    X_DEVICE_ = '{"platform":"web","os":"OS X","device":"Firefox 123.0","name":"unofficial api!","version":4531,' \
+                '"id":"6490' + secrets.token_hex(10) + '","channel":"website","campaign":"","websocket":""}' 
 
     HEADERS = {'User-Agent': USER_AGENT,
                'x-device': X_DEVICE_}
